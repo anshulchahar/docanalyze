@@ -90,7 +90,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest pytest-cov pytest-mock
-        pip install PyPDF2 flask google-generativeai
+        pip install pypdf flask google-generativeai
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       timeout-minutes: 3
     

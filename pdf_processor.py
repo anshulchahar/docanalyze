@@ -1,4 +1,4 @@
-import PyPDF2
+import pypdf  # Note the lowercase name
 import logging
 
 # Configure logging
@@ -16,7 +16,7 @@ def extract_text_from_pdf(pdf_file):
         str: Extracted text from the PDF
     """
     try:
-        pdf_reader = PyPDF2.PdfReader(pdf_file)
+        pdf_reader = pypdf.PdfReader(pdf_file)
         text = ''
         for page_num in range(len(pdf_reader.pages)):
             page = pdf_reader.pages[page_num]
