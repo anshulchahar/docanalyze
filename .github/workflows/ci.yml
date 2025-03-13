@@ -6,8 +6,13 @@ on:
   pull_request:
     branches: [ main ]
 
+# Cancel in-progress runs on new commits to same PR/branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     
     strategy:
@@ -17,12 +22,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 1  # Shallow clone for speed
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+        cache-dependency-path: '**/requirements.txt'
     
     - name: Set up Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
@@ -30,36 +38,39 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     
-    - name: Set up Python virtual environment
-      run: |
-        python -m venv venv
-        source venv/bin/activate
-    
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install flake8 pytest pytest-cov pytest-mock
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      timeout-minutes: 5
     
     - name: Install Node.js dependencies
       run: npm install
+      timeout-minutes: 5
     
     - name: Lint with flake8
       run: |
-        pip install flake8
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --statistics
+      timeout-minutes: 2
     
     - name: Lint with ESLint
       run: npm run lint || echo "ESLint check failed but continuing"
-    
-    # Uncomment when you add tests
-    # - name: Test with pytest
-    #   run: |
-    #     pip install pytest
-    #     pytest
-    
-    # Add potential deployment steps here
-    # - name: Deploy
-    #   if: github.ref == 'refs/heads/main'
-    #   run: |
-    #     # Add deployment commands
+      timeout-minutes: 2
+      
+    - name: Test with pytest
+      run: |
+        pytest tests/unit tests/integration --cov=. --cov-report=xml
+      timeout-minutes: 5
+      
+    - name: Test frontend with Jest
+      run: |
+        npm test
+      timeout-minutes: 5
+      
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
