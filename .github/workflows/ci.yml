@@ -90,8 +90,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest pytest-cov pytest-mock
+        pip install -e .  # Install your package in development mode
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      timeout-minutes: 5
+      timeout-minutes: 3
     
     - name: Install Node.js dependencies
       run: npm install
