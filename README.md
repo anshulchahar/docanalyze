@@ -165,6 +165,47 @@ Alternatively, use the provided setup script:
 ./setup.sh
 ```
 
+## Testing
+
+DocAnalyze uses a comprehensive testing strategy with pytest for backend tests and Jest for frontend tests.
+
+### Running Backend Tests
+
+```bash
+# Activate your virtual environment
+source venv/bin/activate
+
+# Install test dependencies
+pip install pytest pytest-cov pytest-mock
+
+# Run all tests
+pytest
+
+# Run tests with coverage report
+pytest --cov=. --cov-report=term-missing
+
+# Run specific test categories
+pytest tests/unit
+pytest tests/integration
+```
+
+### Running Frontend Tests
+
+```bash
+# Install test dependencies
+npm install
+
+# Run all tests
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+### Continuous Integration
+
+The project uses GitHub Actions for continuous integration, which runs all tests automatically on push and pull requests.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
