@@ -1,0 +1,18 @@
+{
+  "name": "docanalyze",
+  "version": "1.0.0",
+  "description": "A retro-themed PDF document analysis tool powered by Google's Gemini AI.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint static/js/*.js",
+    "lint:fix": "eslint --fix static/js/*.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^9.22.0",
+    "eslint-plugin-react": "^7.37.4"
+  }
+}
