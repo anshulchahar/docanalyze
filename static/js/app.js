@@ -1,5 +1,5 @@
-// React components
-function ModemAnimation({ active }) {
+// Add named exports for testing
+export function ModemAnimation({ active }) {
   return (
     React.createElement("div", { className: "modem" },
       React.createElement("div", { className: `modem-light ${active ? 'active' : ''}` }),
@@ -10,7 +10,7 @@ function ModemAnimation({ active }) {
   );
 }
 
-function Window({ title, children }) {
+export function Window({ title, children }) {
   return (
     React.createElement("div", { className: "window" },
       React.createElement("div", { className: "window-title" },
@@ -26,7 +26,7 @@ function Window({ title, children }) {
   );
 }
 
-function FileList({ files }) {
+export function FileList({ files }) {
   if (!files || files.length === 0) return null;
 
   return React.createElement(
@@ -50,7 +50,7 @@ function FileList({ files }) {
   );
 }
 
-function App() {
+export function App() {
   const [files, setFiles] = React.useState([]);
   const [apiKey, setApiKey] = React.useState('');
   const [loading, setLoading] = React.useState(false);
