@@ -33,3 +33,5 @@ npm-debug.log*
 
 # Package-lock files
 package-lock.json
+
+.coverage
