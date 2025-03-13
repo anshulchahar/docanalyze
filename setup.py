@@ -4,10 +4,10 @@ setup(
     name="docanalyze",
     version="0.1.0",
     packages=find_packages(),
+    include_package_data=True,
     install_requires=[
-        # Add your dependencies here
         "flask",
-        "PyPDF2",  # Consider using "pypdf" instead due to deprecation warning
+        "pypdf>=4.0.0",  # Updated from PyPDF2
         "google-generativeai",
     ],
 )
