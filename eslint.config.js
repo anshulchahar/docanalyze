@@ -9,8 +9,32 @@ export default [
             ecmaVersion: 2021,
             sourceType: 'module',
             globals: {
+                // React globals
                 React: 'readonly',
-                ReactDOM: 'readonly'
+                ReactDOM: 'readonly',
+
+                // Browser globals
+                document: 'readonly',
+                window: 'readonly',
+                fetch: 'readonly',
+                FormData: 'readonly',
+                alert: 'readonly',
+                console: 'readonly',
+                localStorage: 'readonly',
+                sessionStorage: 'readonly',
+                navigator: 'readonly',
+                location: 'readonly',
+                Blob: 'readonly',
+                URL: 'readonly',
+                URLSearchParams: 'readonly',
+                FileReader: 'readonly',
+                Audio: 'readonly',
+
+                // Timer globals (adding these to fix the errors)
+                setTimeout: 'readonly',
+                clearTimeout: 'readonly',
+                setInterval: 'readonly',
+                clearInterval: 'readonly'
             },
             parserOptions: {
                 ecmaFeatures: {
@@ -37,6 +61,37 @@ export default [
             react: {
                 version: 'detect'
             }
+        }
+    },
+    // Add a specific config for script.js to handle vanilla JS
+    {
+        files: ['**/script.js'],
+        languageOptions: {
+            ecmaVersion: 2021,
+            sourceType: 'script', // Change to script mode for vanilla JS files
+            globals: {
+                // Browser globals
+                document: 'readonly',
+                window: 'readonly',
+                fetch: 'readonly',
+                FormData: 'readonly',
+                alert: 'readonly',
+                console: 'readonly',
+                localStorage: 'readonly',
+                sessionStorage: 'readonly',
+                navigator: 'readonly',
+                location: 'readonly',
+                Blob: 'readonly',
+                URL: 'readonly',
+                URLSearchParams: 'readonly',
+                FileReader: 'readonly'
+            }
+        },
+        // Disable React specific rules for script.js
+        rules: {
+            'react/react-in-jsx-scope': 'off',
+            'react/jsx-uses-react': 'off',
+            'react/jsx-uses-vars': 'off'
         }
     }
 ];
