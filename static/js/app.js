@@ -26,8 +26,32 @@ function Window({ title, children }) {
     );
 }
 
+function FileList({ files }) {
+    if (!files || files.length === 0) return null;
+    
+    return React.createElement(
+        "div",
+        { className: "selected-files" },
+        React.createElement("div", { className: "file-label" }, 
+            `${files.length} FILE${files.length !== 1 ? 'S' : ''} SELECTED:`
+        ),
+        React.createElement(
+            "ul",
+            { className: "file-list" },
+            Array.from(files).map((file, index) => 
+                React.createElement("li", { key: index, className: "file-item" },
+                    React.createElement("span", { className: "file-name" }, file.name),
+                    React.createElement("span", { className: "file-size" }, 
+                        `(${Math.round(file.size / 1024)} KB)`
+                    )
+                )
+            )
+        )
+    );
+}
+
 function App() {
-    const [file, setFile] = React.useState(null);
+    const [files, setFiles] = React.useState([]);
     const [apiKey, setApiKey] = React.useState('');
     const [loading, setLoading] = React.useState(false);
     const [progress, setProgress] = React.useState(0);
@@ -36,7 +60,7 @@ function App() {
     const [startSound] = React.useState(new Audio('https://www.myinstants.com/media/sounds/dialup.mp3'));
 
     const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
+        setFiles(e.target.files);
     };
 
     const handleApiKeyChange = (e) => {
@@ -59,7 +83,7 @@ function App() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!file) {
+        if (!files || files.length === 0) {
             setError('Please select a PDF file');
             return;
         }
@@ -79,7 +103,7 @@ function App() {
             startSound.play().catch(e => console.log('Audio play failed:', e));
             
             const formData = new FormData();
-            formData.append('pdfFile', file);
+            Array.from(files).forEach(file => formData.append('pdfFiles', file));
             formData.append('apiKey', apiKey);
             
             const response = await fetch('/analyze', {
@@ -139,7 +163,8 @@ function App() {
                     type: "file", 
                     id: "pdfFile", 
                     accept: ".pdf",
-                    onChange: handleFileChange 
+                    onChange: handleFileChange,
+                    multiple: true
                 }),
                 
                 React.createElement("label", { htmlFor: "apiKey" }, "GEMINI API KEY:"),
@@ -174,7 +199,8 @@ function App() {
                     ),
                     React.createElement(ModemAnimation, { active: loading })
                 )
-            )
+            ),
+            React.createElement(FileList, { files })
         ),
         
         error && React.createElement(
