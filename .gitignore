@@ -1,0 +1,35 @@
+# Virtual environment
+venv/
+env/
+.env/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# IDE files
+.idea/
+.vscode/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# macOS specific
+.DS_Store
+
+# Package-lock files
+package-lock.json
