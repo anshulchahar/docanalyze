@@ -1,3 +1,5 @@
+import React from 'react';
+
 // Add named exports for testing
 export function ModemAnimation({ active }) {
   return (
