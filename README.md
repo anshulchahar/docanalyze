@@ -121,6 +121,50 @@ This project uses GitHub Actions for continuous integration. The workflow:
 
 You can see the workflow configuration in `.github/workflows/ci.yml`.
 
+## Development Setup
+
+### Setting up the development environment
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/anshulchahar/docanalyze.git
+   cd docanalyze
+   ```
+
+2. Set up a virtual environment:
+   ```bash
+   # Create a virtual environment
+   python -m venv venv
+   
+   # Activate it (macOS/Linux)
+   source venv/bin/activate
+   
+   # Or on Windows
+   venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   # Install Python dependencies
+   pip install -r requirements.txt
+   
+   # Install Node.js dependencies
+   npm install
+   ```
+
+4. Run the application:
+   ```bash
+   python app.py
+   ```
+
+5. Access the application at http://127.0.0.1:5000/
+
+### Quick setup (macOS/Linux)
+Alternatively, use the provided setup script:
+```bash
+./setup.sh
+```
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
