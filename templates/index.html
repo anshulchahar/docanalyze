@@ -3,216 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>90's PDF Analyzer</title>
-    <!-- React and ReactDOM -->
-    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
-    <!-- Babel for JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- 90s-style fonts -->
+    <title>90's PDF Document Analyzer</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-    <style>
-        /* Base 90s Style */
-        body {
-            background: #000080;  /* Classic Windows 95 blue */
-            color: white;
-            font-family: 'VT323', monospace;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .app-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* 90s Aesthetic */
-        .window {
-            background: #c0c0c0;
-            border: 3px outset #ddd;
-            border-radius: 0;
-            box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.5);
-            color: #000;
-            margin-bottom: 20px;
-        }
-
-        .window-title {
-            background: linear-gradient(90deg, #000080, #1084d0);
-            color: white;
-            font-weight: bold;
-            padding: 5px 10px;
-            margin: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: 'VT323', monospace;
-            font-size: 20px;
-        }
-
-        .window-title-buttons {
-            display: flex;
-        }
-        
-        .title-button {
-            width: 20px;
-            height: 20px;
-            margin-left: 5px;
-            border: 2px outset #ddd;
-            background: #c0c0c0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .window-body {
-            padding: 15px;
-        }
-
-        /* Form Controls */
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input[type="file"], 
-        input[type="text"] {
-            width: 100%;
-            padding: 5px;
-            margin-bottom: 15px;
-            border: 2px inset #ddd;
-            background: white;
-            font-family: 'VT323', monospace;
-        }
-
-        button {
-            background: #c0c0c0;
-            border: 2px outset #ddd;
-            padding: 5px 10px;
-            font-weight: bold;
-            cursor: pointer;
-            font-family: 'VT323', monospace;
-            font-size: 16px;
-        }
-        
-        button:active {
-            border: 2px inset #ddd;
-        }
-
-        /* Results Section */
-        .results {
-            background: #ffffff;
-            border: 2px inset #ddd;
-            padding: 10px;
-            margin-top: 15px;
-            height: 400px;
-            overflow-y: auto;
-        }
-
-        .section-title {
-            background: linear-gradient(90deg, #000080, #1084d0);
-            color: white;
-            margin: 0 0 10px 0;
-            padding: 3px 10px;
-        }
-
-        .loading {
-            text-align: center;
-            color: black;
-        }
-
-        .error-message {
-            background: #ff0000;
-            color: white;
-            padding: 10px;
-            margin: 10px 0;
-            text-align: center;
-        }
-
-        /* Progress bar */
-        .progress-container {
-            width: 100%;
-            background: white;
-            border: 2px inset #ddd;
-            height: 20px;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #00aa00, #00ff00);
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        /* Key points bullets */
-        .key-point {
-            margin-bottom: 5px;
-            padding-left: 20px;
-            position: relative;
-        }
-        
-        .key-point::before {
-            content: "→";
-            position: absolute;
-            left: 0;
-        }
-        
-        /* Marquee effect */
-        .marquee {
-            background: black;
-            color: #00ff00;
-            white-space: nowrap;
-            overflow: hidden;
-            box-sizing: border-box;
-            border: 2px inset #ddd;
-            padding: 5px;
-        }
-        
-        .marquee p {
-            display: inline-block;
-            padding-left: 100%;
-            animation: marquee 15s linear infinite;
-            margin: 0;
-        }
-        
-        @keyframes marquee {
-            0%   { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
-        }
-
-        /* Modem animation */
-        .modem {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 30px;
-        }
-        
-        .modem-light {
-            width: 10px;
-            height: 10px;
-            margin: 0 5px;
-            border-radius: 50%;
-            background: #444;
-        }
-        
-        .modem-light.active {
-            background: #0f0;
-            box-shadow: 0 0 5px #0f0;
-            animation: blink 0.5s infinite alternate;
-        }
-        
-        @keyframes blink {
-            from { opacity: 1; }
-            to { opacity: 0.3; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div id="app"></div>
+    <div class="marquee">
+        <p>Welcome to the 90's PDF Analyzer! Upload your PDFs and get instant analysis with the power of AI! * Multiple document support! * Built with Gemini API * Totally radical! * Information superhighway!</p>
+    </div>
+    
+    <div class="container">
+        <h1>&lt;&lt; 90's PDF ANALYZER &gt;&gt;</h1>
+        
+        <div class="window">
+            <div class="window-title">
+                <span>Upload.exe</span>
+                <div class="window-title-buttons">
+                    <div class="title-button">_</div>
+                    <div class="title-button">□</div>
+                    <div class="title-button">×</div>
+                </div>
+            </div>
+            <div class="window-body">
+                <form id="upload-form">
+                    <div class="form-group">
+                        <label for="pdfFiles">SELECT YOUR PDF FILES:</label>
+                        <input type="file" id="pdfFiles" name="pdfFiles" accept=".pdf" multiple required>
+                        <div class="file-list" id="fileList"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="apiKey">GEMINI API KEY:</label>
+                        <input type="password" id="apiKey" name="apiKey" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" id="analyze-btn" class="blink">ANALYZE NOW!</button>
+                    </div>
+                </form>
+                
+                <div class="loading" id="loading">
+                    <p>Connecting to neural network...</p>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="modem">
+                        <div class="modem-light"></div>
+                        <div class="modem-light"></div>
+                        <div class="modem-light"></div>
+                        <div class="modem-light"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="error-message" id="error-message">
+            <strong>ERROR:</strong> <span id="error-text"></span>
+        </div>
 
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+        <div class="window" id="results-window">
+            <div class="window-title">
+                <span>Analysis_Results.txt</span>
+                <div class="window-title-buttons">
+                    <div class="title-button">_</div>
+                    <div class="title-button">□</div>
+                    <div class="title-button">×</div>
+                </div>
+            </div>
+            <div class="window-body">
+                <div class="results" id="results">
+                    <div class="file-info" id="fileInfo"></div>
+                    
+                    <div class="result-section">
+                        <h3 class="section-title">EXECUTIVE SUMMARY</h3>
+                        <div id="summary"></div>
+                    </div>
+                    
+                    <div class="result-section">
+                        <h3 class="section-title">KEY POINTS</h3>
+                        <ul id="key-points"></ul>
+                    </div>
+                    
+                    <div class="result-section" id="comparison-section">
+                        <h3 class="section-title">DOCUMENT COMPARISON</h3>
+                        <div id="document-comparison" class="document-comparison"></div>
+                    </div>
+                    
+                    <div class="result-section">
+                        <h3 class="section-title">DETAILED ANALYSIS</h3>
+                        <div id="detailed-analysis"></div>
+                    </div>
+                    
+                    <div class="result-section">
+                        <h3 class="section-title">RECOMMENDATIONS</h3>
+                        <div id="recommendations"></div>
+                    </div>
+                    
+                    <button id="download-btn" class="download-button">SAVE REPORT TO DISK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add dialup sound effect -->
+    <audio id="dialup-sound" src="https://www.myinstants.com/media/sounds/dialup.mp3" preload="auto"></audio>
+    
+    <!-- Load scripts -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
