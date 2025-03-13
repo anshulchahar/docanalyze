@@ -28,7 +28,13 @@ export default [
                 URL: 'readonly',
                 URLSearchParams: 'readonly',
                 FileReader: 'readonly',
-                Audio: 'readonly'
+                Audio: 'readonly',
+
+                // Timer globals (adding these to fix the errors)
+                setTimeout: 'readonly',
+                clearTimeout: 'readonly',
+                setInterval: 'readonly',
+                clearInterval: 'readonly'
             },
             parserOptions: {
                 ecmaFeatures: {
