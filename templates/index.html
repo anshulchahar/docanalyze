@@ -1,112 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>90's PDF Document Analyzer</title>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <title>DocAnalyze - AI Document Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
-    <div class="marquee">
-        <p>Welcome to the 90's PDF Analyzer! Upload your PDFs and get instant analysis with the power of AI! * Multiple document support! * Built with Gemini API * Totally radical! * Information superhighway!</p>
-    </div>
-    
-    <div class="container">
-        <h1>&lt;&lt; 90's PDF ANALYZER &gt;&gt;</h1>
-        
-        <div class="window">
-            <div class="window-title">
-                <span>Upload.exe</span>
-                <div class="window-title-buttons">
-                    <div class="title-button">_</div>
-                    <div class="title-button">□</div>
-                    <div class="title-button">×</div>
-                </div>
+    <header>
+        <div class="header-content">
+            <h1>DocAnalyze</h1>
+            <div class="theme-toggle">
+                <i class="toggle-icon fas fa-sun"></i>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="toggle-slider"></span>
+                </label>
+                <i class="toggle-icon fas fa-moon"></i>
             </div>
-            <div class="window-body">
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Upload Documents</div>
+            </div>
+            <div class="card-body">
                 <form id="upload-form">
                     <div class="form-group">
-                        <label for="pdfFiles">SELECT YOUR PDF FILES:</label>
-                        <input type="file" id="pdfFiles" name="pdfFiles" accept=".pdf" multiple required>
+                        <div class="dropzone" id="drop-area">
+                            <i class="fas fa-file-pdf dropzone-icon"></i>
+                            <p class="dropzone-text">Drag and drop PDF files here or click to browse</p>
+                            <p class="dropzone-subtext">Supports multiple PDFs for comparison analysis</p>
+                            <input type="file" id="pdfFiles" name="pdfFiles" accept=".pdf" multiple required
+                                style="display: none;">
+                        </div>
                         <div class="file-list" id="fileList"></div>
                     </div>
                     <div class="form-group">
-                        <label for="apiKey">GEMINI API KEY:</label>
-                        <input type="password" id="apiKey" name="apiKey" required>
+                        <label for="apiKey">Gemini API Key</label>
+                        <input type="password" id="apiKey" name="apiKey" placeholder="Enter your Google Gemini API key"
+                            required>
                     </div>
                     <div class="form-group">
-                        <button type="submit" id="analyze-btn" class="blink">ANALYZE NOW!</button>
+                        <button type="submit" id="analyze-btn">Analyze Documents</button>
                     </div>
                 </form>
-                
+
                 <div class="loading" id="loading">
-                    <p>Connecting to neural network...</p>
+                    <p>Analyzing documents with AI...</p>
                     <div class="progress-container">
                         <div class="progress-bar" id="progressBar"></div>
                     </div>
-                    <div class="modem">
-                        <div class="modem-light"></div>
-                        <div class="modem-light"></div>
-                        <div class="modem-light"></div>
-                        <div class="modem-light"></div>
-                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="error-message" id="error-message">
-            <strong>ERROR:</strong> <span id="error-text"></span>
         </div>
 
-        <div class="window" id="results-window">
-            <div class="window-title">
-                <span>Analysis_Results.txt</span>
-                <div class="window-title-buttons">
-                    <div class="title-button">_</div>
-                    <div class="title-button">□</div>
-                    <div class="title-button">×</div>
-                </div>
+        <div class="error-message" id="error-message">
+            <strong>Error:</strong> <span id="error-text"></span>
+        </div>
+
+        <div class="card" id="results-window">
+            <div class="card-header">
+                <div class="card-title">Analysis Results</div>
             </div>
-            <div class="window-body">
+            <div class="card-body">
                 <div class="results" id="results">
-                    <div class="file-info" id="fileInfo"></div>
-                    
                     <div class="result-section">
-                        <h3 class="section-title">EXECUTIVE SUMMARY</h3>
+                        <div class="file-info" id="fileInfo"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <h3 class="section-title">Executive Summary</h3>
                         <div id="summary"></div>
                     </div>
-                    
+
                     <div class="result-section">
-                        <h3 class="section-title">KEY POINTS</h3>
+                        <h3 class="section-title">Key Points</h3>
                         <ul id="key-points"></ul>
                     </div>
-                    
+
                     <div class="result-section" id="comparison-section">
-                        <h3 class="section-title">DOCUMENT COMPARISON</h3>
+                        <h3 class="section-title">Document Comparison</h3>
                         <div id="document-comparison" class="document-comparison"></div>
                     </div>
-                    
+
                     <div class="result-section">
-                        <h3 class="section-title">DETAILED ANALYSIS</h3>
+                        <h3 class="section-title">Detailed Analysis</h3>
                         <div id="detailed-analysis"></div>
                     </div>
-                    
+
                     <div class="result-section">
-                        <h3 class="section-title">RECOMMENDATIONS</h3>
+                        <h3 class="section-title">Recommendations</h3>
                         <div id="recommendations"></div>
                     </div>
-                    
-                    <button id="download-btn" class="download-button">SAVE REPORT TO DISK</button>
+
+                    <button id="download-btn" class="download-button">
+                        <i class="fas fa-download"></i> Download Report
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Add dialup sound effect -->
-    <audio id="dialup-sound" src="https://www.myinstants.com/media/sounds/dialup.mp3" preload="auto"></audio>
-    
     <!-- Load scripts -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
+
 </html>
