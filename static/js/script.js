@@ -328,9 +328,9 @@ document.addEventListener('DOMContentLoaded', function () {
       fileInfoText += '- ' + fileInfoItems[i].innerText + '\n';
     }
 
-    // Compile full report
+    // Compile full report with new name
     const fullReport =
-      'DOCUMENT ANALYSIS REPORT\n\n' +
+      'SOLVA DOCUMENT ANALYSIS REPORT\n\n' +
       fileInfoText + '\n\n' +
       'EXECUTIVE SUMMARY:\n' + summaryText + '\n\n' +
       'KEY POINTS:\n' + keyPointsText + '\n\n' +
@@ -338,9 +338,9 @@ document.addEventListener('DOMContentLoaded', function () {
       'DETAILED ANALYSIS:\n' + detailedAnalysisText + '\n\n' +
       'RECOMMENDATIONS:\n' + recommendationsText;
 
-    // Create and download file
+    // Create and download file with new name prefix
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `document-analysis-${timestamp}.txt`;
+    const filename = `solva-analysis-${timestamp}.txt`;
 
     const blob = new Blob([fullReport], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -351,5 +351,21 @@ document.addEventListener('DOMContentLoaded', function () {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  });
+
+  // Add a subtle animation for sun elements
+  const sunElements = document.querySelectorAll('.fa-sun');
+  sunElements.forEach(sun => {
+    if (!sun.classList.contains('toggle-icon')) {
+      sun.addEventListener('mouseover', function () {
+        this.style.transform = 'rotate(180deg)';
+        this.style.transition = 'transform 1s';
+      });
+
+      sun.addEventListener('mouseout', function () {
+        this.style.transform = 'rotate(0deg)';
+        this.style.transition = 'transform 1s';
+      });
+    }
   });
 });

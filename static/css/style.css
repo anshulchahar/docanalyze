@@ -5,9 +5,11 @@
     --card-background: #ffffff;
     --card-border: #e5e5e5;
     --card-shadow: rgba(0, 0, 0, 0.05);
-    --accent-color: #10a37f;
+    --accent-color: #f39c12;
+    /* Changed to sun-themed orange color */
     --secondary-color: #8e8ea0;
-    --button-hover: #0e8e6d;
+    --button-hover: #d68910;
+    /* Darker orange */
     --input-background: #ffffff;
     --input-border: #e5e5e5;
     --header-background: #ffffff;
@@ -15,6 +17,8 @@
     --tooltip-background: #343541;
     --tooltip-text: #ffffff;
     --progress-bar-background: #e5e5e5;
+    --sun-glow: rgba(243, 156, 18, 0.2);
+    /* Sun glow color */
 }
 
 [data-theme='dark'] {
@@ -24,9 +28,11 @@
     --card-background: #2d2d3a;
     --card-border: #3f3f4e;
     --card-shadow: rgba(0, 0, 0, 0.2);
-    --accent-color: #10a37f;
+    --accent-color: #f39c12;
+    /* Keep the sun-theme even in dark mode */
     --secondary-color: #9e9ea8;
-    --button-hover: #0e8e6d;
+    --button-hover: #d68910;
+    /* Darker orange */
     --input-background: #3f3f4e;
     --input-border: #4b4b5a;
     --header-background: #2d2d3a;
@@ -34,6 +40,8 @@
     --tooltip-background: #ececf1;
     --tooltip-text: #1e1e2f;
     --progress-bar-background: #3f3f4e;
+    --sun-glow: rgba(243, 156, 18, 0.15);
+    /* Subtle sun glow for dark mode */
 }
 
 * {
@@ -92,6 +100,7 @@ h1 {
     margin-bottom: 24px;
     overflow: hidden;
     transition: box-shadow 0.3s;
+    border-top: 3px solid var(--accent-color);
 }
 
 .card:hover {
@@ -159,10 +168,14 @@ button {
     transition: background-color 0.2s;
     font-family: inherit;
     font-size: 0.95rem;
+    box-shadow: 0 2px 5px var(--sun-glow);
+    transition: all 0.2s ease;
 }
 
 button:hover {
     background-color: var(--button-hover);
+    box-shadow: 0 4px 8px var(--sun-glow);
+    transform: translateY(-1px);
 }
 
 button:disabled {
@@ -179,6 +192,7 @@ button:disabled {
     cursor: pointer;
     margin-bottom: 20px;
     transition: background-color 0.3s, border-color 0.3s;
+    position: relative;
 }
 
 .dropzone:hover,
@@ -202,6 +216,16 @@ button:disabled {
 .dropzone-subtext {
     font-size: 0.85rem;
     color: var(--secondary-color);
+}
+
+/* Dropzone sun icon */
+.dropzone-sun-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 1.2rem;
+    color: var(--accent-color);
+    opacity: 0.7;
 }
 
 /* File List */
@@ -265,6 +289,9 @@ button:disabled {
     width: 0%;
     border-radius: 4px;
     transition: width 0.4s ease;
+    background-image: linear-gradient(to right, var(--accent-color), #f5b041, var(--accent-color));
+    background-size: 200% 100%;
+    animation: shine 2s infinite linear;
 }
 
 /* Results sections */
@@ -384,5 +411,61 @@ input:checked+.toggle-slider:before {
 
     h1 {
         font-size: 1.5rem;
+    }
+}
+
+/* Logo styles */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sun-logo {
+    font-size: 1.8rem;
+    color: var(--accent-color);
+    filter: drop-shadow(0 0 6px var(--sun-glow));
+    animation: pulse 3s infinite alternate;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 5px var(--sun-glow));
+    }
+
+    100% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 10px var(--sun-glow));
+    }
+}
+
+/* Sun loader */
+.sun-loader {
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    font-size: 1.2rem;
+    color: var(--accent-color);
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes shine {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
     }
 }

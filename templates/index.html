@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocAnalyze - AI Document Analysis</title>
+    <title>Solva - AI Document Analysis</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -13,7 +13,10 @@
 <body>
     <header>
         <div class="header-content">
-            <h1>DocAnalyze</h1>
+            <div class="logo-container">
+                <i class="fas fa-sun sun-logo"></i>
+                <h1>Solva</h1>
+            </div>
             <div class="theme-toggle">
                 <i class="toggle-icon fas fa-sun"></i>
                 <label class="toggle-switch">
@@ -34,6 +37,7 @@
                 <form id="upload-form">
                     <div class="form-group">
                         <div class="dropzone" id="drop-area">
+                            <i class="fas fa-sun dropzone-sun-icon"></i>
                             <i class="fas fa-file-pdf dropzone-icon"></i>
                             <p class="dropzone-text">Drag and drop PDF files here or click to browse</p>
                             <p class="dropzone-subtext">Supports multiple PDFs for comparison analysis</p>
@@ -56,6 +60,9 @@
                     <p>Analyzing documents with AI...</p>
                     <div class="progress-container">
                         <div class="progress-bar" id="progressBar"></div>
+                        <div class="sun-loader">
+                            <i class="fas fa-sun"></i>
+                        </div>
                     </div>
                 </div>
             </div>
