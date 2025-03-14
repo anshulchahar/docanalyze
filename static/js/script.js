@@ -52,47 +52,92 @@ document.addEventListener('DOMContentLoaded', function () {
     dropArea.classList.remove('active');
   }
 
-  dropArea.addEventListener('drop', handleDrop, false);
-
-  function handleDrop(e) {
-    const dt = e.dataTransfer;
-    const files = dt.files;
-    handleFiles(files);
-  }
+  // Handle drop event
+  dropArea.addEventListener('drop', function (e) {
+    const droppedFiles = e.dataTransfer.files;
+    addNewFiles(droppedFiles);
+  });
 
   // Click on dropzone to trigger file input
   dropArea.addEventListener('click', () => {
     fileInput.click();
   });
 
+  // Handle file input change event
   fileInput.addEventListener('change', function () {
-    handleFiles(this.files);
+    addNewFiles(this.files);
+    // Reset the file input value so the same file can be selected again
+    this.value = '';
   });
 
-  function handleFiles(files) {
-    // Validate file types (only PDFs)
-    const validFiles = Array.from(files).filter(file => file.type === 'application/pdf');
+  // Function to add new files to existing selection
+  function addNewFiles(newFiles) {
+    if (!newFiles || newFiles.length === 0) return;
 
-    if (validFiles.length === 0) {
+    // Filter to only accept PDFs
+    const newPdfFiles = Array.from(newFiles).filter(file => file.type === 'application/pdf');
+
+    if (newPdfFiles.length === 0) {
       showError('Please select PDF files only.');
       return;
     }
 
-    // Update file list display
-    updateFileList(validFiles);
+    // Get existing files (if any)
+    let existingFiles = fileInput.files ? Array.from(fileInput.files) : [];
 
-    // Set the files to the input element for form submission
+    // Check for duplicate files (by name)
+    const combinedFiles = [...existingFiles];
+    let duplicatesFound = false;
+
+    newPdfFiles.forEach(newFile => {
+      // Check if file with same name already exists
+      const isDuplicate = combinedFiles.some(existingFile => existingFile.name === newFile.name);
+
+      if (!isDuplicate) {
+        combinedFiles.push(newFile);
+      } else {
+        duplicatesFound = true;
+      }
+    });
+
+    if (duplicatesFound) {
+      showError('Some files were skipped because they were already added.');
+    }
+
+    // Update file input with combined files
     const dataTransfer = new DataTransfer();
-    validFiles.forEach(file => {
+    combinedFiles.forEach(file => {
       dataTransfer.items.add(file);
     });
     fileInput.files = dataTransfer.files;
+
+    // Update display
+    updateFileListUI(combinedFiles);
   }
 
-  function updateFileList(files) {
+  // Update file list UI
+  function updateFileListUI(files) {
     fileList.innerHTML = '';
 
     if (files.length > 0) {
+      // Add clear all button
+      const clearAllContainer = document.createElement('div');
+      clearAllContainer.className = 'clear-all-container';
+      clearAllContainer.innerHTML = `
+        <button type="button" class="clear-all-btn">
+          <i class="fas fa-trash-alt"></i> Clear all files
+        </button>
+      `;
+      clearAllContainer.querySelector('.clear-all-btn').addEventListener('click', clearAllFiles);
+      fileList.appendChild(clearAllContainer);
+
+      // Add file counter
+      const fileCounter = document.createElement('div');
+      fileCounter.className = 'file-counter';
+      fileCounter.innerHTML = `<span>${files.length} file${files.length !== 1 ? 's' : ''} selected</span>`;
+      fileList.appendChild(fileCounter);
+
+      // Add each file
       Array.from(files).forEach((file, index) => {
         const fileSize = formatFileSize(file.size);
         const fileItem = document.createElement('div');
@@ -120,18 +165,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  // Function to clear all files
+  function clearAllFiles() {
+    fileInput.value = '';
+    fileInput.files = new DataTransfer().files;
+    updateFileListUI([]);
+  }
+
+  // Function to remove a single file
   function removeFile(index) {
-    const dt = new DataTransfer();
-    const files = fileInput.files;
+    const files = Array.from(fileInput.files);
+    files.splice(index, 1); // Remove the file at this index
 
-    for (let i = 0; i < files.length; i++) {
-      if (i !== index) {
-        dt.items.add(files[i]);
-      }
-    }
+    // Update file input
+    const dataTransfer = new DataTransfer();
+    files.forEach(file => dataTransfer.items.add(file));
+    fileInput.files = dataTransfer.files;
 
-    fileInput.files = dt.files;
-    updateFileList(fileInput.files);
+    // Update UI
+    updateFileListUI(files);
   }
 
   function formatFileSize(bytes) {
