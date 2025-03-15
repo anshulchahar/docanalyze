@@ -1,8 +1,8 @@
 :root {
     /* Light Theme Colors */
-    --background-color: #f7f7f8;
+    --background-color: #FFFFFF;
     --text-color: #343541;
-    --card-background: #ffffff;
+    --card-background: #FFFFFF;
     --card-border: #e5e5e5;
     --card-shadow: rgba(0, 0, 0, 0.05);
     --accent-color: #f39c12;
@@ -10,12 +10,12 @@
     --secondary-color: #8e8ea0;
     --button-hover: #d68910;
     /* Darker orange */
-    --input-background: #ffffff;
+    --input-background: #FFFFFF;
     --input-border: #e5e5e5;
-    --header-background: #ffffff;
+    --header-background: #FFFFFF;
     --header-shadow: rgba(0, 0, 0, 0.05);
     --tooltip-background: #343541;
-    --tooltip-text: #ffffff;
+    --tooltip-text: #FFFFFF;
     --progress-bar-background: #e5e5e5;
     --sun-glow: rgba(243, 156, 18, 0.2);
     /* Sun glow color */
@@ -23,25 +23,40 @@
 
 [data-theme='dark'] {
     /* Dark Theme Colors */
-    --background-color: #1e1e2f;
-    --text-color: #ececf1;
-    --card-background: #2d2d3a;
-    --card-border: #3f3f4e;
-    --card-shadow: rgba(0, 0, 0, 0.2);
+    --background-color: #000000;
+    --text-color: #FFFFFF;
+    --card-background: #000000;
+    --card-border: #333333;
+    --card-shadow: rgba(255, 255, 255, 0.1);
     --accent-color: #f39c12;
     /* Keep the sun-theme even in dark mode */
     --secondary-color: #9e9ea8;
     --button-hover: #d68910;
     /* Darker orange */
-    --input-background: #3f3f4e;
-    --input-border: #4b4b5a;
-    --header-background: #2d2d3a;
-    --header-shadow: rgba(0, 0, 0, 0.2);
-    --tooltip-background: #ececf1;
-    --tooltip-text: #1e1e2f;
-    --progress-bar-background: #3f3f4e;
+    --input-background: #111111;
+    --input-border: #333333;
+    --header-background: #000000;
+    --header-shadow: rgba(255, 255, 255, 0.1);
+    --tooltip-background: #FFFFFF;
+    --tooltip-text: #000000;
+    --progress-bar-background: #333333;
     --sun-glow: rgba(243, 156, 18, 0.15);
     /* Subtle sun glow for dark mode */
+}
+
+[data-theme='dark'] input[type="file"],
+[data-theme='dark'] input[type="password"],
+[data-theme='dark'] input[type="text"] {
+    background-color: #111111;
+    border-color: #444444;
+    color: #FFFFFF;
+}
+
+[data-theme='dark'] input[type="file"]:focus,
+[data-theme='dark'] input[type="password"]:focus,
+[data-theme='dark'] input[type="text"]:focus {
+    border-color: var(--accent-color);
+    background-color: #1a1a1a;
 }
 
 * {
@@ -66,10 +81,11 @@ body {
     padding: 20px;
 }
 
+/* Header styling */
 header {
-    background-color: var(--header-background);
-    box-shadow: 0 1px 5px var(--header-shadow);
-    padding: 15px 0;
+    background-color: var(--background-color);
+    box-shadow: none;
+    padding: 10px 0;
     margin-bottom: 20px;
     position: sticky;
     top: 0;
@@ -79,19 +95,35 @@ header {
 .header-content {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     max-width: 1000px;
     margin: 0 auto;
     padding: 0 20px;
 }
 
+.logo-container {
+    display: flex;
+    gap: 12px;
+    margin-right: auto;
+}
+
+.site-logo {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+}
+
 h1 {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: var(--text-color);
 }
 
-/* Cards */
+.theme-toggle {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
 .card {
     background-color: var(--card-background);
     border: 1px solid var(--card-border);
@@ -99,8 +131,18 @@ h1 {
     box-shadow: 0 4px 12px var(--card-shadow);
     margin-bottom: 24px;
     overflow: hidden;
-    transition: box-shadow 0.3s;
+    transition: all 0.3s;
     border-top: 3px solid var(--accent-color);
+}
+
+[data-theme='dark'] .card {
+    border-color: #444444;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='light'] .card {
+    border-color: #e0e0e0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .card:hover {
@@ -334,8 +376,8 @@ button:disabled {
 /* Dark mode toggle */
 .theme-toggle {
     display: flex;
-    align-items: center;
     gap: 8px;
+    margin-left: auto;
 }
 
 .toggle-switch {
@@ -417,7 +459,6 @@ input:checked+.toggle-slider:before {
 /* Logo styles */
 .logo-container {
     display: flex;
-    align-items: center;
     gap: 12px;
 }
 
