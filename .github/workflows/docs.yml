@@ -1,13 +1,13 @@
-name: Publish Documentation
+name: Deploy MkDocs to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
+      - 'requirements.txt'
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -16,36 +16,58 @@ permissions:
   id-token: write
 
 jobs:
-  deploy:
+  deploy-mkdocs:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetching all history for proper versioning
       
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
+          cache: 'pip'
       
-      - name: Install MkDocs dependencies
+      - name: Install MkDocs and dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mkdocs-material==9.2.0
+          pip install mkdocs-material>=9.2.0
           pip install Pygments
           pip install pymdown-extensions
           pip install mkdocs-material-extensions
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
       
-      - name: Configure Git user
+      - name: Setup Git
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
       
-      - name: Deploy MkDocs
+      - name: Build and Deploy MkDocs
         run: |
-          # Use the mkdocs gh-deploy command which handles GitHub Pages deployment automatically
-          mkdocs gh-deploy --force --clean --verbose
+          mkdocs build --verbose --clean
           
-      - name: Verify GitHub Pages deployment
+          # Create necessary files for GitHub Pages
+          touch ./site/.nojekyll
+          
+          # Deploy to GitHub Pages
+          cd site
+          git init
+          git add -A
+          git commit -m "Deploy Documentation updates" || echo "No changes to commit"
+          git push --force "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" main:gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Verify Deployment
         run: |
-          echo "Documentation deployed to GitHub Pages."
-          echo "Please wait a few minutes for GitHub to build the site."
-          echo "You can view your site at: https://anshulchahar.github.io/docanalyze/"
+          echo "Documentation has been deployed to GitHub Pages."
+          echo "Please allow a few minutes for the changes to be visible at:"
+          echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
