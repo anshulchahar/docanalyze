@@ -302,47 +302,104 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Handle download button
   downloadBtn.addEventListener('click', function () {
+    const format = document.getElementById('download-format').value;
     const summaryText = document.getElementById('summary').innerText;
     const keyPointsItems = document.getElementById('key-points').getElementsByTagName('li');
-    let keyPointsText = '';
-    for (let i = 0; i < keyPointsItems.length; i++) {
-      keyPointsText += '- ' + keyPointsItems[i].innerText + '\n';
-    }
-
-    const documentComparisonText = document.getElementById('document-comparison').innerText;
     const detailedAnalysisText = document.getElementById('detailed-analysis').innerText;
     const recommendationsText = document.getElementById('recommendations').innerText;
+    const comparisonText = document.getElementById('document-comparison').innerText;
 
-    // Create file info section
-    const fileInfoItems = document.getElementById('fileInfo').getElementsByTagName('li');
-    let fileInfoText = 'DOCUMENTS ANALYZED:\n';
-    for (let i = 0; i < fileInfoItems.length; i++) {
-      fileInfoText += '- ' + fileInfoItems[i].innerText + '\n';
+    let content = '';
+    let filename = `solva-analysis-${new Date().toISOString().replace(/[:.]/g, '-')}`;
+    let mimeType = 'text/plain';
+
+    if (format === 'md') {
+      content = `# Document Analysis Report\n\n` +
+        `## Executive Summary\n\n${summaryText}\n\n` +
+        `## Key Points\n\n` +
+        Array.from(keyPointsItems).map(item => `* ${item.innerText}`).join('\n') + '\n\n' +
+        (comparisonText ? `## Document Comparison\n\n${comparisonText}\n\n` : '') +
+        `## Detailed Analysis\n\n${detailedAnalysisText}\n\n` +
+        `## Recommendations\n\n${recommendationsText}`;
+      filename += '.md';
+      mimeType = 'text/markdown';
+    } else if (format === 'pdf') {
+      // For PDF, we'll create a styled HTML that will be converted to PDF
+      content = `
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
+            h1 { color: #333; border-bottom: 2px solid #f39c12; padding-bottom: 10px; }
+            h2 { color: #444; margin-top: 20px; }
+            ul { margin-left: 20px; }
+            li { margin-bottom: 5px; }
+          </style>
+        </head>
+        <body>
+          <h1>Document Analysis Report</h1>
+          <h2>Executive Summary</h2>
+          <p>${summaryText}</p>
+          <h2>Key Points</h2>
+          <ul>
+            ${Array.from(keyPointsItems).map(item => `<li>${item.innerText}</li>`).join('')}
+          </ul>
+          ${comparisonText ? `<h2>Document Comparison</h2><p>${comparisonText}</p>` : ''}
+          <h2>Detailed Analysis</h2>
+          <p>${detailedAnalysisText}</p>
+          <h2>Recommendations</h2>
+          <p>${recommendationsText}</p>
+        </body>
+        </html>`;
+      filename += '.pdf';
+      mimeType = 'application/pdf';
+    } else {
+      // Default text format
+      content = 'DOCUMENT ANALYSIS REPORT\n\n' +
+        'EXECUTIVE SUMMARY:\n' + summaryText + '\n\n' +
+        'KEY POINTS:\n' + Array.from(keyPointsItems).map(item => '- ' + item.innerText).join('\n') + '\n\n' +
+        (comparisonText ? 'DOCUMENT COMPARISON:\n' + comparisonText + '\n\n' : '') +
+        'DETAILED ANALYSIS:\n' + detailedAnalysisText + '\n\n' +
+        'RECOMMENDATIONS:\n' + recommendationsText;
+      filename += '.txt';
     }
 
-    // Compile full report with new name
-    const fullReport =
-      'SOLVA DOCUMENT ANALYSIS REPORT\n\n' +
-      fileInfoText + '\n\n' +
-      'EXECUTIVE SUMMARY:\n' + summaryText + '\n\n' +
-      'KEY POINTS:\n' + keyPointsText + '\n\n' +
-      (documentComparisonText ? 'DOCUMENT COMPARISON:\n' + documentComparisonText + '\n\n' : '') +
-      'DETAILED ANALYSIS:\n' + detailedAnalysisText + '\n\n' +
-      'RECOMMENDATIONS:\n' + recommendationsText;
-
-    // Create and download file with new name prefix
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `solva-analysis-${timestamp}.txt`;
-
-    const blob = new Blob([fullReport], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // For PDF, we need to convert HTML to PDF using a server endpoint
+    if (format === 'pdf') {
+      fetch('/api/convert-to-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ html: content })
+      })
+        .then(response => response.blob())
+        .then(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+          console.error('Error generating PDF:', error);
+          showError('Failed to generate PDF. Please try another format.');
+        });
+    } else {
+      // For text and markdown formats, create and download file directly
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   });
 
   // Add a subtle animation for sun elements
