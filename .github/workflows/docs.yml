@@ -3,71 +3,47 @@ name: Deploy MkDocs to GitHub Pages
 on:
   push:
     branches: ["main"]
-    paths:
-      - 'docs/**'
-      - 'mkdocs.yml'
-      - '.github/workflows/docs.yml'
-      - 'requirements.txt'
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
   deploy-mkdocs:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
 
     steps:
       - name: Checkout source repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetching all history for proper versioning
-      
+          path: main
+      - name: Checkout gh-pages repository
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-          cache: 'pip'
-      
       - name: Install MkDocs and dependencies
+        working-directory: main
         run: |
-          python -m pip install --upgrade pip
-          pip install mkdocs-material>=9.2.0
-          pip install Pygments
-          pip install pymdown-extensions
-          pip install mkdocs-material-extensions
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
-      
-      - name: Setup Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      
+          pip install --upgrade pip
+          pip install -r requirements.txt
       - name: Build and Deploy MkDocs
+        working-directory: main
         run: |
-          mkdocs build --verbose --clean
-          
-          # Create necessary files for GitHub Pages
-          touch ./site/.nojekyll
-          
-          # Deploy to GitHub Pages
-          cd site
-          git init
-          git add -A
-          git commit -m "Deploy Documentation updates" || echo "No changes to commit"
-          git push --force "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" main:gh-pages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Verify Deployment
+          mkdocs build --site-dir ../gh-pages  # Build documentation into the gh-pages directory
+          cd ../gh-pages
+          # We need to disable Jekyll, because gh-pages does not copy files/folders with underscores:
+          # https://github.blog/2009-12-29-bypassing-jekyll-on-github-pages/
+          touch .nojekyll  # Prevent GitHub Pages from ignoring files with underscores
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          # git commit returns an error if there are not updates, but this is ok
+          git commit -m "Update MkDocs documentation" -a || true
+      - name: Push documentation changes
+        working-directory: gh-pages
         run: |
-          echo "Documentation has been deployed to GitHub Pages."
-          echo "Please allow a few minutes for the changes to be visible at:"
-          echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          git push
