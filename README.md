@@ -1,6 +1,6 @@
 # DocAnalyze
 
-A retro-themed PDF document analysis tool powered by Google's Gemini AI.
+A PDF document analysis tool powered by Google's Gemini AI.
 
 ## Overview
 
