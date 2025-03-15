@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | DocAnalyze</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <i class="fas fa-sun sun-logo"></i>
+                <h1>DocAnalyze</h1>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">404 - Page Not Found</div>
+            </div>
+            <div class="card-body">
+                <div class="error-container">
+                    <i class="fas fa-exclamation-triangle error-icon"></i>
+                    <h2>Oops! Page not found.</h2>
+                    <p>The page you are looking for doesn't exist or has been moved.</p>
+                    <a href="{{ url_for('web.index') }}" class="btn-link">Return to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

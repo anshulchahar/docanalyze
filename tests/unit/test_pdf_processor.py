@@ -4,11 +4,8 @@ from unittest.mock import patch, MagicMock
 import sys
 import tempfile
 
-# Add the parent directory to the path if needed
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
-# Import your module
-from pdf_processor import extract_text_from_pdf  # Adjust the import based on your actual file structure
+# Import your module with the new path
+from docanalyze.core.pdf.processor import extract_text_from_pdf
 
 class TestPdfProcessor:
     
@@ -21,7 +18,7 @@ class TestPdfProcessor:
     @pytest.fixture
     def mock_pypdf(self):
         """Create a mock for pypdf."""
-        with patch('pdf_processor.pypdf') as mock:
+        with patch('docanalyze.core.pdf.processor.pypdf') as mock:
             # Configure mock to return expected values
             reader_mock = MagicMock()
             mock.PdfReader.return_value = reader_mock

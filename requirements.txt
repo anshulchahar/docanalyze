@@ -1,11 +1,18 @@
-flask==2.3.3
-pypdf==4.0.1  # Use the latest version
-google-generativeai==0.3.0
-flake8==6.0.0
-pre-commit==3.3.2
-# Documentation requirements
-mkdocs==1.5.3
-mkdocs-material==9.4.6
-pymdown-extensions==10.3
-mkdocstrings==0.23.0
-mkdocstrings-python==1.7.3
+# Core dependencies
+flask>=2.3.3
+pypdf>=4.0.1
+google-generativeai>=0.3.0
+python-dotenv>=1.0.0
+
+# Development dependencies
+pytest>=7.0.0
+pytest-cov>=4.0.0
+flake8>=6.0.0
+pre-commit>=3.3.2
+
+# Documentation dependencies
+mkdocs>=1.5.3
+mkdocs-material>=9.4.6
+pymdown-extensions>=10.3
+mkdocstrings>=0.23.0
+mkdocstrings-python>=1.7.3

@@ -4,16 +4,15 @@ from unittest.mock import patch, MagicMock
 import tempfile
 import io
 
-# Add project root to Python path
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
-from app import app  # Import your Flask app
+# Import from the new structure
+from docanalyze import create_app
 
 @pytest.fixture
 def client():
     """Create a test client for the Flask app."""
+    app = create_app('testing')
     app.config['TESTING'] = True
+    
     with app.test_client() as client:
         yield client
 
@@ -21,14 +20,37 @@ class TestAnalysisWorkflow:
     
     def create_sample_pdf(self):
         """Create a minimal valid PDF file for testing."""
-        # Instead of trying to create a valid PDF, use a simple text file
-        # that we'll mock to work with our PDF processor
+        # Create a test file with proper PDF structure
+        test_content = b"""%PDF-1.4
+1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
+2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
+3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>/Contents 4 0 R>>endobj
+4 0 obj<</Length 22>>stream
+BT
+/F1 12 Tf
+(Test) Tj
+ET
+endstream
+endobj
+xref
+0 5
+0000000000 65535 f
+0000000009 00000 n
+0000000056 00000 n
+0000000111 00000 n
+0000000212 00000 n
+trailer
+<</Size 5/Root 1 0 R>>
+startxref
+287
+%%EOF"""
+    
         with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as f:
-            f.write(b"This is sample text for testing purposes.")
+            f.write(test_content)
             return f.name
     
-    @patch('app.extract_text_from_pdf')  # Patch in app.py, not pdf_processor
-    @patch('app.analyze_text_with_gemini')  # Patch in app.py, not gemini_api_handler
+    @patch('docanalyze.core.pdf.processor.extract_text_from_pdf')
+    @patch('docanalyze.core.ai.gemini_handler.GeminiAPIHandler.analyze_text')
     def test_end_to_end_workflow(self, mock_gemini, mock_extract, client):
         """Test the complete PDF analysis workflow."""
         # Create a sample PDF
@@ -50,9 +72,9 @@ class TestAnalysisWorkflow:
             with open(pdf_path, 'rb') as pdf:
                 pdf_content = pdf.read()
             
-            # Make the request
+            # Make the request to the API endpoint
             response = client.post(
-                '/analyze',
+                '/api/analyze',
                 data={
                     'pdfFiles': (io.BytesIO(pdf_content), 'test.pdf'),
                     'apiKey': 'DUMMY_API_KEY'

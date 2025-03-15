@@ -2,7 +2,7 @@ import os
 import tempfile
 import pytest
 from pypdf import PdfWriter
-from pdf_processor import extract_text_from_pdf
+from docanalyze.core.pdf.processor import extract_text_from_pdf
 
 def test_extract_text_from_pdf_with_pypdf():
     """Test that text extraction works with pypdf."""
