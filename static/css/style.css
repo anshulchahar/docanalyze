@@ -428,6 +428,12 @@ input:checked+.toggle-slider:before {
     animation: pulse 3s infinite alternate;
 }
 
+.site-logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
 @keyframes pulse {
     0% {
         transform: scale(1);
