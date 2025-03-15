@@ -1,7 +1,7 @@
 flask==2.3.3
 pypdf==4.0.1  # Use the latest version
 google-generativeai==0.3.0
-flake8==6.0.0
+flake8==7.1.2
 pre-commit==3.3.2
 # Documentation requirements
 mkdocs==1.5.3
