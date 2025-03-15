@@ -27,19 +27,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Build and deploy documentation
+      - name: Build documentation
         run: |
-          mkdocs build --site-dir ../gh-pages  # Build documentation into the gh-pages directory
-          cd ../gh-pages
-          # We need to disable Jekyll, because gh-pages does not copy files/folders with underscores:
-          # https://github.blog/2009-12-29-bypassing-jekyll-on-github-pages/
-          touch .nojekyll  # Prevent GitHub Pages from ignoring files with underscores
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add .
-          # git commit returns an error if there are not updates, but this is ok
-          git commit -m "Update MkDocs documentation" -a || true
-      - name: Push documentation changes
-        working-directory: gh-pages
-        run: |
-          git push
+          mkdocs build --site-dir ./site
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          force_orphan: true
+          publish_branch: gh-pages
+          enable_jekyll: false
