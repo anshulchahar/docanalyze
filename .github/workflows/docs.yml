@@ -28,15 +28,27 @@ jobs:
         with:
           python-version: '3.10'
       
-      - name: Install dependencies
+      - name: Install documentation dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mkdocs mkdocs-material
+          pip install mkdocs
+          pip install mkdocs-material
+          pip install pymdown-extensions
+          pip install mkdocs-material-extensions
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      
+      - name: Debug MkDocs configuration
+        run: |
+          echo "MkDocs version:"
+          mkdocs --version
+          echo "Material theme version:"
+          pip show mkdocs-material | grep Version
+          echo "Available plugins:"
+          pip list | grep mkdocs
       
       - name: Build documentation
         run: |
-          mkdocs build --site-dir ./site
+          mkdocs build --site-dir ./site --verbose
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
@@ -46,3 +58,4 @@ jobs:
           force_orphan: true
           publish_branch: gh-pages
           enable_jekyll: false
+          cname: ${{ secrets.CNAME }}
