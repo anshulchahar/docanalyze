@@ -18,7 +18,7 @@ class Config:
     # Application settings
     APP_NAME = "DocAnalyze"
     UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
-    MAX_CONTENT_LENGTH = 20 * 1024 * 1024  # 20MB max upload size
+    MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50MB max upload size
     
     # API settings
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')

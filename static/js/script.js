@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function () {
     formData.append('apiKey', apiKey);
 
     try {
-      const response = await fetch('/analyze', {
+      const response = await fetch('/api/analyze', {  // Add the /api prefix
         method: 'POST',
         body: formData
       });
