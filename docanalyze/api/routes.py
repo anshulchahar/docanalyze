@@ -27,16 +27,19 @@ def analyze_pdf():
         logger.error("No PDF files in request")
         return jsonify({'error': 'No PDF files provided'}), 400
     
-    if 'apiKey' not in request.form:
-        logger.error("No API key in request")
-        return jsonify({'error': 'No API key provided'}), 400
-
     pdf_files = request.files.getlist('pdfFiles')
-    api_key = request.form['apiKey']
     
     if not pdf_files or pdf_files[0].filename == '':
         logger.error("No PDF files selected")
         return jsonify({'error': 'No PDF files selected'}), 400
+    
+    # Get API key from configuration
+    config = get_config()
+    api_key = config.GEMINI_API_KEY
+    
+    if not api_key:
+        logger.error("Gemini API key not configured")
+        return jsonify({'error': 'Server configuration error: Gemini API key not set'}), 500
     
     try:
         # Process each PDF and combine the text

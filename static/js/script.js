@@ -165,12 +165,6 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    const apiKey = document.getElementById('apiKey').value;
-    if (!apiKey) {
-      showError('Please enter your Gemini API key.');
-      return;
-    }
-
     // Show loading and start progress
     loadingSection.style.display = 'flex';
     const progressBar = document.getElementById('progressBar');
@@ -191,10 +185,8 @@ document.addEventListener('DOMContentLoaded', function () {
       formData.append('pdfFiles', files[i]);
     }
 
-    formData.append('apiKey', apiKey);
-
     try {
-      const response = await fetch('/api/analyze', {  // Add the /api prefix
+      const response = await fetch('/api/analyze', {
         method: 'POST',
         body: formData
       });
