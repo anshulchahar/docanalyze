@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          fetch-depth: 0  # Fetching the whole history to compare changes
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -33,7 +33,22 @@ jobs:
           pip install flake8
         timeout-minutes: 2
       
-      - name: Run flake8
+      - name: Get changed Python files
+        id: changed-python-files
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "files=$(git diff --name-only --diff-filter=ACMRTUXB origin/${{ github.base_ref }} ${{ github.sha }} | grep -E '\.py$' | xargs)" >> $GITHUB_OUTPUT
+      
+      - name: Run flake8 on changed files
+        if: github.event_name == 'pull_request' && steps.changed-python-files.outputs.files != ''
+        run: |
+          echo "Linting changed Python files: ${{ steps.changed-python-files.outputs.files }}"
+          flake8 ${{ steps.changed-python-files.outputs.files }} --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 ${{ steps.changed-python-files.outputs.files }} --count --exit-zero --statistics
+        timeout-minutes: 2
+      
+      - name: Run flake8 on all files (main branch)
+        if: github.event_name == 'push'
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 . --count --exit-zero --statistics
@@ -45,7 +60,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          fetch-depth: 0  # Fetching the whole history to compare changes
       
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -56,7 +71,21 @@ jobs:
         run: npm install
         timeout-minutes: 5
       
-      - name: Run ESLint
+      - name: Get changed JS files
+        id: changed-js-files
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "files=$(git diff --name-only --diff-filter=ACMRTUXB origin/${{ github.base_ref }} ${{ github.sha }} | grep -E '\.(js|jsx|ts|tsx)$' | xargs)" >> $GITHUB_OUTPUT
+      
+      - name: Run ESLint on changed files
+        if: github.event_name == 'pull_request' && steps.changed-js-files.outputs.files != ''
+        run: |
+          echo "Linting changed JS files: ${{ steps.changed-js-files.outputs.files }}"
+          npx eslint ${{ steps.changed-js-files.outputs.files }} || echo "ESLint check failed but continuing"
+        timeout-minutes: 2
+      
+      - name: Run ESLint on all files (main branch)
+        if: github.event_name == 'push'
         run: npm run lint || echo "ESLint check failed but continuing"
         timeout-minutes: 2
 
