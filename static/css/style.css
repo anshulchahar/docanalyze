@@ -435,9 +435,50 @@ input:checked+.toggle-slider:before {
     display: none;
 }
 
-/* Download button */
-.download-button {
+/* Download section */
+.download-section {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
     margin-top: 20px;
+}
+
+.format-select {
+    padding: 12px;
+    /* Match the button padding */
+    border-radius: 6px;
+    /* Match the button border-radius */
+    border: 1px solid var(--input-border);
+    background-color: var(--input-background);
+    color: var(--text-color);
+    font-size: 0.95rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 44px;
+    /* Match the button height */
+    display: flex;
+    align-items: center;
+}
+
+.format-select:hover {
+    border-color: var(--accent-color);
+}
+
+.format-select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--sun-glow);
+}
+
+/* Download button - remove top margin since it's handled by the section */
+.download-button {
+    margin-top: 0;
+    height: 44px;
+    /* Set fixed height */
+    display: flex;
+    align-items: center;
 }
 
 /* Responsive design */

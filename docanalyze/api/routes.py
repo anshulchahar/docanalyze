@@ -1,10 +1,16 @@
 """
 API routes for the DocAnalyze application.
 """
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 import os
 import logging
 from typing import Dict, Any, List
+from io import BytesIO
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, ListFlowable, ListItem
+from reportlab.lib.units import inch
 
 # Import application components
 from docanalyze.core.pdf.processor import extract_text_from_pdf, extract_metadata
@@ -99,6 +105,120 @@ def analyze_pdf():
         logger.error(f"Error in analyze_pdf: {error_msg}")
         logger.exception("Exception details:")
         return jsonify({'error': error_msg}), 500
+
+@api_bp.route('/convert-to-pdf', methods=['POST'])
+def convert_to_pdf():
+    """Convert content to PDF using ReportLab."""
+    try:
+        if not request.is_json:
+            return jsonify({'error': 'Content-Type must be application/json'}), 400
+
+        data = request.get_json()
+        if not data or 'html' not in data:
+            return jsonify({'error': 'Content is required'}), 400
+
+        # Create a buffer for the PDF
+        buffer = BytesIO()
+
+        # Create the PDF document
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=letter,
+            rightMargin=72,
+            leftMargin=72,
+            topMargin=72,
+            bottomMargin=72
+        )
+
+        # Create styles
+        styles = getSampleStyleSheet()
+        styles.add(ParagraphStyle(
+            name='CustomHeading1',
+            parent=styles['Heading1'],
+            fontSize=24,
+            spaceAfter=30,
+            textColor=colors.HexColor('#333333')
+        ))
+        styles.add(ParagraphStyle(
+            name='CustomHeading2',
+            parent=styles['Heading2'],
+            fontSize=18,
+            spaceBefore=20,
+            spaceAfter=10,
+            textColor=colors.HexColor('#444444')
+        ))
+        styles.add(ParagraphStyle(
+            name='CustomBody',
+            parent=styles['Normal'],
+            fontSize=12,
+            leading=16,
+            textColor=colors.HexColor('#333333')
+        ))
+
+        # Parse the HTML-like content and convert to reportlab elements
+        content = []
+        
+        # Add title
+        content.append(Paragraph("Document Analysis Report", styles['CustomHeading1']))
+        content.append(Spacer(1, 12))
+
+        # Extract sections from the HTML-like content
+        html = data['html']
+        sections = html.split('<h2>')
+        
+        # Process each section
+        for section in sections[1:]:  # Skip first empty part
+            # Extract section title and content
+            title_end = section.find('</h2>')
+            if title_end != -1:
+                title = section[0:title_end].strip()
+                body = section[title_end + 5:].strip()
+                
+                # Add section title
+                content.append(Paragraph(title, styles['CustomHeading2']))
+                
+                # Handle bullet points
+                if '<ul>' in body and '</ul>' in body:
+                    ul_start = body.find('<ul>')
+                    ul_end = body.find('</ul>')
+                    list_content = body[ul_start + 4:ul_end]
+                    items = list_content.split('<li>')
+                    bullets = []
+                    for item in items[1:]:  # Skip first empty item
+                        item_text = item.split('</li>')[0].strip()
+                        bullets.append(ListItem(Paragraph(item_text, styles['CustomBody'])))
+                    content.append(ListFlowable(
+                        bullets,
+                        bulletType='bullet',
+                        start='•',
+                        leftIndent=20,
+                        bulletFontSize=8,
+                        bulletOffsetY=2
+                    ))
+                else:
+                    # Regular paragraph
+                    paragraphs = body.replace('<p>', '').split('</p>')
+                    for p in paragraphs:
+                        if p.strip():
+                            content.append(Paragraph(p.strip(), styles['CustomBody']))
+                            content.append(Spacer(1, 12))
+
+        # Build the PDF document
+        doc.build(content)
+        
+        # Prepare the response
+        buffer.seek(0)
+        return send_file(
+            buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name='analysis-report.pdf'
+        )
+
+    except Exception as e:
+        logger.error(f"Error in PDF conversion: {str(e)}")
+        logger.exception("Exception details:")
+        return jsonify({'error': 'Failed to generate PDF'}), 500
 
 @api_bp.route('/health', methods=['GET'])
 def health_check():
