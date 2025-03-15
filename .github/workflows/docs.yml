@@ -20,42 +20,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
       
-      - name: Install documentation dependencies
+      - name: Install MkDocs dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mkdocs
-          pip install mkdocs-material
+          pip install mkdocs-material==9.2.0
+          pip install Pygments
           pip install pymdown-extensions
           pip install mkdocs-material-extensions
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       
-      - name: Debug MkDocs configuration
+      - name: Configure Git user
         run: |
-          echo "MkDocs version:"
-          mkdocs --version
-          echo "Material theme version:"
-          pip show mkdocs-material | grep Version
-          echo "Available plugins:"
-          pip list | grep mkdocs
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
       
-      - name: Build documentation
+      - name: Deploy MkDocs
         run: |
-          mkdocs build --site-dir ./site --verbose
-      
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
-          force_orphan: true
-          publish_branch: gh-pages
-          enable_jekyll: false
-          cname: ${{ secrets.CNAME }}
+          # Use the mkdocs gh-deploy command which handles GitHub Pages deployment automatically
+          mkdocs gh-deploy --force --clean --verbose
+          
+      - name: Verify GitHub Pages deployment
+        run: |
+          echo "Documentation deployed to GitHub Pages."
+          echo "Please wait a few minutes for GitHub to build the site."
+          echo "You can view your site at: https://anshulchahar.github.io/docanalyze/"
