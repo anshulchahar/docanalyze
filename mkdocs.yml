@@ -1,0 +1,66 @@
+site_name: DocAnalyze
+site_description: Documentation for the DocAnalyze application
+site_url: https://yourusername.github.io/docanalyze/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.path
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+repo_name: docanalyze
+repo_url: https://github.com/yourusername/docanalyze
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - User Guide:
+    - Getting Started: user-guide/getting-started.md
+    - Features: user-guide/features.md
+    - Usage Examples: user-guide/examples.md
+  - API Reference:
+    - PDF Processor: api-reference/pdf-processor.md
+    - Gemini API: api-reference/gemini-api.md
+    - App Routes: api-reference/app-routes.md
+  - Development:
+    - Contributing: development/contributing.md
+    - Testing: development/testing.md
+  - About:
+    - License: about/license.md
+    - Changelog: about/changelog.md
