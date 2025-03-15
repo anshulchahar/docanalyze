@@ -233,43 +233,13 @@ button:disabled {
     margin-top: 15px;
 }
 
-.file-counter {
-    margin-bottom: 12px;
-    font-weight: 500;
-    color: var(--secondary-color);
-}
-
-.clear-all-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
-}
-
-.clear-all-btn {
-    background: none;
-    color: var(--secondary-color);
-    border: 1px solid var(--input-border);
-    padding: 5px 10px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: none;
-}
-
-.clear-all-btn:hover {
-    color: #e53935;
-    background-color: rgba(229, 57, 53, 0.05);
-    box-shadow: none;
-    transform: none;
-}
-
 .file-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 15px;
     border-radius: 6px;
-    background-color: rgba(243, 156, 18, 0.1);
+    background-color: rgba(16, 163, 127, 0.1);
     margin-bottom: 8px;
 }
 
