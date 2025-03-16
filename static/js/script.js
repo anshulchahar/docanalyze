@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const downloadBtn = document.getElementById('download-btn');
   const themeToggle = document.getElementById('theme-toggle');
 
+  // Keep track of all selected files
+  let selectedFiles = [];
+
   // Theme switching functionality
   function initTheme() {
     // Check for saved theme preference or default to 'light'
@@ -66,26 +69,43 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   fileInput.addEventListener('change', function () {
-    handleFiles(this.files);
+    const newFiles = Array.from(this.files);
+    handleFiles(newFiles);
   });
 
-  function handleFiles(files) {
+  function handleFiles(newFiles) {
     // Validate file types (only PDFs)
-    const validFiles = Array.from(files).filter(file => file.type === 'application/pdf');
+    const validNewFiles = Array.from(newFiles).filter(file => file.type === 'application/pdf');
 
-    if (validFiles.length === 0) {
+    if (validNewFiles.length === 0) {
       showError('Please select PDF files only.');
       return;
     }
 
-    // Update file list display
-    updateFileList(validFiles);
+    // Add new valid files to our selectedFiles array, checking for duplicates by name
+    const existingFileNames = selectedFiles.map(f => f.name);
 
-    // Set the files to the input element for form submission
+    validNewFiles.forEach(file => {
+      if (!existingFileNames.includes(file.name)) {
+        selectedFiles.push(file);
+        existingFileNames.push(file.name);
+      }
+    });
+
+    // Update the file input with all files from our array
+    updateFileInputFromSelectedFiles();
+
+    // Update file list display with all files
+    updateFileList(selectedFiles);
+  }
+
+  function updateFileInputFromSelectedFiles() {
     const dataTransfer = new DataTransfer();
-    validFiles.forEach(file => {
+
+    selectedFiles.forEach(file => {
       dataTransfer.items.add(file);
     });
+
     fileInput.files = dataTransfer.files;
   }
 
@@ -121,17 +141,14 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function removeFile(index) {
-    const dt = new DataTransfer();
-    const files = fileInput.files;
+    // Remove file from our array
+    selectedFiles.splice(index, 1);
 
-    for (let i = 0; i < files.length; i++) {
-      if (i !== index) {
-        dt.items.add(files[i]);
-      }
-    }
+    // Update the file input
+    updateFileInputFromSelectedFiles();
 
-    fileInput.files = dt.files;
-    updateFileList(fileInput.files);
+    // Update the UI
+    updateFileList(selectedFiles);
   }
 
   function formatFileSize(bytes) {
