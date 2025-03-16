@@ -1,0 +1,63 @@
+name: Security Scan
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
+          
+      - name: Run Bandit
+        run: bandit -r ./docanalyze -f json -o bandit-results.json || true
+
+      - name: Run Safety Check
+        run: safety check
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+    
+      - name: Install npm dependencies
+        run: npm ci
+  
+      - name: Run npm audit
+        run: npm audit
+
+      - name: Check for hardcoded secrets
+        uses: gitleaks/gitleaks-action@v2
+
+      - name: Upload security scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: bandit-results.json
+
+      - name: Notify on failure
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_TITLE: "Security Scan Failed"
+
+  dependency-review:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/dependency-review-action@v3
