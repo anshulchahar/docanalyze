@@ -425,18 +425,20 @@ button[type="submit"] {
     background-color: var(--secondary-color);
     transition: .4s;
     border-radius: 24px;
+    overflow: hidden;
 }
 
 .toggle-slider:before {
     position: absolute;
     content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
     background-color: white;
-    transition: .4s;
     border-radius: 50%;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
 }
 
 input:checked+.toggle-slider {
@@ -447,9 +449,15 @@ input:checked+.toggle-slider:before {
     transform: translateX(24px);
 }
 
+/* Add animation for the icons */
 .toggle-icon {
     font-size: 1rem;
     color: var(--text-color);
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover .toggle-icon {
+    transform: scale(1.1);
 }
 
 /* Make the results window initially hidden */
