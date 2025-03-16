@@ -7,9 +7,11 @@
     --card-shadow: rgba(0, 0, 0, 0.05);
     --accent-color: #f39c12;
     /* Changed to sun-themed orange color */
+    --button-default: #c17d0e;
+    /* Dimmer orange */
+    --button-hover: #f39c12;
+    /* Brighter orange on hover */
     --secondary-color: #8e8ea0;
-    --button-hover: #d68910;
-    /* Darker orange */
     --input-background: #FFFFFF;
     --input-border: #e5e5e5;
     --header-background: #FFFFFF;
@@ -30,9 +32,9 @@
     --card-shadow: rgba(255, 255, 255, 0.1);
     --accent-color: #f39c12;
     /* Keep the sun-theme even in dark mode */
+    --button-default: #c17d0e;
+    --button-hover: #f39c12;
     --secondary-color: #9e9ea8;
-    --button-hover: #d68910;
-    /* Darker orange */
     --input-background: #111111;
     --input-border: #333333;
     --header-background: #000000;
@@ -198,22 +200,23 @@ input[type="text"]:focus {
 }
 
 button {
-    background-color: var(--accent-color);
+    background-color: var(--button-default) !important;
+    /* Added !important to override any Tailwind defaults */
     color: white;
     border: none;
     border-radius: 6px;
     padding: 12px 20px;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
     font-family: inherit;
     font-size: 0.95rem;
     box-shadow: 0 2px 5px var(--sun-glow);
-    transition: all 0.2s ease;
 }
 
 button:hover {
-    background-color: var(--button-hover);
+    background-color: var(--button-hover) !important;
+    /* Added !important to override any Tailwind defaults */
     box-shadow: 0 4px 8px var(--sun-glow);
     transform: translateY(-1px);
 }
