@@ -29,13 +29,18 @@ jobs:
         run: |
           # Verify the directory exists
           if [ -d "docanalyze" ]; then
-            bandit -r ./docanalyze --format sarif --output bandit-results.sarif
+            bandit -r ./docanalyze --format json --output bandit-results.json
           else
             # If directory doesn't exist, scan the whole repo
-            bandit -r . --exclude ./venv,./node_modules --format sarif --output bandit-results.sarif
+            bandit -r . --exclude ./venv,./node_modules --format json --output bandit-results.json
           fi
           # Verify the file was created
-          ls -la bandit-results.sarif
+          ls -la bandit-results.json
+
+      - name: Convert Bandit JSON to SARIF
+        run: |
+          pip install bandit2sarif
+          bandit2sarif -o bandit-results.sarif bandit-results.json
 
       - name: Run Safety Check
         run: safety check
