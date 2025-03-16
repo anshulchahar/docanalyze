@@ -26,7 +26,8 @@ jobs:
           pip install bandit safety
           
       - name: Run Bandit
-        run: bandit -r ./docanalyze -f json -o bandit-results.json || true
+        # Use --format sarif instead of -f json
+        run: bandit -r ./docanalyze --format sarif --output bandit-results.sarif || true
 
       - name: Run Safety Check
         run: safety check
@@ -48,9 +49,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload security scan results
-        uses: github/codeql-action/upload-sarif@v2
+        # Update to v3
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: bandit-results.json
+          sarif_file: bandit-results.sarif
 
       - name: Notify on failure
         if: ${{ failure() }}
