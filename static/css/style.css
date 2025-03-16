@@ -156,7 +156,8 @@ h1 {
 }
 
 .card-body {
-    padding: 20px;
+    padding: 12px;
+    /* Reduced padding to allow wider content */
 }
 
 /* Form elements */
@@ -164,6 +165,8 @@ h1 {
     margin-bottom: 20px;
     display: flex;
     justify-content: center;
+    padding: 0 6px;
+    /* Reduced side padding */
 }
 
 label {
@@ -236,6 +239,12 @@ button[type="submit"] {
     margin-bottom: 20px;
     transition: background-color 0.3s, border-color 0.3s;
     position: relative;
+    width: 100%;
+    /* Ensure it takes full width */
+    max-width: 98%;
+    /* Allow some small margin on sides */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .dropzone:hover,
