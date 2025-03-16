@@ -120,13 +120,12 @@ h1 {
 
 .card {
     background-color: var(--card-background);
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px var(--card-shadow);
+    border: none;
+    box-shadow: none;
+    border-top: none;
     margin-bottom: 24px;
     overflow: hidden;
     transition: all 0.3s;
-    border-top: 3px solid var(--accent-color);
 }
 
 [data-theme='dark'] .card {
@@ -145,7 +144,7 @@ h1 {
 
 .card-header {
     padding: 16px 20px;
-    border-bottom: 1px solid var(--card-border);
+    border-bottom: none;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -163,6 +162,8 @@ h1 {
 /* Form elements */
 .form-group {
     margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
 }
 
 label {
@@ -217,6 +218,12 @@ button:hover {
 button:disabled {
     background-color: var(--secondary-color);
     cursor: not-allowed;
+}
+
+/* Center align the analyze button */
+button[type="submit"] {
+    width: auto;
+    padding: 12px 40px;
 }
 
 /* Drag and Drop Area */
