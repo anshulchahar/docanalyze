@@ -34,13 +34,14 @@ jobs:
             # If directory doesn't exist, scan the whole repo
             bandit -r . --exclude ./venv,./node_modules --format json --output bandit-results.json
           fi
-          # Verify the file was created
-          ls -la bandit-results.json
 
-      - name: Convert Bandit JSON to SARIF
-        run: |
-          pip install bandit2sarif
-          bandit2sarif -o bandit-results.sarif bandit-results.json
+      - name: Upload Bandit Results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: bandit-security-results
+          path: bandit-results.json
+          retention-days: 14
 
       - name: Run Safety Check
         run: safety check
@@ -60,12 +61,6 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload security scan results
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()  # Try to upload even if previous steps failed
-        with:
-          sarif_file: bandit-results.sarif
 
       - name: Notify on failure
         if: ${{ failure() }}
