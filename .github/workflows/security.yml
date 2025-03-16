@@ -26,8 +26,16 @@ jobs:
           pip install bandit safety
           
       - name: Run Bandit
-        # Use --format sarif instead of -f json
-        run: bandit -r ./docanalyze --format sarif --output bandit-results.sarif || true
+        run: |
+          # Verify the directory exists
+          if [ -d "docanalyze" ]; then
+            bandit -r ./docanalyze --format sarif --output bandit-results.sarif
+          else
+            # If directory doesn't exist, scan the whole repo
+            bandit -r . --exclude ./venv,./node_modules --format sarif --output bandit-results.sarif
+          fi
+          # Verify the file was created
+          ls -la bandit-results.sarif
 
       - name: Run Safety Check
         run: safety check
@@ -49,8 +57,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload security scan results
-        # Update to v3
         uses: github/codeql-action/upload-sarif@v3
+        if: always()  # Try to upload even if previous steps failed
         with:
           sarif_file: bandit-results.sarif
 
