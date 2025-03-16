@@ -7,10 +7,10 @@
     --card-shadow: rgba(0, 0, 0, 0.05);
     --accent-color: #f39c12;
     /* Changed to sun-themed orange color */
-    --button-default: #c17d0e;
-    /* Dimmer orange */
+    --button-default: rgba(243, 156, 18, 0.7);
+    /* Matches dropzone sun icon color with opacity */
     --button-hover: #f39c12;
-    /* Brighter orange on hover */
+    /* Matches theme toggle sun icon color */
     --secondary-color: #8e8ea0;
     --input-background: #FFFFFF;
     --input-border: #e5e5e5;
@@ -32,7 +32,7 @@
     --card-shadow: rgba(255, 255, 255, 0.1);
     --accent-color: #f39c12;
     /* Keep the sun-theme even in dark mode */
-    --button-default: #c17d0e;
+    --button-default: rgba(243, 156, 18, 0.7);
     --button-hover: #f39c12;
     --secondary-color: #9e9ea8;
     --input-background: #111111;
@@ -132,16 +132,16 @@ h1 {
 
 [data-theme='dark'] .card {
     border-color: #444444;
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+    box-shadow: none;
 }
 
 [data-theme='light'] .card {
     border-color: #e0e0e0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: none;
 }
 
 .card:hover {
-    box-shadow: 0 6px 16px var(--card-shadow);
+    box-shadow: none;
 }
 
 .card-header {
@@ -201,22 +201,26 @@ input[type="text"]:focus {
 
 button {
     background-color: var(--button-default) !important;
-    /* Added !important to override any Tailwind defaults */
-    color: white;
+    color: #FFFFFF !important;
+    /* Force white text color with !important */
     border: none;
-    border-radius: 6px;
-    padding: 12px 20px;
-    font-weight: 500;
+    border-radius: 10px;
+    padding: 10px 20px;
+    /* Reduced padding for more compact size */
+    font-weight: 600;
+    font-size: 1.1rem;
     cursor: pointer;
     transition: all 0.2s ease;
     font-family: inherit;
-    font-size: 0.95rem;
     box-shadow: 0 2px 5px var(--sun-glow);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 button:hover {
     background-color: var(--button-hover) !important;
-    /* Added !important to override any Tailwind defaults */
     box-shadow: 0 4px 8px var(--sun-glow);
     transform: translateY(-1px);
 }
@@ -229,7 +233,12 @@ button:disabled {
 /* Center align the analyze button */
 button[type="submit"] {
     width: auto;
-    padding: 12px 40px;
+    padding: 4px 28px;
+    /* Reduced vertical padding from 8px to 4px */
+    font-weight: 700;
+    font-size: 1.35rem;
+    min-height: 40px;
+    /* Reduced min-height from 44px to 40px */
 }
 
 /* Drag and Drop Area */
