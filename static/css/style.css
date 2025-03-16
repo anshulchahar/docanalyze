@@ -75,13 +75,10 @@ body {
     margin: 0;
 }
 
-.container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
-}
+/* Remove the container styles since we're using Tailwind's container */
+/* Remove header styling as we're now using Tailwind classes */
 
-/* Header styling */
+/* Note: Removing the following CSS blocks:
 header {
     background-color: var(--background-color);
     box-shadow: none;
@@ -91,7 +88,6 @@ header {
     top: 0;
     z-index: 100;
 }
-
 .header-content {
     display: flex;
     justify-content: space-between;
@@ -99,18 +95,16 @@ header {
     margin: 0 auto;
     padding: 0 20px;
 }
-
 .logo-container {
     display: flex;
     gap: 12px;
     margin-right: auto;
 }
-
 .site-logo {
     height: 32px;
     width: auto;
     object-fit: contain;
-}
+} */
 
 h1 {
     font-size: 1.5rem;
@@ -118,10 +112,10 @@ h1 {
     color: var(--text-color);
 }
 
+/* Theme toggle styles - keeping some base styles but letting Tailwind handle most styling */
 .theme-toggle {
     display: flex;
     gap: 8px;
-    margin-left: auto;
 }
 
 .card {
