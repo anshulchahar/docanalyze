@@ -1,0 +1,79 @@
+name: Security Scan
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
+          
+      - name: Run Bandit
+        run: |
+          # Verify the directory exists
+          if [ -d "docanalyze" ]; then
+            bandit -r ./docanalyze --format json --output bandit-results.json
+          else
+            # If directory doesn't exist, scan the whole repo
+            bandit -r . --exclude ./venv,./node_modules --format json --output bandit-results.json
+          fi
+
+      - name: Upload Bandit Results
+        uses: actions/upload-artifact@v4  # Update from v3 to v4
+        if: always()
+        with:
+          name: bandit-security-results
+          path: bandit-results.json
+          retention-days: 14
+
+      - name: Run Safety Check
+        run: safety check
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+    
+      - name: Install npm dependencies
+        run: npm ci
+  
+      - name: Run npm audit
+        run: npm audit
+
+      - name: Check for hardcoded secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify on failure
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_TITLE: "Security Scan Failed"
+
+  dependency-review:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags
+      - uses: actions/dependency-review-action@v3
