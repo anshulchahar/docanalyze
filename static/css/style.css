@@ -7,9 +7,11 @@
     --card-shadow: rgba(0, 0, 0, 0.05);
     --accent-color: #f39c12;
     /* Changed to sun-themed orange color */
+    --button-default: rgba(243, 156, 18, 0.7);
+    /* Matches dropzone sun icon color with opacity */
+    --button-hover: #f39c12;
+    /* Matches theme toggle sun icon color */
     --secondary-color: #8e8ea0;
-    --button-hover: #d68910;
-    /* Darker orange */
     --input-background: #FFFFFF;
     --input-border: #e5e5e5;
     --header-background: #FFFFFF;
@@ -30,9 +32,9 @@
     --card-shadow: rgba(255, 255, 255, 0.1);
     --accent-color: #f39c12;
     /* Keep the sun-theme even in dark mode */
+    --button-default: rgba(243, 156, 18, 0.7);
+    --button-hover: #f39c12;
     --secondary-color: #9e9ea8;
-    --button-hover: #d68910;
-    /* Darker orange */
     --input-background: #111111;
     --input-border: #333333;
     --header-background: #000000;
@@ -75,13 +77,10 @@ body {
     margin: 0;
 }
 
-.container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
-}
+/* Remove the container styles since we're using Tailwind's container */
+/* Remove header styling as we're now using Tailwind classes */
 
-/* Header styling */
+/* Note: Removing the following CSS blocks:
 header {
     background-color: var(--background-color);
     box-shadow: none;
@@ -91,7 +90,6 @@ header {
     top: 0;
     z-index: 100;
 }
-
 .header-content {
     display: flex;
     justify-content: space-between;
@@ -99,18 +97,16 @@ header {
     margin: 0 auto;
     padding: 0 20px;
 }
-
 .logo-container {
     display: flex;
     gap: 12px;
     margin-right: auto;
 }
-
 .site-logo {
     height: 32px;
     width: auto;
     object-fit: contain;
-}
+} */
 
 h1 {
     font-size: 1.5rem;
@@ -118,40 +114,39 @@ h1 {
     color: var(--text-color);
 }
 
+/* Theme toggle styles - keeping some base styles but letting Tailwind handle most styling */
 .theme-toggle {
     display: flex;
     gap: 8px;
-    margin-left: auto;
 }
 
 .card {
     background-color: var(--card-background);
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px var(--card-shadow);
+    border: none;
+    box-shadow: none;
+    border-top: none;
     margin-bottom: 24px;
     overflow: hidden;
     transition: all 0.3s;
-    border-top: 3px solid var(--accent-color);
 }
 
 [data-theme='dark'] .card {
     border-color: #444444;
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+    box-shadow: none;
 }
 
 [data-theme='light'] .card {
     border-color: #e0e0e0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: none;
 }
 
 .card:hover {
-    box-shadow: 0 6px 16px var(--card-shadow);
+    box-shadow: none;
 }
 
 .card-header {
     padding: 16px 20px;
-    border-bottom: 1px solid var(--card-border);
+    border-bottom: none;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -163,12 +158,17 @@ h1 {
 }
 
 .card-body {
-    padding: 20px;
+    padding: 12px;
+    /* Reduced padding to allow wider content */
 }
 
 /* Form elements */
 .form-group {
     margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    padding: 0 6px;
+    /* Reduced side padding */
 }
 
 label {
@@ -200,22 +200,27 @@ input[type="text"]:focus {
 }
 
 button {
-    background-color: var(--accent-color);
-    color: white;
+    background-color: var(--button-default) !important;
+    color: #FFFFFF !important;
+    /* Force white text color with !important */
     border: none;
-    border-radius: 6px;
-    padding: 12px 20px;
-    font-weight: 500;
+    border-radius: 10px;
+    padding: 10px 20px;
+    /* Reduced padding for more compact size */
+    font-weight: 600;
+    font-size: 1.1rem;
     cursor: pointer;
-    transition: background-color 0.2s;
-    font-family: inherit;
-    font-size: 0.95rem;
-    box-shadow: 0 2px 5px var(--sun-glow);
     transition: all 0.2s ease;
+    font-family: inherit;
+    box-shadow: 0 2px 5px var(--sun-glow);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 button:hover {
-    background-color: var(--button-hover);
+    background-color: var(--button-hover) !important;
     box-shadow: 0 4px 8px var(--sun-glow);
     transform: translateY(-1px);
 }
@@ -223,6 +228,17 @@ button:hover {
 button:disabled {
     background-color: var(--secondary-color);
     cursor: not-allowed;
+}
+
+/* Center align the analyze button */
+button[type="submit"] {
+    width: auto;
+    padding: 4px 28px;
+    /* Reduced vertical padding from 8px to 4px */
+    font-weight: 700;
+    font-size: 1.35rem;
+    min-height: 40px;
+    /* Reduced min-height from 44px to 40px */
 }
 
 /* Drag and Drop Area */
@@ -235,6 +251,12 @@ button:disabled {
     margin-bottom: 20px;
     transition: background-color 0.3s, border-color 0.3s;
     position: relative;
+    width: 100%;
+    /* Ensure it takes full width */
+    max-width: 98%;
+    /* Allow some small margin on sides */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .dropzone:hover,
@@ -403,18 +425,20 @@ button:disabled {
     background-color: var(--secondary-color);
     transition: .4s;
     border-radius: 24px;
+    overflow: hidden;
 }
 
 .toggle-slider:before {
     position: absolute;
     content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
     background-color: white;
-    transition: .4s;
     border-radius: 50%;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
 }
 
 input:checked+.toggle-slider {
@@ -425,9 +449,15 @@ input:checked+.toggle-slider:before {
     transform: translateX(24px);
 }
 
+/* Add animation for the icons */
 .toggle-icon {
     font-size: 1rem;
     color: var(--text-color);
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover .toggle-icon {
+    transform: scale(1.1);
 }
 
 /* Make the results window initially hidden */

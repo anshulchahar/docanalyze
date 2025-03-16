@@ -15,10 +15,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Theme switching functionality
   function initTheme() {
-    // Check for saved theme preference or default to 'light'
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-    themeToggle.checked = savedTheme === 'dark';
+    if (savedTheme === 'dark') {
+      themeToggle.checked = true;
+      document.querySelector('.toggle-slider').classList.add('checked');
+    }
   }
 
   initTheme();
@@ -27,6 +29,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const newTheme = this.checked ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
+
+    // Add or remove checked class for animation
+    const slider = document.querySelector('.toggle-slider');
+    if (this.checked) {
+      slider.classList.add('checked');
+    } else {
+      slider.classList.remove('checked');
+    }
   });
 
   // Drag and drop functionality
