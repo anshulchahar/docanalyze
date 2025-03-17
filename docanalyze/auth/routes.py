@@ -61,23 +61,24 @@ def google_authorize():
         return redirect(url_for('auth.login'))
     
     token = oauth.google.authorize_access_token()
-    user_info = oauth.google.get('userinfo').json()
+    resp = oauth.google.get('https://www.googleapis.com/oauth2/v3/userinfo')
+    user_info = resp.json()
     
     # Check if user exists
-    user = User.query.filter_by(oauth_id=user_info['id'], oauth_provider='google').first()
+    user = User.query.filter_by(oauth_id=user_info['sub'], oauth_provider='google').first()
     if not user:
         # Check if email exists
         user = User.query.filter_by(email=user_info['email']).first()
         if user:
             # Link existing account
-            user.oauth_id = user_info['id']
+            user.oauth_id = user_info['sub']
             user.oauth_provider = 'google'
         else:
             # Create new user
             user = User(
                 email=user_info['email'],
                 name=user_info['name'],
-                oauth_id=user_info['id'],
+                oauth_id=user_info['sub'],
                 oauth_provider='google'
             )
             db.session.add(user)
