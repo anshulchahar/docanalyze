@@ -3,6 +3,9 @@ flask>=2.3.3
 pypdf>=4.0.1
 google-generativeai>=0.3.0
 python-dotenv>=1.0.0
+flask-sqlalchemy>=3.0.0
+flask-login>=0.6.0
+authlib>=1.0.0
 
 # Development dependencies
 pytest>=7.0.0
