@@ -108,9 +108,11 @@ export function App() {
       Array.from(files).forEach(file => formData.append('pdfFiles', file));
       formData.append('apiKey', apiKey);
 
-      const response = await fetch('/analyze', {
+      // Add authorization header to fetch requests
+      const response = await fetch('/api/analyze', {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: 'same-origin', // Include cookies in the request
       });
 
       const data = await response.json();
