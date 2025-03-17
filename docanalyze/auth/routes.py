@@ -1,11 +1,10 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
-from authlib.integrations.flask_client import OAuth
 from docanalyze.models import db, User
 from docanalyze.auth.forms import LoginForm, RegistrationForm
+from docanalyze import oauth  # Import the configured OAuth instance
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
-oauth = OAuth()
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -48,11 +47,19 @@ def logout():
 # OAuth routes for Google
 @auth_bp.route('/login/google')
 def google_login():
+    if 'google' not in oauth._registry:
+        flash('Google login is not configured. Please check your environment variables.', 'error')
+        return redirect(url_for('auth.login'))
+    
     redirect_uri = url_for('auth.google_authorize', _external=True)
     return oauth.google.authorize_redirect(redirect_uri)
 
 @auth_bp.route('/login/google/callback')
 def google_authorize():
+    if 'google' not in oauth._registry:
+        flash('Google login is not configured. Please check your environment variables.', 'error')
+        return redirect(url_for('auth.login'))
+    
     token = oauth.google.authorize_access_token()
     user_info = oauth.google.get('userinfo').json()
     
@@ -80,14 +87,32 @@ def google_authorize():
     login_user(user)
     return redirect(url_for('web.index'))
 
-# Similar route for Apple Sign In
+# Simple placeholder route for Apple login - commented out for future implementation
+'''
+@auth_bp.route('/apple/login')
+def apple_login():
+    # TODO: Implement Apple login
+    flash('Apple login is not yet implemented', 'info')
+    return redirect(url_for('auth.login'))
+'''
+
+# Apple OAuth routes - commented out for now
+'''
 @auth_bp.route('/login/apple')
 def apple_login():
+    if 'apple' not in oauth._registry:
+        flash('Apple login is not configured. Please check your environment variables.', 'error')
+        return redirect(url_for('auth.login'))
+    
     redirect_uri = url_for('auth.apple_authorize', _external=True)
     return oauth.apple.authorize_redirect(redirect_uri)
 
 @auth_bp.route('/login/apple/callback')
 def apple_authorize():
+    if 'apple' not in oauth._registry:
+        flash('Apple login is not configured. Please check your environment variables.', 'error')
+        return redirect(url_for('auth.login'))
+    
     token = oauth.apple.authorize_access_token()
     user_info = oauth.apple.parse_id_token(token)
     
@@ -114,3 +139,4 @@ def apple_authorize():
     
     login_user(user)
     return redirect(url_for('web.index'))
+'''

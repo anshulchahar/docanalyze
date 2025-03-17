@@ -59,15 +59,19 @@
 
         <div class="mt-6 pt-6 border-t">
             <p class="text-center mb-4">Or sign in with:</p>
-            <div class="flex justify-center space-x-4">
+            <div class="flex justify-center">
                 <a href="{{ url_for('auth.google_login') }}"
                     class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                     Google
                 </a>
+                {# Temporarily remove Apple login until implemented
                 <a href="{{ url_for('auth.apple_login') }}"
-                    class="bg-gray-800 hover:bg-black text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Apple
+                    class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    <img src="{{ url_for('static', filename='img/apple-logo.png') }}" alt="Apple logo"
+                        class="h-5 w-5 mr-2">
+                    Continue with Apple
                 </a>
+                #}
             </div>
         </div>
     </div>
