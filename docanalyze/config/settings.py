@@ -24,6 +24,18 @@ class Config:
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
     GEMINI_MODEL = "gemini-1.5-pro"
     
+    # Database settings
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', f"sqlite:///{os.path.join(os.getcwd(), 'docanalyze.db')}")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # OAuth settings
+    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
+    APPLE_CLIENT_ID = os.environ.get('APPLE_CLIENT_ID')
+    APPLE_TEAM_ID = os.environ.get('APPLE_TEAM_ID')
+    APPLE_KEY_ID = os.environ.get('APPLE_KEY_ID')
+    APPLE_PRIVATE_KEY = os.environ.get('APPLE_PRIVATE_KEY')
+    
     # Ensure upload folder exists
     @classmethod
     def init_app(cls) -> None:
