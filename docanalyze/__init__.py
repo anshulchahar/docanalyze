@@ -98,7 +98,7 @@ def register_oauth_providers(app):
     
     # Apple OAuth
     if all(app.config.get(k) for k in ['APPLE_CLIENT_ID', 'APPLE_TEAM_ID', 'APPLE_KEY_ID']):
-        oauth.register(
+        oauth.register(  # nosec B106
             name='apple',
             client_id=app.config['APPLE_CLIENT_ID'],
             client_secret={
@@ -106,8 +106,8 @@ def register_oauth_providers(app):
                 'team_id': app.config['APPLE_TEAM_ID'],
                 'private_key': app.config['APPLE_PRIVATE_KEY'],
             },
-            authorize_url='https://appleid.apple.com/auth/authorize',
-            access_token_url='https://appleid.apple.com/auth/token',
+            authorize_url='https://appleid.apple.com/auth/authorize',  # nosec B106
+            access_token_url='https://appleid.apple.com/auth/token',  # nosec B106
             userinfo_endpoint=None,  # Apple doesn't have a userinfo endpoint
             client_kwargs={'scope': 'name email'},
         )
