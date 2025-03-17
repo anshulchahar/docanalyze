@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis History{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Your Document Analysis History</h1>
+
+    {% if analyses %}
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="min-w-full">
+            <thead>
+                <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
+                    <th class="py-3 px-6 text-left">Document</th>
+                    <th class="py-3 px-6 text-left">Date</th>
+                    <th class="py-3 px-6 text-left">Type</th>
+                    <th class="py-3 px-6 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-600 text-sm">
+                {% for analysis in analyses %}
+                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                    <td class="py-3 px-6 text-left whitespace-nowrap">
+                        {{ analysis.document_name }}
+                    </td>
+                    <td class="py-3 px-6 text-left">
+                        {{ analysis.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </td>
+                    <td class="py-3 px-6 text-left">
+                        {{ analysis.analysis_type }}
+                    </td>
+                    <td class="py-3 px-6 text-center">
+                        <a href="{{ url_for('web.view_analysis', analysis_id=analysis.id) }}"
+                            class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded">
+                            View
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="bg-white shadow-md rounded-lg p-8 text-center">
+        <p class="text-gray-600 mb-4">You haven't analyzed any documents yet.</p>
+        <a href="{{ url_for('web.index') }}" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">
+            Upload a Document
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

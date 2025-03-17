@@ -41,6 +41,15 @@
                     <h1 class="text-xl font-semibold">Solva</h1>
                 </div>
                 <div class="flex items-center gap-3 mr-0 lg:mr-4">
+                    {% if current_user.is_authenticated %}
+                    <span>{{ current_user.name }}</span>
+                    <a href="{{ url_for('web.history') }}" class="text-accent">My Documents</a>
+                    <a href="{{ url_for('auth.logout') }}" class="text-accent">Logout</a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="text-accent">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="text-accent">Register</a>
+                    {% endif %}
+                    <!-- Your existing theme toggle -->
                     <div class="flex items-center h-6 -mt-[5px]">
                         <i class="toggle-icon fas fa-sun text-accent text-lg"></i>
                     </div>
