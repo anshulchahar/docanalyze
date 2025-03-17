@@ -30,7 +30,8 @@
     {% block extra_css %}{% endblock %}
 </head>
 
-<body>
+<body class="min-h-screen flex flex-col bg-background">
+    {% block header %}
     <header class="sticky top-0 z-50 bg-background w-full">
         <div class="w-full px-4 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -76,8 +77,9 @@
             </div>
         </div>
     </header>
+    {% endblock %}
 
-    <main class="container">
+    <main class="flex-grow flex items-center justify-center">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <div class="flash-messages">
@@ -98,7 +100,7 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    {% block extra_js %}{% endblock %}
+    {% block scripts %}{% endblock %}
 </body>
 
 </html>
