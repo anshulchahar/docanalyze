@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="window mx-auto max-w-md mt-10">
+    <div class="window-title">
+        <span>Register.exe</span>
+        <div class="window-title-buttons">
+            <div class="title-button">_</div>
+            <div class="title-button">□</div>
+            <div class="title-button">×</div>
+        </div>
+    </div>
+    <div class="window-body p-6">
+        <h2 class="text-xl mb-4">Create a DocAnalyze Account</h2>
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-4">
+                {{ form.name.label(class="block text-sm font-bold mb-2") }}
+                {{ form.name(class="shadow appearance-none border rounded w-full py-2 px-3") }}
+                {% if form.name.errors %}
+                <div class="error-message mt-1">
+                    {% for error in form.name.errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="mb-4">
+                {{ form.email.label(class="block text-sm font-bold mb-2") }}
+                {{ form.email(class="shadow appearance-none border rounded w-full py-2 px-3") }}
+                {% if form.email.errors %}
+                <div class="error-message mt-1">
+                    {% for error in form.email.errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="mb-4">
+                {{ form.password.label(class="block text-sm font-bold mb-2") }}
+                {{ form.password(class="shadow appearance-none border rounded w-full py-2 px-3") }}
+                {% if form.password.errors %}
+                <div class="error-message mt-1">
+                    {% for error in form.password.errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="mb-6">
+                {{ form.password2.label(class="block text-sm font-bold mb-2") }}
+                {{ form.password2(class="shadow appearance-none border rounded w-full py-2 px-3") }}
+                {% if form.password2.errors %}
+                <div class="error-message mt-1">
+                    {% for error in form.password2.errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="flex items-center justify-between">
+                {{ form.submit(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded
+                focus:outline-none focus:shadow-outline") }}
+                <a href="{{ url_for('auth.login') }}"
+                    class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+                    Already have an account? Login
+                </a>
+            </div>
+        </form>
+        <div class="mt-6 pt-6 border-t">
+            <p class="text-center mb-4">Or sign up with:</p>
+            <div class="flex justify-center space-x-4">
+                <a href="{{ url_for('auth.google_login') }}"
+                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Google
+                </a>
+                <a href="{{ url_for('auth.apple_login') }}"
+                    class="bg-gray-800 hover:bg-black text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Apple
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

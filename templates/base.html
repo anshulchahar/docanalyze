@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DocAnalyze{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <a href="{{ url_for('web.index') }}" class="navbar-brand">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="DocAnalyze Logo" height="40">
+                </a>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+                    <li class="nav-item"><a href="{{ url_for('web.about') }}">About</a></li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item"><a href="#">Dashboard</a></li>
+                    <li class="nav-item"><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+                    {% else %}
+                    <li class="nav-item"><a href="{{ url_for('auth.login') }}">Login</a></li>
+                    <li class="nav-item"><a href="{{ url_for('auth.register') }}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for message in messages %}
+            <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; {{ current_year }} DocAnalyze. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

@@ -18,6 +18,10 @@ from docanalyze.core.ai.gemini_handler import GeminiAPIHandler
 from docanalyze.config.settings import get_config
 from docanalyze.utils.helpers import validate_pdf_file, get_file_info
 
+# Add imports
+from flask_login import current_user
+from docanalyze.models import db, DocumentAnalysis
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -98,6 +102,18 @@ def analyze_pdf():
         ai_analysis['fileInfo'] = file_info
         
         logger.debug("Analysis completed successfully")
+        
+        # After successful analysis:
+        if current_user.is_authenticated:
+            # Save the analysis to the user's history
+            analysis = DocumentAnalysis(
+                user_id=current_user.id,
+                filename=pdf_file.filename,
+                analysis_data=ai_analysis
+            )
+            db.session.add(analysis)
+            db.session.commit()
+        
         return jsonify(ai_analysis)
     
     except Exception as e:

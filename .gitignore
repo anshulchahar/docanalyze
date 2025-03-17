@@ -35,3 +35,8 @@ npm-debug.log*
 package-lock.json
 
 .coverage
+
+# Database files
+*.db
+docanalyze.db
+
