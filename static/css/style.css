@@ -733,7 +733,7 @@ input:checked+.toggle-slider:before {
 }
 
 .claude-footer a {
-    color: #000000;
+    color: #f39c12;
     text-decoration: none;
     font-weight: 500;
 }
