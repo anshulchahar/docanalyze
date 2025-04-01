@@ -223,4 +223,3 @@ This project is licensed under the MIT License - see the `LICENSE` file for deta
 ## Acknowledgments
 
 * Google Generative AI for powering the document analysis
-* Inspired by the aesthetic of 90s computing
