@@ -1,24 +1,24 @@
 # DocAnalyze
 
-A PDF document analysis tool powered by Google's Gemini AI.
+A document analysis tool powered by AI Models.
 
 ## Overview
 
-DocAnalyze transforms your PDF documents into structured insights using artificial intelligence. Upload your PDF, and the application will analyze the content to provide:
+SolvaAI transforms your documents into structured insights using artificial intelligence. Upload your Document, and the application will analyze the content to provide:
 
 * Concise executive summary
 * Key takeaway points
 * Detailed topical analysis
 * Actionable recommendations
 
-All presented in a nostalgic 90s-style user interface that brings a fun twist to document analysis.
+All presented in a clean user-friendly interface.
 
 ## Features
 
 * **PDF Text Extraction:** Automatically extracts text content from uploaded PDFs
-* **AI-Powered Analysis:** Uses Google's Gemini 1.5 Pro to generate comprehensive document analysis
+* **AI-Powered Analysis:** Uses Google's Gemini 2.0 flash to generate comprehensive document analysis
 * **Structured Output:** Presents information in well-organized sections for easy consumption
-* **Retro UI:** Enjoy a throwback to the 90s computing era with the vintage interface
+* **Modern Interface:** Enjoy a Modern, Minimalist and Modular Interface to fast pace your reading and understanding.
 * **CI/CD Pipeline:** Automated testing and deployment with GitHub Actions
 
 ## Getting Started
@@ -58,7 +58,7 @@ All presented in a nostalgic 90s-style user interface that brings a fun twist to
 ### Usage
 
 1.  Open the application in your web browser.
-2.  Upload your PDF document using the file selector.
+2.  Upload your document using the file selector.
 3.  Enter your Google Gemini API key.
 4.  Click "ANALYZE NOW!" and wait for the processing to complete.
 5.  Review the structured analysis results.
