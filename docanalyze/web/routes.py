@@ -1,7 +1,7 @@
 """
 Web routes for the DocAnalyze application.
 """
-from flask import Blueprint, render_template, current_app, abort
+from flask import Blueprint, render_template, current_app, abort, redirect, url_for
 import logging
 from flask_login import login_required, current_user
 from docanalyze.models import DocumentAnalysis
@@ -39,6 +39,17 @@ def view_analysis(analysis_id):
     if analysis.user_id != current_user.id:
         abort(403)  # Forbidden
     return render_template('analysis.html', analysis=analysis)
+
+# Routes for React auth components
+@web_bp.route('/login', methods=['GET'])
+def login():
+    """Serve the React login component."""
+    return render_template('base.html', title="Login", page_name="login")
+
+@web_bp.route('/register', methods=['GET'])
+def register():
+    """Serve the React register component."""
+    return render_template('base.html', title="Register", page_name="register")
 
 # Error handlers
 @web_bp.app_errorhandler(404)

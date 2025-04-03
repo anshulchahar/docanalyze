@@ -6,37 +6,17 @@ from docanalyze import oauth  # Import the configured OAuth instance
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@auth_bp.route('/login', methods=['GET', 'POST'])
+@auth_bp.route('/login', methods=['GET'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('web.index'))
-        
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user and user.check_password(form.password.data):
-            login_user(user, remember=form.remember_me.data)
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('web.index'))
-        flash('Invalid email or password')
-    
-    return render_template('auth/login.html', form=form)
+    # Just render a template that will load the React app
+    # React router will handle showing the login component
+    return render_template('base.html', title="Login", page_name="login")
 
-@auth_bp.route('/register', methods=['GET', 'POST'])
+@auth_bp.route('/register', methods=['GET'])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('web.index'))
-        
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        user = User(email=form.email.data, name=form.name.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Registration successful!')
-        return redirect(url_for('auth.login'))
-        
-    return render_template('auth/register.html', form=form)
+    # Just render a template that will load the React app
+    # React router will handle showing the register component
+    return render_template('base.html', title="Register", page_name="register")
 
 @auth_bp.route('/logout')
 @login_required
@@ -86,16 +66,28 @@ def google_authorize():
         db.session.commit()
     
     login_user(user)
-    return redirect(url_for('web.index'))
+    
+    # Generate JWT token for React app
+    import jwt
+    from datetime import datetime, timedelta
+    from docanalyze.config.settings import get_config
+    
+    config = get_config()
+    secret_key = config.SECRET_KEY
+    
+    token = jwt.encode({
+        'user_id': user.id,
+        'exp': datetime.utcnow() + timedelta(days=7)
+    }, secret_key, algorithm='HS256')
+    
+    # Return token as URL parameter to be used by the React app
+    return redirect(url_for('web.index', token=token))
 
-# Simple placeholder route for Apple login - commented out for future implementation
-'''
-@auth_bp.route('/apple/login')
+# Simple placeholder route for Apple login (updated to return to React app)
+@auth_bp.route('/login/apple')
 def apple_login():
-    # TODO: Implement Apple login
     flash('Apple login is not yet implemented', 'info')
     return redirect(url_for('auth.login'))
-'''
 
 # Apple OAuth routes - commented out for now
 '''
@@ -141,3 +133,9 @@ def apple_authorize():
     login_user(user)
     return redirect(url_for('web.index'))
 '''
+
+# Add routes without the /auth prefix to simplify React routing
+@auth_bp.route('/login/route', methods=['GET'])
+def react_login_redirect():
+    # This will be registered at /login and redirect to /auth/login
+    return redirect(url_for('auth.login'))
