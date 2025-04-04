@@ -19,14 +19,8 @@ from docanalyze.config.settings import get_config
 from docanalyze.utils.helpers import validate_pdf_file, get_file_info
 
 # Add imports
-from flask_login import current_user, login_user, logout_user
-from docanalyze.models import db, DocumentAnalysis, User
-import jwt
-from datetime import datetime, timedelta
-
-# Get the SECRET_KEY from config
-config = get_config()
-SECRET_KEY = config.SECRET_KEY
+from flask_login import current_user
+from docanalyze.models import db, DocumentAnalysis
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -248,79 +242,4 @@ def health_check():
     return jsonify({
         'status': 'ok',
         'version': '1.0.0',
-    })
-
-@api_bp.route('/auth/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    
-    if not data or not data.get('email') or not data.get('password'):
-        return jsonify({'message': 'Missing email or password'}), 400
-    
-    user = User.query.filter_by(email=data.get('email')).first()
-    
-    if not user or not user.check_password(data.get('password')):
-        return jsonify({'message': 'Invalid email or password'}), 401
-    
-    # Generate JWT token
-    token = jwt.encode({
-        'user_id': user.id,
-        'exp': datetime.utcnow() + timedelta(days=7)
-    }, SECRET_KEY, algorithm='HS256')
-    
-    # Login the user in the session as well (for compatibility with Flask-Login)
-    login_user(user, remember=data.get('remember_me', False))
-    
-    return jsonify({
-        'token': token,
-        'user': {
-            'id': user.id,
-            'name': user.name,
-            'email': user.email
-        }
-    })
-
-@api_bp.route('/auth/register', methods=['POST'])
-def register():
-    data = request.get_json()
-    
-    # Validate required fields
-    if not data or not data.get('name') or not data.get('email') or not data.get('password'):
-        return jsonify({'message': 'Missing required fields'}), 400
-    
-    # Check if email already exists
-    if User.query.filter_by(email=data.get('email')).first():
-        return jsonify({
-            'message': 'Email already registered',
-            'field': 'email'
-        }), 400
-    
-    # Create new user
-    user = User(
-        name=data.get('name'),
-        email=data.get('email')
-    )
-    user.set_password(data.get('password'))
-    
-    db.session.add(user)
-    db.session.commit()
-    
-    return jsonify({'message': 'Registration successful'}), 201
-
-@api_bp.route('/auth/logout', methods=['POST'])
-def logout():
-    logout_user()
-    return jsonify({'message': 'Logged out successfully'}), 200
-
-@api_bp.route('/auth/user', methods=['GET'])
-def get_user():
-    if not current_user.is_authenticated:
-        return jsonify({'message': 'Not authenticated'}), 401
-    
-    return jsonify({
-        'user': {
-            'id': current_user.id,
-            'name': current_user.name,
-            'email': current_user.email
-        }
     })

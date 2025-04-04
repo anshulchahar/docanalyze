@@ -28,34 +28,6 @@
         }
     </script>
     {% block extra_css %}{% endblock %}
-    <!-- Token handling script for OAuth callbacks -->
-    <script>
-        // Check for token parameter in URL after OAuth login
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log("DOM Content Loaded");
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get('token');
-            if (token) {
-                localStorage.setItem('authToken', token);
-
-                // Remove token from URL to prevent leakage in browser history
-                window.history.replaceState({}, document.title, window.location.pathname);
-
-                // Refresh the page to ensure React picks up the token
-                if (window.location.pathname === "/" ||
-                    window.location.pathname === "/login" ||
-                    window.location.pathname === "/register" ||
-                    window.location.pathname === "/auth/login" ||
-                    window.location.pathname === "/auth/register") {
-                    window.location.reload();
-                }
-            }
-
-            // Debug current path
-            console.log("Current path:", window.location.pathname);
-            console.log("Should load React:", {{ 'true' if request.path == "/auth/login" or request.path == "/auth/register" or request.path == "/login" or request.path == "/register" or page_name == "login" or page_name == "register" else 'false' }});
-        });
-    </script>
 </head>
 
 <body class="min-h-screen flex flex-col bg-background">
@@ -118,16 +90,7 @@
         {% endif %}
         {% endwith %}
 
-        <!-- Debug output -->
-        <div style="display: none;">
-            <p>Path: {{ request.path }}</p>
-            <p>Page name: {{ page_name }}</p>
-        </div>
-
-        <!-- Add a root element for React to mount to -->
-        <div id="root" class="w-full">
-            {% block content %}{% endblock %}
-        </div>
+        {% block content %}{% endblock %}
     </main>
 
     <footer class="footer">
@@ -136,19 +99,7 @@
         </div>
     </footer>
 
-    <!-- Load React app on auth pages and direct paths -->
-    {% if request.path == "/auth/login" or request.path == "/auth/register" or request.path == "/login" or request.path
-    == "/register" or page_name == "login" or page_name == "register" %}
-    <!-- Import the bundled React app -->
-    <script>
-        console.log("Loading React app bundle");
-        console.log("Root element exists:", document.getElementById('root') !== null);
-    </script>
-    <script src="{{ url_for('static', filename='dist/app.bundle.js') }}"></script>
-    {% else %}
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    {% endif %}
-
     {% block scripts %}{% endblock %}
 </body>
 
