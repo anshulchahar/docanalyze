@@ -1,28 +1,25 @@
 {% extends "base.html" %}
-
-{% block title %}Login{% endblock %}
+{% block title %}Login - Solva{% endblock %}
 
 {% block content %}
-<div class="window mx-auto max-w-md mt-10">
-    <div class="window-title">
-        <span>Login.exe</span>
-        <div class="window-title-buttons">
-            <div class="title-button">_</div>
-            <div class="title-button">□</div>
-            <div class="title-button">×</div>
+<div class="w-full flex items-center justify-center py-12">
+    <div class="claude-card">
+        <div class="logo-corner">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="DocAnalyze Logo" class="corner-logo">
         </div>
-    </div>
-    <div class="window-body p-6">
-        <h2 class="text-xl mb-4">Log in to DocAnalyze</h2>
+        <div class="claude-header">
+            <h2 class="claude-logo">solva</h2>
+            <p>Welcome back to Solva</p>
+        </div>
 
-        <form method="POST" action="{{ url_for('auth.login') }}">
+        <form class="claude-form" method="POST" action="{{ url_for('auth.login') }}">
             {{ form.hidden_tag() }}
 
-            <div class="mb-4">
-                {{ form.email.label(class="block text-sm font-bold mb-2") }}
-                {{ form.email(class="shadow appearance-none border rounded w-full py-2 px-3") }}
+            <div class="claude-input-group">
+                {{ form.email.label(class="sr-only") }}
+                {{ form.email(class="claude-input", placeholder="Email address") }}
                 {% if form.email.errors %}
-                <div class="error-message mt-1">
+                <div class="text-red-500 text-sm mt-1">
                     {% for error in form.email.errors %}
                     <p>{{ error }}</p>
                     {% endfor %}
@@ -30,11 +27,11 @@
                 {% endif %}
             </div>
 
-            <div class="mb-6">
-                {{ form.password.label(class="block text-sm font-bold mb-2") }}
-                {{ form.password(class="shadow appearance-none border rounded w-full py-2 px-3") }}
+            <div class="claude-input-group">
+                {{ form.password.label(class="sr-only") }}
+                {{ form.password(class="claude-input", placeholder="Password") }}
                 {% if form.password.errors %}
-                <div class="error-message mt-1">
+                <div class="text-red-500 text-sm mt-1">
                     {% for error in form.password.errors %}
                     <p>{{ error }}</p>
                     {% endfor %}
@@ -42,34 +39,33 @@
                 {% endif %}
             </div>
 
-            <div class="mb-6">
-                {{ form.remember_me() }}
-                {{ form.remember_me.label }}
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center">
+                    {{ form.remember_me(class="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded") }}
+                    {{ form.remember_me.label(class="ml-2 block text-sm text-gray-500 mt-2") }}
+                </div>
+                <a href="#" class="text-sm font-medium text-gray-600 hover:text-gray-500">Forgot password?</a>
             </div>
 
-            <div class="flex items-center justify-between">
-                {{ form.submit(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded
-                focus:outline-none focus:shadow-outline") }}
-                <a href="{{ url_for('auth.register') }}"
-                    class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
-                    Register
-                </a>
+            {{ form.submit(class="claude-button", value="Sign in") }}
+
+            <div class="claude-divider">
+                <span>Or continue with</span>
+            </div>
+
+            <a href="{{ url_for('auth.google_login') }}" class="claude-social-button">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
+                </svg>
+                Continue with Google
+            </a>
+
+            <div class="claude-footer">
+                Don't have an account?
+                <a href="{{ url_for('auth.register') }}">Sign up</a>
             </div>
         </form>
-
-        <div class="mt-6 pt-6 border-t">
-            <p class="text-center mb-4">Or sign in with:</p>
-            <div class="flex justify-center space-x-4">
-                <a href="{{ url_for('auth.google_login') }}"
-                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Google
-                </a>
-                <a href="{{ url_for('auth.apple_login') }}"
-                    class="bg-gray-800 hover:bg-black text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Apple
-                </a>
-            </div>
-        </div>
     </div>
 </div>
 {% endblock %}

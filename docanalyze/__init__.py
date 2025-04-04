@@ -88,6 +88,7 @@ def register_oauth_providers(app):
     """Register OAuth providers."""
     # Google OAuth
     if app.config.get('GOOGLE_CLIENT_ID') and app.config.get('GOOGLE_CLIENT_SECRET'):
+        app.logger.debug(f"Registering Google OAuth with client_id: {app.config['GOOGLE_CLIENT_ID'][:8]}...")
         oauth.register(
             name='google',
             client_id=app.config['GOOGLE_CLIENT_ID'],
@@ -95,8 +96,12 @@ def register_oauth_providers(app):
             server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
             client_kwargs={'scope': 'openid email profile'}
         )
+        app.logger.debug("Google OAuth registration successful")
+    else:
+        app.logger.warning("Google OAuth credentials not found in configuration")
     
-    # Apple OAuth
+    # Apple OAuth - commented out for now
+    '''
     if all(app.config.get(k) for k in ['APPLE_CLIENT_ID', 'APPLE_TEAM_ID', 'APPLE_KEY_ID']):
         oauth.register(  # nosec B106
             name='apple',
@@ -111,3 +116,4 @@ def register_oauth_providers(app):
             userinfo_endpoint=None,  # Apple doesn't have a userinfo endpoint
             client_kwargs={'scope': 'name email'},
         )
+    '''

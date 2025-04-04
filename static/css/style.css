@@ -587,3 +587,253 @@ input:checked+.toggle-slider:before {
         background-position: -200% 0;
     }
 }
+
+/* Claude-inspired styles */
+.claude-bg {
+    background: linear-gradient(135deg, #000000 0%, #000000 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.claude-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    margin: 24px;
+    overflow: hidden;
+    transform: translateY(0);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    /* Add this to position the logo absolutely within the card */
+}
+
+.claude-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.claude-header {
+    padding: 32px 32px 24px;
+    text-align: center;
+}
+
+.claude-logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 8px;
+}
+
+.claude-form {
+    padding: 0 32px 32px;
+}
+
+.claude-input-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.claude-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    font-size: 16px;
+    line-height: 24px;
+    color: #1F2937;
+    background: #F9FAFB;
+    transition: all 0.2s ease;
+}
+
+.claude-input:focus {
+    border-color: #000000;
+    background: #ffffff;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(121, 24, 242, 0.1);
+}
+
+.claude-input::placeholder {
+    color: #9CA3AF;
+}
+
+.claude-button {
+    width: 100%;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #f39c12 0%, #f39c12 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.claude-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.claude-button:active {
+    transform: translateY(0);
+}
+
+.claude-divider {
+    margin: 24px 0;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #6B7280;
+}
+
+.claude-divider::before,
+.claude-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.claude-divider span {
+    padding: 0 12px;
+    font-size: 14px;
+}
+
+.claude-social-button {
+    width: 100%;
+    padding: 12px 24px;
+    background: #ffffff;
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    color: #374151;
+    font-size: 16px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.claude-social-button:hover {
+    background: #F9FAFB;
+    border-color: #D1D5DB;
+}
+
+.claude-footer {
+    text-align: center;
+    padding-top: 16px;
+    font-size: 14px;
+    color: #6B7280;
+}
+
+.claude-footer a {
+    color: #f39c12;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.claude-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Dark mode styles */
+[data-theme='dark'] .claude-card {
+    background: #1F2937;
+}
+
+[data-theme='dark'] .claude-logo {
+    color: #ffffff;
+}
+
+[data-theme='dark'] .claude-input {
+    background: #374151;
+    border-color: #4B5563;
+    color: #ffffff;
+}
+
+[data-theme='dark'] .claude-input:focus {
+    border-color: #000000;
+    background: #374151;
+}
+
+[data-theme='dark'] .claude-input::placeholder {
+    color: #9CA3AF;
+}
+
+[data-theme='dark'] .claude-social-button {
+    background: #374151;
+    border-color: #4B5563;
+    color: #ffffff;
+}
+
+[data-theme='dark'] .claude-social-button:hover {
+    background: #4B5563;
+    border-color: #6B7280;
+}
+
+[data-theme='dark'] .claude-divider {
+    color: #9CA3AF;
+}
+
+[data-theme='dark'] .claude-divider::before,
+[data-theme='dark'] .claude-divider::after {
+    border-color: #4B5563;
+}
+
+[data-theme='dark'] .claude-footer {
+    color: #9CA3AF;
+}
+
+/* Add to your existing CSS file */
+.logo-corner {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 10;
+}
+
+.corner-logo {
+    height: 24px;
+    width: auto;
+    display: block;
+}
+
+/* Make social buttons shorter and more compact */
+.claude-social-button {
+    padding: 8px 16px;
+    /* Reduced from 12px 24px */
+    height: 40px;
+    /* Fixed height */
+    font-size: 14px;
+    /* Smaller font */
+    gap: 8px;
+    /* Reduced gap between icon and text */
+}
+
+/* Target Google logo specifically - covers different implementation methods */
+.claude-social-button img,
+.claude-social-button svg,
+.claude-social-button .google-icon {
+    height: 16px;
+    /* Smaller icon height */
+    width: auto;
+    flex-shrink: 0;
+}
+
+/* If you have Apple sign-in icon too */
+.claude-social-button .apple-icon {
+    height: 16px;
+    width: auto;
+    flex-shrink: 0;
+}
+
+/* Add margin between social buttons if you have multiple */
+.claude-social-button+.claude-social-button {
+    margin-top: 8px;
+}

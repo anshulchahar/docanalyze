@@ -69,14 +69,10 @@
         </form>
         <div class="mt-6 pt-6 border-t">
             <p class="text-center mb-4">Or sign up with:</p>
-            <div class="flex justify-center space-x-4">
+            <div class="flex justify-center">
                 <a href="{{ url_for('auth.google_login') }}"
                     class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                     Google
-                </a>
-                <a href="{{ url_for('auth.apple_login') }}"
-                    class="bg-gray-800 hover:bg-black text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Apple
                 </a>
             </div>
         </div>
