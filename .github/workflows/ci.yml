@@ -1,159 +1,114 @@
-# name: DocAnalyze CI
+name: DocAnalyze CI
 
-# on:
-#   push:
-#     branches: [ main ]
-#   pull_request:
-#     branches: [ main ]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-# # Cancel in-progress runs on new commits to same PR/branch
-# concurrency:
-#   group: ${{ github.workflow }}-${{ github.ref }}
-#   cancel-in-progress: true
+# Cancel in-progress runs on new commits to same PR/branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-# jobs:
-#   lint-python:
-#     name: Python Linting
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0  # Fetching the whole history to compare changes
+jobs:
+  lint:
+    name: TypeScript & Next.js Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetching the whole history to compare changes
       
-#       - name: Set up Python
-#         uses: actions/setup-python@v4
-#         with:
-#           python-version: '3.9'
-#           cache: 'pip'
-#           cache-dependency-path: '**/requirements.txt'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
       
-#       - name: Install dependencies
-#         run: |
-#           python -m pip install --upgrade pip
-#           pip install flake8
-#         timeout-minutes: 2
+      - name: Install dependencies
+        run: npm ci
+        timeout-minutes: 5
       
-#       - name: Get changed Python files
-#         id: changed-python-files
-#         if: github.event_name == 'pull_request'
-#         run: |
-#           echo "files=$(git diff --name-only --diff-filter=ACMRTUXB origin/${{ github.base_ref }} ${{ github.sha }} | grep -E '\.py$' | xargs)" >> $GITHUB_OUTPUT
+      - name: Get changed TS/JS files
+        id: changed-ts-files
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "files=$(git diff --name-only --diff-filter=ACMRTUXB origin/${{ github.base_ref }} ${{ github.sha }} | grep -E '\.(js|jsx|ts|tsx)$' | xargs)" >> $GITHUB_OUTPUT
       
-#       - name: Run flake8 on changed files
-#         if: github.event_name == 'pull_request' && steps.changed-python-files.outputs.files != ''
-#         run: |
-#           echo "Linting changed Python files: ${{ steps.changed-python-files.outputs.files }}"
-#           flake8 ${{ steps.changed-python-files.outputs.files }} --count --select=E9,F63,F7,F82 --show-source --statistics
-#           flake8 ${{ steps.changed-python-files.outputs.files }} --count --exit-zero --statistics
-#         timeout-minutes: 2
+      - name: Run ESLint on changed files
+        if: github.event_name == 'pull_request' && steps.changed-ts-files.outputs.files != ''
+        run: |
+          echo "Linting changed TS/JS files: ${{ steps.changed-ts-files.outputs.files }}"
+          npx eslint ${{ steps.changed-ts-files.outputs.files }}
+        timeout-minutes: 2
       
-#       - name: Run flake8 on all files (main branch)
-#         if: github.event_name == 'push'
-#         run: |
-#           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-#           flake8 . --count --exit-zero --statistics
-#         timeout-minutes: 2
+      - name: Run Next.js lint
+        run: npx next lint
+        timeout-minutes: 2
+        
+      - name: TypeScript type checking
+        run: npx tsc --noEmit
+        timeout-minutes: 2
 
-#   lint-js:
-#     name: JavaScript Linting
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0  # Fetching the whole history to compare changes
+  test:
+    name: Jest Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 1  # Shallow clone for speed
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Install Node.js dependencies
+      run: npm ci
+      timeout-minutes: 5
       
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: '18.x'
+    - name: Test frontend with Jest
+      run: |
+        npm test -- --coverage
+      timeout-minutes: 5
       
-#       - name: Install dependencies
-#         run: npm install
-#         timeout-minutes: 5
-      
-#       - name: Get changed JS files
-#         id: changed-js-files
-#         if: github.event_name == 'pull_request'
-#         run: |
-#           echo "files=$(git diff --name-only --diff-filter=ACMRTUXB origin/${{ github.base_ref }} ${{ github.sha }} | grep -E '\.(js|jsx|ts|tsx)$' | xargs)" >> $GITHUB_OUTPUT
-      
-#       - name: Run ESLint on changed files
-#         if: github.event_name == 'pull_request' && steps.changed-js-files.outputs.files != ''
-#         run: |
-#           echo "Linting changed JS files: ${{ steps.changed-js-files.outputs.files }}"
-#           npx eslint ${{ steps.changed-js-files.outputs.files }} || echo "ESLint check failed but continuing"
-#         timeout-minutes: 2
-      
-#       - name: Run ESLint on all files (main branch)
-#         if: github.event_name == 'push'
-#         run: npm run lint || echo "ESLint check failed but continuing"
-#         timeout-minutes: 2
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage/coverage-final.json
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
 
-#   test:
-#     runs-on: ubuntu-latest
-    
-#     strategy:
-#       matrix:
-#         python-version: [3.9]
-#         node-version: [18.x]
-
-#     steps:
-#     - uses: actions/checkout@v3
-#       with:
-#         fetch-depth: 1  # Shallow clone for speed
-    
-#     - name: Set up Python ${{ matrix.python-version }}
-#       uses: actions/setup-python@v4
-#       with:
-#         python-version: ${{ matrix.python-version }}
-#         cache: 'pip'
-#         cache-dependency-path: '**/requirements.txt'
-    
-#     - name: Set up Node.js ${{ matrix.node-version }}
-#       uses: actions/setup-node@v3
-#       with:
-#         node-version: ${{ matrix.node-version }}
-#         cache: 'npm'
-    
-#     - name: Install Python dependencies
-#       run: |
-#         python -m pip install --upgrade pip
-#         pip install pytest pytest-cov pytest-mock
-#         pip install pypdf flask google-generativeai
-#         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-#       timeout-minutes: 3
-    
-#     - name: Install Node.js dependencies
-#       run: npm install
-#       timeout-minutes: 5
-    
-#     - name: Debug file system
-#       run: |
-#         echo "Current directory:"
-#         pwd
-#         echo "Files in current directory:"
-#         ls -la
-#         echo "Files in tests directory:"
-#         ls -la tests/
-#         echo "Python path:"
-#         python -c "import sys; print(sys.path)"
-    
-#     - name: Set PYTHONPATH
-#       run: |
-#         echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
-    
-#     - name: Test with pytest
-#       run: |
-#         PYTHONPATH=$PYTHONPATH:$(pwd) pytest tests/unit tests/integration --cov=. --cov-report=xml || echo "Tests failed but continuing"
-#       timeout-minutes: 5
+  build:
+    name: Build Next.js App
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
       
-#     - name: Test frontend with Jest
-#       run: |
-#         npm test || echo "Jest tests failed but continuing"
-#       timeout-minutes: 5
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
       
-#     - name: Upload coverage to Codecov
-#       uses: codecov/codecov-action@v3
-#       with:
-#         file: ./coverage.xml
-#         fail_ci_if_error: false
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Setup Prisma
+        run: npx prisma generate
+        
+      - name: Build Next.js app
+        run: npm run build
+        
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
