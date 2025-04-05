@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/config/auth';
 import { errorResponse, handleServerError } from './apiUtils';
 import { ERROR_MESSAGES } from '@/constants/api';
 import { Session } from 'next-auth';
