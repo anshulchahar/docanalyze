@@ -1,0 +1,21 @@
+# MkDocs core
+mkdocs>=1.4.2
+mkdocs-material>=9.0.0
+
+# MkDocs plugins
+mkdocs-minify-plugin>=0.6.0
+mkdocs-git-revision-date-localized-plugin>=1.2.0
+mkdocs-awesome-pages-plugin>=2.8.0
+mkdocs-macros-plugin>=0.7.0
+mkdocs-glightbox>=0.3.0
+
+# Markdown extensions
+pymdown-extensions>=9.9.0
+markdown-include>=0.7.0
+pygments>=2.14.0
+
+# Search
+mkdocs-search>=0.4.0
+
+# Diagrams support
+plantuml-markdown>=3.8.0
