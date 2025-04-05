@@ -9,6 +9,8 @@ interface AnalysisData {
     fileInfo: Array<{
         filename: string;
         character_count: number;
+        pages?: number;
+        fileSize?: string;
     }>;
 }
 
@@ -17,25 +19,48 @@ export async function exportToPDF(analysis: AnalysisData): Promise<Uint8Array> {
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const page = pdfDoc.addPage();
-    const { width, height } = page.getSize();
+    let currentPage = pdfDoc.addPage();
+    const { width, height } = currentPage.getSize();
     const margin = 50;
     let y = height - margin;
     const lineHeight = 15;
 
     // Helper function to add text and manage pagination
     const addText = async (text: string, isBold = false, indent = 0) => {
-        const lines = font.split(text, {
-            maxWidth: width - (margin * 2) - indent,
-        });
+        // Use manual text wrapping instead of font.split
+        const maxCharsPerLine = Math.floor((width - (margin * 2) - indent) / 7); // Rough estimate
+        const words = text.split(' ');
+        let currentLine = '';
 
-        for (const line of lines) {
+        for (const word of words) {
+            if ((currentLine + word).length > maxCharsPerLine) {
+                if (y < margin + lineHeight) {
+                    y = height - margin;
+                    currentPage = pdfDoc.addPage();
+                }
+
+                currentPage.drawText(currentLine, {
+                    x: margin + indent,
+                    y,
+                    font: isBold ? boldFont : font,
+                    size: 12,
+                    color: rgb(0, 0, 0),
+                });
+
+                y -= lineHeight;
+                currentLine = word + ' ';
+            } else {
+                currentLine += word + ' ';
+            }
+        }
+
+        if (currentLine.trim().length > 0) {
             if (y < margin + lineHeight) {
                 y = height - margin;
-                page = pdfDoc.addPage();
+                currentPage = pdfDoc.addPage();
             }
 
-            page.drawText(line, {
+            currentPage.drawText(currentLine.trim(), {
                 x: margin + indent,
                 y,
                 font: isBold ? boldFont : font,

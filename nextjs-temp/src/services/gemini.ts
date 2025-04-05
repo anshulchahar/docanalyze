@@ -1,7 +1,5 @@
-// Remove unused imports
-// import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ANALYSIS_PROMPTS, ANALYSIS_OPTIONS } from '@/config/prompts';
-import { PROMPTS } from '@/config/prompts';
 import { AnalysisResult } from '@/types/api';
 
 // Define a type for text content instead of using 'any'
@@ -11,7 +9,9 @@ type TextContent = {
 
 export class GeminiService {
     private apiKey: string;
-    private model = 'gemini-pro';
+    private modelName = 'gemini-pro';
+    private genAI: GoogleGenerativeAI;
+    private model: any;
 
     constructor() {
         const apiKey = process.env.GEMINI_API_KEY;
@@ -29,12 +29,14 @@ export class GeminiService {
         }
 
         this.apiKey = apiKey;
+        this.genAI = new GoogleGenerativeAI(this.apiKey);
+        this.model = this.genAI.getGenerativeModel({ model: this.modelName });
     }
 
     // Process text documents and generate analysis
     async analyzeDocuments(documents: string[]): Promise<string> {
         try {
-            const url = `https://generativelanguage.googleapis.com/v1/models/${this.model}:generateContent?key=${this.apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1/models/${this.modelName}:generateContent?key=${this.apiKey}`;
 
             // Format the documents for the prompt
             const formattedDocs = documents.map((doc, i) =>
@@ -42,7 +44,9 @@ export class GeminiService {
             ).join('\n\n');
 
             // Create the prompt with docs
-            const prompt = PROMPTS.ANALYSIS_PROMPT.replace('{{DOCUMENTS}}', formattedDocs);
+            const prompt = documents.length > 1 
+                ? ANALYSIS_PROMPTS.MULTIPLE_DOCUMENTS.replace('{text}', formattedDocs)
+                : ANALYSIS_PROMPTS.SINGLE_DOCUMENT.replace('{text}', documents[0]);
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -50,8 +54,8 @@ export class GeminiService {
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: {
-                        temperature: 0.2,
-                        maxOutputTokens: 8192,
+                        temperature: ANALYSIS_OPTIONS.TEMPERATURE,
+                        maxOutputTokens: ANALYSIS_OPTIONS.MAX_OUTPUT_TOKENS,
                     }
                 })
             });
@@ -92,7 +96,7 @@ export class GeminiService {
             const prompt = ANALYSIS_PROMPTS.EXTRACT_METADATA;
             const promptText = prompt.replace('{text}', text);
 
-            // Updated API format for content
+            // Use the model instance correctly
             const result = await this.model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: promptText }] }],
                 generationConfig: {

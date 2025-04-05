@@ -38,6 +38,7 @@ export function useApi<T>() {
             setState({
                 data: null,
                 error: {
+                    error: error instanceof Error ? error.message : 'Unknown error occurred',
                     message: error instanceof Error ? error.message : 'Unknown error occurred'
                 },
                 isLoading: false

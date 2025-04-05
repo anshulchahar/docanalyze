@@ -1,6 +1,8 @@
 export interface FileInfo {
     filename: string;
     character_count: number;
+    pages: number;
+    fileSize: string;
 }
 
 export interface AnalysisResult {
@@ -21,6 +23,7 @@ export interface AnalysisHistory {
 
 export interface ApiError {
     error: string;
+    message?: string;
 }
 
 export type ApiResponse<T> = T | ApiError;

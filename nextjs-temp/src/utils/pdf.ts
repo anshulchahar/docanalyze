@@ -1,17 +1,12 @@
 import { PDFDocument } from 'pdf-lib';
+import pdfParse from 'pdf-parse';
 
 export async function extractTextFromPdf(file: ArrayBuffer): Promise<string> {
     try {
-        const pdfDoc = await PDFDocument.load(file);
-        const pages = pdfDoc.getPages();
-        let text = '';
-
-        for (const page of pages) {
-            const content = await page.getText();
-            text += content + '\n';
-        }
-
-        return text;
+        // Use pdf-parse for text extraction instead of pdf-lib
+        const dataBuffer = Buffer.from(file);
+        const data = await pdfParse(dataBuffer);
+        return data.text;
     } catch (error) {
         console.error('Error extracting text from PDF:', error);
         throw new Error('Failed to extract text from PDF');

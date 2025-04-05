@@ -3,10 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { errorResponse, handleServerError } from './apiUtils';
 import { ERROR_MESSAGES } from '@/constants/api';
+import { Session } from 'next-auth';
 
 type ApiHandler = (
     req: NextRequest,
-    session: Awaited<ReturnType<typeof getServerSession>>,
+    session: Session | null,
 ) => Promise<NextResponse>;
 
 export function withAuth(handler: ApiHandler) {

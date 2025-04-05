@@ -12,7 +12,7 @@ export class PDFService {
             const pdfParse = (await import('pdf-parse')).default;
 
             // Use pdf-parse to extract text from the PDF
-            const pdfData = new Uint8Array(file);
+            const pdfData = Buffer.from(file);
             const result = await pdfParse(pdfData);
 
             // Return the extracted text

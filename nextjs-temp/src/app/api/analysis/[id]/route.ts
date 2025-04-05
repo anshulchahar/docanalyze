@@ -22,6 +22,10 @@ export const GET = withAuth(async (req, session) => {
             return NextResponse.json(cachedAnalysis);
         }
 
+        if (!session || !session.user || !session.user.id) {
+            return errorResponse('User not authenticated', 401);
+        }
+
         // Fetch analysis from database
         const analysis = await prisma.analysis.findUnique({
             where: {

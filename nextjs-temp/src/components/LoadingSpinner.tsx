@@ -5,6 +5,8 @@ interface LoadingSpinnerProps {
     color?: 'primary' | 'secondary' | 'light';
     text?: string;
     className?: string;
+    fullScreen?: boolean;
+    message?: string;
 }
 
 export default function LoadingSpinner({
@@ -12,6 +14,8 @@ export default function LoadingSpinner({
     color = 'primary',
     text,
     className = '',
+    fullScreen = false,
+    message,
 }: LoadingSpinnerProps) {
     const sizeClasses = {
         sm: 'w-4 h-4',
@@ -26,7 +30,7 @@ export default function LoadingSpinner({
     };
 
     return (
-        <div className={`flex flex-col items-center justify-center ${className}`}>
+        <div className={`flex flex-col items-center justify-center ${fullScreen ? 'fixed inset-0 bg-white dark:bg-gray-900 z-50' : ''} ${className}`}>
             <div
                 className={`${sizeClasses[size]} ${colorClasses[color]} animate-spin`}
                 role="status"
@@ -49,8 +53,8 @@ export default function LoadingSpinner({
                 </svg>
                 <span className="sr-only">Loading...</span>
             </div>
-            {text && (
-                <p className={`mt-2 text-sm font-medium ${colorClasses[color]}`}>{text}</p>
+            {(text || message) && (
+                <p className={`mt-2 text-sm font-medium ${colorClasses[color]}`}>{text || message}</p>
             )}
         </div>
     );
