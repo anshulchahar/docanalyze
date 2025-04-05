@@ -44,7 +44,7 @@ export class GeminiService {
             ).join('\n\n');
 
             // Create the prompt with docs
-            const prompt = documents.length > 1 
+            const prompt = documents.length > 1
                 ? ANALYSIS_PROMPTS.MULTIPLE_DOCUMENTS.replace('{text}', formattedDocs)
                 : ANALYSIS_PROMPTS.SINGLE_DOCUMENT.replace('{text}', documents[0]);
 

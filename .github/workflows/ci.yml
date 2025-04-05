@@ -84,7 +84,7 @@ jobs:
       run: npm install
       timeout-minutes: 5
       
-    - name: Test frontend with Jest
+    - name: Test with Jest
       working-directory: ./nextjs-temp
       run: |
         npm test -- --coverage
