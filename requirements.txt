@@ -14,8 +14,5 @@ pymdown-extensions>=9.9.0
 markdown-include>=0.7.0
 pygments>=2.14.0
 
-# Search
-mkdocs-search>=0.4.0
-
 # Diagrams support
 plantuml-markdown>=3.8.0
