@@ -1,49 +1,49 @@
 import { useState } from 'react';
-import { ApiError, ApiResponse } from '@/types/api';
+import { ApiError } from '@/types/api';
 
-interface UseApiResponse<T> {
-    data: T | null;
-    error: string | null;
-    loading: boolean;
-    execute: (...args: any[]) => Promise<void>;
-}
+// Define generic types instead of 'any'
+type ApiResponse<T> = {
+  data: T | null;
+  error: ApiError | null;
+  isLoading: boolean;
+};
 
-export function useApi<T>(
-    apiFunction: (...args: any[]) => Promise<Response>,
-): UseApiResponse<T> {
-    const [data, setData] = useState<T | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
+export function useApi<T>() {
+  const [state, setState] = useState<ApiResponse<T>>({
+    data: null,
+    error: null,
+    isLoading: false,
+  });
 
-    const isApiError = (response: ApiResponse<T>): response is ApiError => {
-        return 'error' in response;
-    };
+  const fetchData = async (url: string, options?: RequestInit): Promise<void> => {
+    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...options?.headers,
+          'Content-Type': 'application/json',
+        },
+      });
 
-    const execute = async (...args: any[]) => {
-        try {
-            setLoading(true);
-            setError(null);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `API error: ${response.status}`);
+      }
 
-            const response = await apiFunction(...args);
-            const result = await response.json() as ApiResponse<T>;
+      const data = await response.json() as T;
+      setState({ data, error: null, isLoading: false });
+    } catch (error) {
+      setState({ 
+        data: null, 
+        error: { 
+          message: error instanceof Error ? error.message : 'Unknown error occurred'
+        }, 
+        isLoading: false 
+      });
+    }
+  };
 
-            if (!response.ok || isApiError(result)) {
-                throw new Error(isApiError(result) ? result.error : 'An error occurred');
-            }
-
-            setData(result as T);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'An unexpected error occurred');
-            setData(null);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return {
-        data,
-        error,
-        loading,
-        execute,
-    };
+  return { ...state, fetchData };
 }

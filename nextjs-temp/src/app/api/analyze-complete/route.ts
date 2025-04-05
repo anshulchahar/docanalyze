@@ -54,7 +54,6 @@ export async function POST(req: NextRequest) {
 
                 // Use options to avoid file system dependency issues
                 const result = await pdfParse(pdfData, {
-                    fontHandle: (font) => Buffer.from([]), // Return empty buffer for fonts
                     renderPdf: false,                     // Don't try to render pages
                     max: 0                                // No page limitation
                 });
