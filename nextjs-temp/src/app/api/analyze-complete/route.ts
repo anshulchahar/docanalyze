@@ -1,8 +1,7 @@
-// filepath: /Users/anshulchahar/Documents/GitHub/docanalyze/nextjs-temp/src/app/api/analyze-complete/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { PrismaClient } from '@prisma/client';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/config/auth';
 import { GeminiService } from '@/services/gemini';
 
 const prisma = new PrismaClient();
@@ -47,16 +46,17 @@ export async function POST(req: NextRequest) {
         const processedFiles = await Promise.all(files.map(async (file) => {
             try {
                 const buffer = await file.arrayBuffer();
-                const pdfData = new Uint8Array(buffer);
+                // Convert to Buffer instead of Uint8Array for pdf-parse
+                const pdfData = Buffer.from(buffer);
 
                 // Dynamically import pdf-parse with proper options
                 const pdfParse = (await import('pdf-parse')).default;
 
                 // Use options to avoid file system dependency issues
                 const result = await pdfParse(pdfData, {
-                    fontHandle: (font) => Buffer.from([]), // Return empty buffer for fonts
-                    renderPdf: false,                     // Don't try to render pages
-                    max: 0                                // No page limitation
+                    // Use pagerender instead of renderPdf
+                    pagerender: () => '',    // Don't attempt to render pages
+                    max: 0                   // No page limitation
                 });
 
                 return {

@@ -1,92 +1,89 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import { ANALYSIS_PROMPTS, ANALYSIS_OPTIONS } from '@/config/prompts';
+import { AnalysisResult } from '@/types/api';
+
+// Define a type for text content instead of using 'any'
+type TextContent = {
+    text: string;
+};
 
 export class GeminiService {
-    private model: any;
+    private apiKey: string;
+    private modelName = 'gemini-pro';
+    private genAI: GoogleGenerativeAI;
+    private model: GenerativeModel;
 
     constructor() {
-        try {
-            const apiKey = process.env.GEMINI_API_KEY;
+        const apiKey = process.env.GEMINI_API_KEY;
 
-            // Log API key presence (not the actual key)
-            console.log('Gemini API key check:', {
-                isDefined: !!apiKey,
-                length: apiKey ? apiKey.length : 0,
-                firstChar: apiKey ? apiKey[0] : null,
-                lastChars: apiKey ? `...${apiKey.slice(-3)}` : null
-            });
+        // Log API key presence (not the actual key)
+        console.log('Gemini API key check:', {
+            isDefined: !!apiKey,
+            length: apiKey ? apiKey.length : 0,
+            firstChar: apiKey ? apiKey[0] : null,
+            lastChars: apiKey ? `...${apiKey.slice(-3)}` : null
+        });
 
-            if (!apiKey) {
-                throw new Error('Missing Gemini API key. Please check your environment variables.');
-            }
-
-            const genAI = new GoogleGenerativeAI(apiKey);
-            // Update to the newer model name supported in the v1 API
-            this.model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-            console.log('Successfully initialized Gemini API client with model: gemini-pro');
-        } catch (error) {
-            console.error('Error initializing Gemini service:', error);
-            throw new Error(error instanceof Error
-                ? `Failed to initialize Gemini API: ${error.message}`
-                : 'Failed to initialize Gemini API');
+        if (!apiKey) {
+            throw new Error('Missing Gemini API key. Please check your environment variables.');
         }
+
+        this.apiKey = apiKey;
+        this.genAI = new GoogleGenerativeAI(this.apiKey);
+        this.model = this.genAI.getGenerativeModel({ model: this.modelName });
     }
 
-    async analyzeDocuments(texts: string[]): Promise<string> {
+    // Process text documents and generate analysis
+    async analyzeDocuments(documents: string[]): Promise<string> {
         try {
-            if (!texts || texts.length === 0) {
-                throw new Error('No text provided for analysis');
-            }
+            const url = `https://generativelanguage.googleapis.com/v1/models/${this.modelName}:generateContent?key=${this.apiKey}`;
 
-            console.log(`Analyzing ${texts.length} documents (total characters: ${texts.reduce((acc, txt) => acc + txt.length, 0)})`);
-
-            const prompt = texts.length > 1
-                ? ANALYSIS_PROMPTS.MULTIPLE_DOCUMENTS
-                : ANALYSIS_PROMPTS.SINGLE_DOCUMENT;
-
-            const combinedText = texts.map((text, index) =>
-                `Document ${index + 1}:\n${text}`
+            // Format the documents for the prompt
+            const formattedDocs = documents.map((doc, i) =>
+                `DOCUMENT ${i + 1}:\n${doc.slice(0, 15000)}`
             ).join('\n\n');
 
-            const promptText = prompt.replace('{text}', combinedText);
-            console.log('Sending request to Gemini API...');
+            // Create the prompt with docs
+            const prompt = documents.length > 1
+                ? ANALYSIS_PROMPTS.MULTIPLE_DOCUMENTS.replace('{text}', formattedDocs)
+                : ANALYSIS_PROMPTS.SINGLE_DOCUMENT.replace('{text}', documents[0]);
 
-            // Updated API format for content and safety settings
-            const result = await this.model.generateContent({
-                contents: [{ role: 'user', parts: [{ text: promptText }] }],
-                generationConfig: {
-                    temperature: ANALYSIS_OPTIONS.TEMPERATURE,
-                    topP: ANALYSIS_OPTIONS.TOP_P,
-                    maxOutputTokens: ANALYSIS_OPTIONS.MAX_OUTPUT_TOKENS,
-                },
-                safetySettings: [
-                    {
-                        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-                        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
-                    },
-                    {
-                        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
-                    },
-                    {
-                        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-                        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
-                    },
-                    {
-                        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        temperature: ANALYSIS_OPTIONS.TEMPERATURE,
+                        maxOutputTokens: ANALYSIS_OPTIONS.MAX_OUTPUT_TOKENS,
                     }
-                ]
+                })
             });
 
-            const responseText = result.response.text();
-            console.log(`Received response from Gemini API (${responseText.length} characters)`);
-            return responseText;
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Gemini API error: ${response.status} ${errorText}`);
+            }
+
+            const data = await response.json();
+
+            // Extract text content
+            if (!data.candidates || !data.candidates[0]?.content?.parts) {
+                throw new Error('Unexpected API response structure');
+            }
+
+            const textContent = data.candidates[0].content.parts.find(
+                (part: TextContent) => part.text
+            );
+
+            if (!textContent || !textContent.text) {
+                throw new Error('No text content found in the API response');
+            }
+
+            return textContent.text;
         } catch (error) {
-            console.error('Error analyzing documents with Gemini:', error);
-            throw new Error(error instanceof Error
-                ? `Failed to analyze with Gemini API: ${error.message}`
-                : 'Failed to analyze with Gemini API: Unknown error');
+            console.error('Error calling Gemini API:', error);
+            throw error;
         }
     }
 
@@ -99,7 +96,7 @@ export class GeminiService {
             const prompt = ANALYSIS_PROMPTS.EXTRACT_METADATA;
             const promptText = prompt.replace('{text}', text);
 
-            // Updated API format for content
+            // Use the model instance correctly
             const result = await this.model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: promptText }] }],
                 generationConfig: {
@@ -118,75 +115,56 @@ export class GeminiService {
         }
     }
 
-    static parseAnalysisResponse(response: string) {
+    // Parse the analysis response
+    static parseAnalysisResponse(text: string): AnalysisResult {
+        const result: AnalysisResult = {
+            summary: '',
+            keyPoints: [],
+            detailedAnalysis: '',
+            recommendations: '',
+            documentComparison: '',
+            fileInfo: []
+        };
+
         try {
-            if (!response || typeof response !== 'string') {
-                throw new Error('Invalid analysis response from Gemini API');
+            // Extract summary
+            const summaryMatch = text.match(/## Summary\s*\n([\s\S]*?)(?=\n## Key Points|\n## Detailed Analysis|$)/i);
+            if (summaryMatch && summaryMatch[1]) {
+                result.summary = summaryMatch[1].trim();
             }
 
-            const sections = {
-                summary: '',
-                keyPoints: [] as string[],
-                detailedAnalysis: '',
-                recommendations: '',
-                documentComparison: '',
-            };
-
-            const parts = response.split('\n\n');
-            let currentSection = '';
-
-            for (const part of parts) {
-                const lowerPart = part.toLowerCase();
-
-                if (lowerPart.includes('summary')) {
-                    currentSection = 'summary';
-                    sections.summary = part.split('\n').slice(1).join('\n');
-                } else if (lowerPart.includes('key points')) {
-                    currentSection = 'keyPoints';
-                    sections.keyPoints = part
-                        .split('\n')
-                        .slice(1)
-                        .filter(line => line.trim())
-                        .map(point => point.replace(/^[•-]\s*/, ''));
-                } else if (lowerPart.includes('detailed analysis')) {
-                    currentSection = 'detailedAnalysis';
-                    sections.detailedAnalysis = part.split('\n').slice(1).join('\n');
-                } else if (lowerPart.includes('recommendations')) {
-                    currentSection = 'recommendations';
-                    sections.recommendations = part.split('\n').slice(1).join('\n');
-                } else if (lowerPart.includes('comparison')) {
-                    currentSection = 'documentComparison';
-                    sections.documentComparison = part.split('\n').slice(1).join('\n');
-                } else if (part.trim()) {
-                    // Append to current section if it's a continuation
-                    switch (currentSection) {
-                        case 'summary':
-                            sections.summary += '\n\n' + part;
-                            break;
-                        case 'detailedAnalysis':
-                            sections.detailedAnalysis += '\n\n' + part;
-                            break;
-                        case 'recommendations':
-                            sections.recommendations += '\n\n' + part;
-                            break;
-                        case 'documentComparison':
-                            sections.documentComparison += '\n\n' + part;
-                            break;
-                    }
-                }
+            // Extract key points
+            const keyPointsMatch = text.match(/## Key Points\s*\n([\s\S]*?)(?=\n## Detailed Analysis|$)/i);
+            if (keyPointsMatch && keyPointsMatch[1]) {
+                result.keyPoints = keyPointsMatch[1]
+                    .split('\n')
+                    .filter(line => line.trim().startsWith('-') || line.trim().startsWith('*'))
+                    .map(point => point.replace(/^[-*]\s*/, '').trim())
+                    .filter(point => point.length > 0);
             }
 
-            // Ensure we have at least the mandatory sections
-            if (!sections.summary || sections.keyPoints.length === 0 || !sections.detailedAnalysis || !sections.recommendations) {
-                console.warn('Analysis response is missing required sections:', JSON.stringify(sections));
+            // Extract detailed analysis
+            const detailedAnalysisMatch = text.match(/## Detailed Analysis\s*\n([\s\S]*?)(?=\n## Recommendations|$)/i);
+            if (detailedAnalysisMatch && detailedAnalysisMatch[1]) {
+                result.detailedAnalysis = detailedAnalysisMatch[1].trim();
             }
 
-            return sections;
+            // Extract recommendations
+            const recommendationsMatch = text.match(/## Recommendations\s*\n([\s\S]*?)(?=\n## Document Comparison|$)/i);
+            if (recommendationsMatch && recommendationsMatch[1]) {
+                result.recommendations = recommendationsMatch[1].trim();
+            }
+
+            // Extract document comparison if multiple documents
+            const comparisonMatch = text.match(/## Document Comparison\s*\n([\s\S]*?)$/i);
+            if (comparisonMatch && comparisonMatch[1]) {
+                result.documentComparison = comparisonMatch[1].trim();
+            }
+
         } catch (error) {
             console.error('Error parsing analysis response:', error);
-            throw new Error(error instanceof Error
-                ? `Failed to parse analysis: ${error.message}`
-                : 'Failed to parse analysis: Unknown error');
         }
+
+        return result;
     }
 }

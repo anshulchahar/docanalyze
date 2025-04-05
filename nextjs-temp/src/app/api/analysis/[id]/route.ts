@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { withAuth } from '@/utils/apiMiddleware';
 import { errorResponse } from '@/utils/apiUtils';
@@ -20,6 +20,10 @@ export const GET = withAuth(async (req, session) => {
         const cachedAnalysis = getCachedAnalysis(id);
         if (cachedAnalysis) {
             return NextResponse.json(cachedAnalysis);
+        }
+
+        if (!session || !session.user || !session.user.id) {
+            return errorResponse('User not authenticated', 401);
         }
 
         // Fetch analysis from database

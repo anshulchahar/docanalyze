@@ -1,6 +1,7 @@
 import { PDFDocument } from 'pdf-lib';
 import { validateFile } from '@/utils/fileValidation';
-import { ERROR_MESSAGES } from '@/constants/api';
+// Remove unused import
+// import { FileInfo } from '@/types/api';
 // Use dynamic import for pdf-parse to avoid server-side rendering issues
 // import pdfParse from 'pdf-parse';
 
@@ -11,7 +12,7 @@ export class PDFService {
             const pdfParse = (await import('pdf-parse')).default;
 
             // Use pdf-parse to extract text from the PDF
-            const pdfData = new Uint8Array(file);
+            const pdfData = Buffer.from(file);
             const result = await pdfParse(pdfData);
 
             // Return the extracted text
@@ -95,7 +96,8 @@ export class PDFService {
         const helveticaBold = await pdfDoc.embedFont('Helvetica-Bold');
 
         let page = pdfDoc.addPage();
-        const { width, height } = page.getSize();
+        // Remove the variable completely since it's not needed
+        const { height } = page.getSize();
         const margin = 50;
         let y = height - margin;
         const lineHeight = 15;

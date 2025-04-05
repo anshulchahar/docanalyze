@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { withAuth } from '@/utils/apiMiddleware';
 import { AnalysisHistory } from '@/types/api';
@@ -7,6 +7,13 @@ const prisma = new PrismaClient();
 
 export const GET = withAuth(async (req, session) => {
     try {
+        if (!session || !session.user || !session.user.id) {
+            return NextResponse.json(
+                { error: 'User not authenticated' },
+                { status: 401 }
+            );
+        }
+
         // Get user's analysis history
         const analyses = await prisma.analysis.findMany({
             where: {

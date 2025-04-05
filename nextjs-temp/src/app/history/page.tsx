@@ -90,7 +90,7 @@ export default function HistoryPage() {
                     </svg>
                     <h2 className="mt-2 text-lg font-medium text-gray-900">No analyses found</h2>
                     <p className="mt-1 text-sm text-gray-500">
-                        You haven't analyzed any documents yet.
+                        You haven&apos;t analyzed any documents yet.
                     </p>
                     <div className="mt-6">
                         <Link
@@ -117,49 +117,58 @@ export default function HistoryPage() {
 
                 <div className="bg-white shadow overflow-hidden sm:rounded-md">
                     <ul className="divide-y divide-gray-200">
-                        {history.map((item) => (
-                            <li key={item.id}>
-                                <Link
-                                    href={`/analysis/${item.id}`}
-                                    className="block hover:bg-gray-50 transition duration-150 ease-in-out"
-                                >
-                                    <div className="px-4 py-4 sm:px-6">
-                                        <div className="flex items-center justify-between">
-                                            <div className="truncate">
-                                                <div className="flex text-sm">
-                                                    <p className="font-medium text-blue-600 truncate">
-                                                        {item.filename}
-                                                    </p>
-                                                    <p className="ml-1 flex-shrink-0 font-normal text-gray-500">
-                                                        on {formatDate(item.createdAt)}
-                                                    </p>
+                        {history.length === 0 ? (
+                            <div className="text-center py-10">
+                                <p>You haven&apos;t analyzed any documents yet.</p>
+                                <Link href="/" className="text-blue-500 hover:underline mt-2 inline-block">
+                                    Analyze your first document
+                                </Link>
+                            </div>
+                        ) : (
+                            history.map((item) => (
+                                <li key={item.id}>
+                                    <Link
+                                        href={`/analysis/${item.id}`}
+                                        className="block hover:bg-gray-50 transition duration-150 ease-in-out"
+                                    >
+                                        <div className="px-4 py-4 sm:px-6">
+                                            <div className="flex items-center justify-between">
+                                                <div className="truncate">
+                                                    <div className="flex text-sm">
+                                                        <p className="font-medium text-blue-600 truncate">
+                                                            {item.filename}
+                                                        </p>
+                                                        <p className="ml-1 flex-shrink-0 font-normal text-gray-500">
+                                                            on {formatDate(item.createdAt)}
+                                                        </p>
+                                                    </div>
+                                                    <div className="mt-2">
+                                                        <p className="text-sm text-gray-700">
+                                                            {truncateText(item.summary, 150)}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div className="mt-2">
-                                                    <p className="text-sm text-gray-700">
-                                                        {truncateText(item.summary, 150)}
-                                                    </p>
+                                                <div className="ml-4 flex-shrink-0">
+                                                    <svg
+                                                        className="h-5 w-5 text-gray-400"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 20 20"
+                                                        fill="currentColor"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <path
+                                                            fillRule="evenodd"
+                                                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                                            clipRule="evenodd"
+                                                        />
+                                                    </svg>
                                                 </div>
-                                            </div>
-                                            <div className="ml-4 flex-shrink-0">
-                                                <svg
-                                                    className="h-5 w-5 text-gray-400"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                    aria-hidden="true"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
                                             </div>
                                         </div>
-                                    </div>
-                                </Link>
-                            </li>
-                        ))}
+                                    </Link>
+                                </li>
+                            ))
+                        )}
                     </ul>
                 </div>
 

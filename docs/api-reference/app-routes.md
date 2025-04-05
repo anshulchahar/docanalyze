@@ -1,126 +1,146 @@
 # Application Routes Reference
 
-This page documents the Flask application routes and API endpoints available in Solva.
+This page documents the Next.js application routes and API endpoints available in Solva.
 
 ## Web Interface Routes
 
 ### `GET /`
 
-The main application route that renders the home page.
+The main application route that renders the home page with document upload functionality.
 
-**Response:** HTML page with the document upload form.
+**Response:** Next.js rendered page with document upload form.
 
-### `GET /about`
+### `GET /auth/signin`
 
-About page with information about the application.
+Authentication page for user sign-in.
 
-**Response:** HTML page with application information.
+**Response:** Next.js rendered sign-in page.
+
+### `GET /history`
+
+View history of previously analyzed documents.
+
+**Response:** Next.js rendered page displaying document analysis history.
+
+### `GET /analysis/[id]`
+
+View detailed results for a specific document analysis.
+
+**URL Parameters:**
+- `id`: Unique identifier for the analysis
+
+**Response:** Next.js rendered page showing detailed analysis results.
 
 ## API Endpoints
 
-### `POST /api/upload`
+### `POST /api/simple-upload`
 
 Endpoint for uploading PDF documents.
 
 **Request:**
 - Content-Type: `multipart/form-data`
-- Body: Form data with `file` field containing the PDF document
+- Body: Form data with file containing the PDF document
 
 **Response:**
 ```json
 {
   "success": true,
-  "file_id": "unique-file-identifier",
+  "fileId": "unique-file-identifier",
   "message": "File uploaded successfully"
 }
 ```
 
-### `POST /api/analyze/{file_id}`
+### `POST /api/analyze-complete/route`
 
 Endpoint for analyzing a previously uploaded document.
-
-**URL Parameters:**
-- `file_id`: Unique identifier returned from the upload endpoint
 
 **Request:**
 - Content-Type: `application/json`
 - Body:
 ```json
 {
-  "analysis_type": "general",
+  "fileId": "unique-file-identifier",
   "options": {
-    "extract_images": false,
-    "ocr": false
+    "extractImages": false,
+    "includeMetadata": true
   }
 }
 ```
+
+**Response:**
+```json
+{
+  "success": true,
+  "analysisId": "unique-analysis-id",
+  "status": "completed",
+  "results": {
+    "summary": "Document summary...",
+    "keyPoints": ["Point 1", "Point 2"],
+    "metadata": {
+      "title": "Document Title",
+      "author": "Author Name",
+      "pageCount": 10
+    }
+  }
+}
+```
+
+### `GET /api/analysis/[id]/route`
+
+Endpoint for retrieving a specific analysis.
+
+**URL Parameters:**
+- `id`: Unique identifier for the analysis
 
 **Response:**
 ```json
 {
   "success": true,
   "analysis": {
-    "summary": "Document summary...",
-    "entities": ["Entity1", "Entity2"],
-    "metadata": {
-      "title": "Document Title",
-      "author": "Author Name",
-      "page_count": 10
-    }
+    "id": "unique-analysis-id",
+    "fileId": "unique-file-identifier",
+    "timestamp": "2025-04-01T15:30:45",
+    "results": {
+      "summary": "Document summary...",
+      "keyPoints": ["Point 1", "Point 2"]
+    },
+    "status": "completed"
   }
 }
 ```
 
-### `POST /api/question/{file_id}`
+### `GET /api/history/route`
 
-Endpoint for asking questions about a document.
-
-**URL Parameters:**
-- `file_id`: Unique identifier returned from the upload endpoint
-
-**Request:**
-- Content-Type: `application/json`
-- Body:
-```json
-{
-  "question": "What is the main topic of this document?"
-}
-```
+Endpoint for retrieving a list of previous document analyses.
 
 **Response:**
 ```json
 {
   "success": true,
-  "answer": "The main topic of this document is..."
-}
-```
-
-### `GET /api/documents`
-
-Endpoint for retrieving a list of previously uploaded documents.
-
-**Response:**
-```json
-{
-  "success": true,
-  "documents": [
+  "analyses": [
     {
-      "file_id": "unique-file-identifier-1",
+      "id": "unique-analysis-id-1",
       "filename": "document1.pdf",
-      "upload_time": "2023-06-01T12:34:56",
-      "size": 1024000,
-      "analysis_status": "completed"
+      "timestamp": "2025-04-01T12:34:56",
+      "status": "completed"
     },
     {
-      "file_id": "unique-file-identifier-2",
+      "id": "unique-analysis-id-2",
       "filename": "document2.pdf",
-      "upload_time": "2023-06-02T10:11:12",
-      "size": 2048000,
-      "analysis_status": "pending"
+      "timestamp": "2025-04-02T10:11:12",
+      "status": "processing"
     }
   ]
 }
 ```
+
+## Authentication
+
+The application uses NextAuth.js for authentication. API endpoints are protected using middleware that verifies authentication status.
+
+### `GET/POST /api/auth/[...nextauth]/route`
+
+NextAuth.js authentication endpoints.
 
 ## Error Handling
 
@@ -128,6 +148,8 @@ All API endpoints return appropriate HTTP status codes:
 
 - `200 OK`: Request successful
 - `400 Bad Request`: Invalid request parameters
+- `401 Unauthorized`: Authentication required
+- `403 Forbidden`: Insufficient permissions
 - `404 Not Found`: Resource not found
 - `415 Unsupported Media Type`: Unsupported file format
 - `500 Internal Server Error`: Server-side error

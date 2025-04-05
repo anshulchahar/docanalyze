@@ -9,7 +9,7 @@ export function errorResponse(message: string, status: number = 400): NextRespon
 }
 
 export function isApiError<T>(response: T | ApiError): response is ApiError {
-    return 'error' in response && typeof (response as ApiError).error === 'string';
+    return typeof response === 'object' && response !== null && 'error' in response && typeof (response as ApiError).error === 'string';
 }
 
 export async function handleServerError(error: unknown) {

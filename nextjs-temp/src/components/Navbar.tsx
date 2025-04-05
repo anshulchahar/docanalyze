@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import DarkModeToggle from './DarkModeToggle';
+import Image from 'next/image';
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -28,12 +29,16 @@ export default function Navbar() {
                     <div className="flex">
                         <div className="flex-shrink-0 flex items-center">
                             <Link href="/" className="flex items-center">
-                                <img
-                                    className="h-8 w-auto"
+                                <Image
                                     src="/solva.png"
-                                    alt="Solva"
+                                    alt="DocAnalyze Logo"
+                                    width={32}
+                                    height={32}
+                                    className="h-8 w-auto"
                                 />
-                                <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">Solva</span>
+                                <span className="ml-2 text-lg font-semibold text-gray-900 dark:text-white">
+                                    DocAnalyze
+                                </span>
                             </Link>
                         </div>
                         <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
