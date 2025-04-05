@@ -50,13 +50,21 @@ export function useAnalysis() {
                 body: formData,
             });
 
+            // Check Content-Type to ensure it's JSON before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Non-JSON response:', text);
+                throw new Error('Server returned an invalid response format');
+            }
+
+            const data = await response.json();
+
             if (!response.ok) {
-                const data = await response.json();
                 throw new Error(data.error || 'Failed to analyze PDF');
             }
 
-            const result = await response.json();
-            setAnalysis(result);
+            setAnalysis(data);
             setProgress(100);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');

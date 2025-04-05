@@ -16,15 +16,18 @@ export default function Home() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
   const handleFilesAdded = (newFiles: File[]) => {
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
     setError(null);
+    setDebugInfo(null);
   };
 
   const handleFileRemoved = (index: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
     setError(null);
+    setDebugInfo(null);
   };
 
   const handleAnalyze = async () => {
@@ -34,6 +37,7 @@ export default function Home() {
     }
 
     setError(null);
+    setDebugInfo(null);
     setIsAnalyzing(true);
     setProgress(10); // Start progress at 10%
 
@@ -43,6 +47,8 @@ export default function Home() {
     });
 
     try {
+      console.log('Starting analysis request with files:', files.map(f => `${f.name} (${f.size} bytes)`));
+
       // Simulate progress for UI feedback
       const progressInterval = setInterval(() => {
         setProgress((prevProgress) => {
@@ -51,22 +57,39 @@ export default function Home() {
         });
       }, 1000);
 
-      const response = await fetch('/api/analyze', {
+      // Use the analyze-complete endpoint that was working previously
+      const response = await fetch('/api/analyze-complete', {
         method: 'POST',
         body: formData,
       });
 
       clearInterval(progressInterval);
 
+      // Get response details for debugging
+      const contentType = response.headers.get('content-type');
+
+      // For any non-JSON response, show the raw response
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+
+        // Keep first 500 chars of response for debugging
+        const preview = text.substring(0, 500) + (text.length > 500 ? '...' : '');
+        setDebugInfo(`Status: ${response.status}, Content-Type: ${contentType}, Response: ${preview}`);
+
+        throw new Error('Server returned an invalid response format');
+      }
+
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to analyze document');
+        throw new Error(data.error || 'Failed to process document');
       }
 
       setProgress(100);
-      const data = await response.json();
-      setAnalysisResult(data);
+      setAnalysisResult(data as AnalysisResult);
     } catch (error) {
+      console.error('Analysis error:', error);
       setError(error instanceof Error ? error.message : 'An error occurred during analysis');
     } finally {
       setIsAnalyzing(false);
@@ -78,6 +101,7 @@ export default function Home() {
     setAnalysisResult(null);
     setProgress(0);
     setError(null);
+    setDebugInfo(null);
   };
 
   return (
@@ -114,6 +138,15 @@ export default function Home() {
                 {error && (
                   <div className="mt-4">
                     <ErrorDisplay message={error} />
+
+                    {debugInfo && (
+                      <div className="mt-2 p-3 bg-gray-100 text-xs font-mono text-gray-700 rounded overflow-auto max-h-40">
+                        <details>
+                          <summary className="cursor-pointer">Debug Info</summary>
+                          {debugInfo}
+                        </details>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -121,9 +154,7 @@ export default function Home() {
                   <button
                     onClick={handleAnalyze}
                     disabled={files.length === 0 || isAnalyzing}
-                    className={`px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${files.length === 0 || isAnalyzing
-                        ? 'opacity-50 cursor-not-allowed'
-                        : ''
+                    className={`px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${files.length === 0 || isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                   >
                     Analyze Document

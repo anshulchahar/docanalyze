@@ -1,52 +1,75 @@
 import { PDFDocument } from 'pdf-lib';
 import { validateFile } from '@/utils/fileValidation';
 import { ERROR_MESSAGES } from '@/constants/api';
+// Use dynamic import for pdf-parse to avoid server-side rendering issues
+// import pdfParse from 'pdf-parse';
 
 export class PDFService {
     static async extractText(file: ArrayBuffer): Promise<string> {
         try {
-            const pdfDoc = await PDFDocument.load(file);
-            const pages = pdfDoc.getPages();
-            let text = '';
+            // Dynamically import pdf-parse only when needed
+            const pdfParse = (await import('pdf-parse')).default;
 
-            for (const page of pages) {
-                const content = await page.getText();
-                text += content + '\n';
-            }
+            // Use pdf-parse to extract text from the PDF
+            const pdfData = new Uint8Array(file);
+            const result = await pdfParse(pdfData);
 
-            return text;
+            // Return the extracted text
+            return result.text || '';
         } catch (error) {
             console.error('Error extracting text from PDF:', error);
-            throw new Error('Failed to extract text from PDF');
+            throw new Error(error instanceof Error
+                ? `Failed to extract text from PDF: ${error.message}`
+                : 'Failed to extract text from PDF: Unknown error');
         }
     }
 
     static async validateAndProcessFiles(files: File[]): Promise<{ text: string; info: { filename: string; character_count: number; } }[]> {
-        const results = [];
-
-        for (const file of files) {
-            const validation = validateFile(file);
-            if (!validation.isValid) {
-                throw new Error(`${file.name}: ${validation.error}`);
+        try {
+            const results = [];
+            if (!files || files.length === 0) {
+                throw new Error('No files provided for processing');
             }
 
-            const buffer = await file.arrayBuffer();
-            const text = await this.extractText(buffer);
+            for (const file of files) {
+                try {
+                    const validation = validateFile(file);
+                    if (!validation.isValid) {
+                        console.error(`File validation failed for ${file.name}:`, validation.error);
+                        throw new Error(`${file.name}: ${validation.error}`);
+                    }
 
-            if (!text.trim()) {
-                throw new Error(`${file.name}: No text content found in PDF`);
+                    const buffer = await file.arrayBuffer();
+                    const text = await this.extractText(buffer);
+
+                    if (!text || !text.trim()) {
+                        throw new Error(`${file.name}: No text content found in PDF`);
+                    }
+
+                    results.push({
+                        text,
+                        info: {
+                            filename: file.name,
+                            character_count: text.length,
+                        },
+                    });
+                } catch (fileError) {
+                    console.error(`Error processing file ${file.name}:`, fileError);
+                    throw fileError;
+                }
             }
 
-            results.push({
-                text,
-                info: {
-                    filename: file.name,
-                    character_count: text.length,
-                },
-            });
+            if (results.length === 0) {
+                throw new Error('No valid files were processed');
+            }
+
+            return results;
+        } catch (error) {
+            console.error('PDF processing error:', error);
+            throw error instanceof Error
+                ? error
+                : new Error('Unknown error during PDF processing');
         }
-
-        return results;
     }
 
     static async getPageCount(buffer: ArrayBuffer): Promise<number> {
