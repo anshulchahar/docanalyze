@@ -2,113 +2,133 @@
 
 This page documents the Google Gemini API integration in Solva.
 
-## Gemini API Handler Module
+## Gemini Service Module
 
-The `gemini_api_handler.py` module provides functions for interacting with Google's Gemini API to analyze document content.
+The `src/services/gemini.ts` module provides functions for interacting with Google's Gemini API to analyze document content.
 
-### `analyze_text(text, analysis_type="general")`
+### `analyzeText(text: string, options?: AnalysisOptions): Promise<AnalysisResult>`
 
 Analyzes text content using the Gemini API.
 
 **Parameters:**
 
-- `text` (str): Text content to analyze
-- `analysis_type` (str, optional): Type of analysis to perform. Options include:
-  - `"general"`: General purpose analysis (default)
-  - `"summary"`: Text summarization
-  - `"entities"`: Named entity recognition
-  - `"sentiment"`: Sentiment analysis
+- `text` (string): Text content to analyze
+- `options` (AnalysisOptions, optional): Configuration options including:
+  - `mode`: Analysis mode (default: "general")
+  - `maxLength`: Maximum response length
+  - `temperature`: Model temperature setting
 
 **Returns:**
 
-- `dict`: Analysis results with structure varying by analysis type
+- `Promise<AnalysisResult>`: Analysis results with structure defined by the AnalysisResult type
 
 **Example:**
 
-```python
-from gemini_api_handler import analyze_text
+```typescript
+import { analyzeText } from '@/services/gemini';
 
-text = "Your document text here..."
-analysis = analyze_text(text, analysis_type="summary")
-print(f"Summary: {analysis['summary']}")
+async function performAnalysis() {
+  const text = "Your document text here...";
+  const analysis = await analyzeText(text, { mode: "summary" });
+  console.log(`Summary: ${analysis.summary}`);
+}
 ```
 
-### `ask_question(text, question)`
+### `askQuestion(context: string, question: string): Promise<string>`
 
 Asks a specific question about the document content.
 
 **Parameters:**
 
-- `text` (str): Document text content
-- `question` (str): Question to ask about the document
+- `context` (string): Document text content
+- `question` (string): Question to ask about the document
 
 **Returns:**
 
-- `str`: Answer to the question
+- `Promise<string>`: Answer to the question
 
 **Example:**
 
-```python
-from gemini_api_handler import ask_question
+```typescript
+import { askQuestion } from '@/services/gemini';
 
-text = "Your document text here..."
-question = "What is the main topic of this document?"
-answer = ask_question(text, question)
-print(f"Q: {question}")
-print(f"A: {answer}")
+async function questionDocument() {
+  const text = "Your document text here...";
+  const question = "What is the main topic of this document?";
+  const answer = await askQuestion(text, question);
+  console.log(`Q: ${question}`);
+  console.log(`A: ${answer}`);
+}
 ```
 
-### `batch_analyze(documents, analysis_type="general")`
+### `analyzeWithPrompt(text: string, prompt: string): Promise<string>`
 
-Analyzes multiple documents in batch.
+Analyzes text using a custom prompt template.
 
 **Parameters:**
 
-- `documents` (list): List of document text strings
-- `analysis_type` (str, optional): Type of analysis to perform
+- `text` (string): Document text content
+- `prompt` (string): Custom prompt template to use for analysis
 
 **Returns:**
 
-- `list`: List of analysis results corresponding to each document
+- `Promise<string>`: Generated response from the model
 
 **Example:**
 
-```python
-from gemini_api_handler import batch_analyze
-from pdf_processor import extract_text
-import os
+```typescript
+import { analyzeWithPrompt } from '@/services/gemini';
+import { EXTRACT_KEY_POINTS } from '@/config/prompts';
 
-# Extract text from multiple documents
-documents = []
-for filename in os.listdir("docs"):
-    if filename.endswith(".pdf"):
-        text = extract_text(f"docs/{filename}")
-        documents.append(text)
+async function extractKeyPoints() {
+  const text = "Your document text here...";
+  const keyPoints = await analyzeWithPrompt(text, EXTRACT_KEY_POINTS);
+  console.log(keyPoints);
+}
+```
 
-# Analyze all documents
-results = batch_analyze(documents, analysis_type="summary")
+## Type Definitions
 
-# Process results
-for i, result in enumerate(results):
-    print(f"Document {i+1} Summary: {result['summary']}")
+The module uses TypeScript interfaces to define data structures:
+
+```typescript
+interface AnalysisOptions {
+  mode?: "general" | "summary" | "entities" | "sentiment";
+  maxLength?: number;
+  temperature?: number;
+}
+
+interface AnalysisResult {
+  summary: string;
+  keyPoints: string[];
+  entities?: {
+    name: string;
+    type: string;
+  }[];
+  sentiment?: {
+    score: number;
+    label: "positive" | "negative" | "neutral";
+  };
+  metadata?: Record<string, any>;
+}
 ```
 
 ## Configuration
 
-The Gemini API integration requires an API key to be configured. This can be set:
+The Gemini API integration requires an API key to be configured. This is managed through environment variables:
 
-1. In a `.env` file in the project root directory:
+1. In a `.env.local` file in the project root directory:
    ```
    GEMINI_API_KEY=your_api_key_here
    ```
 
-2. As an environment variable:
-   ```bash
-   export GEMINI_API_KEY=your_api_key_here
-   ```
-
-3. Programmatically:
-   ```python
-   import os
-   os.environ["GEMINI_API_KEY"] = "your_api_key_here"
+2. Or through Next.js environment configuration:
+   ```typescript
+   // In next.config.mjs
+   const nextConfig = {
+     env: {
+       GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+     },
+     // Other configuration...
+   };
    ```

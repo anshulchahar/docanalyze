@@ -2,92 +2,169 @@
 
 This page documents the PDF processing functionality available in Solva.
 
-## PDF Processor Module
+## PDF Service Module
 
-The `pdf_processor.py` module provides functions for extracting and processing text from PDF documents.
+The `src/services/pdf.ts` module provides functions for extracting and processing text from PDF documents.
 
-### `extract_text(file_path)`
+### `extractText(file: File | Buffer): Promise<string>`
 
 Extracts text content from a PDF file.
 
 **Parameters:**
 
-- `file_path` (str): Path to the PDF file
+- `file` (File | Buffer): PDF file as either a browser File object or Node.js Buffer
 
 **Returns:**
 
-- `str`: Extracted text content from the PDF
+- `Promise<string>`: Extracted text content from the PDF
 
 **Example:**
 
-```python
-from pdf_processor import extract_text
+```typescript
+import { extractText } from '@/services/pdf';
 
-text = extract_text("path/to/document.pdf")
-print(text)
+// In browser context
+const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+if (fileInput?.files?.length) {
+  const text = await extractText(fileInput.files[0]);
+  console.log(text);
+}
+
+// In server context
+import fs from 'fs/promises';
+const buffer = await fs.readFile('path/to/document.pdf');
+const text = await extractText(buffer);
+console.log(text);
 ```
 
-### `extract_metadata(file_path)`
+### `extractMetadata(file: File | Buffer): Promise<PDFMetadata>`
 
 Extracts metadata from a PDF file.
 
 **Parameters:**
 
-- `file_path` (str): Path to the PDF file
+- `file` (File | Buffer): PDF file as either a browser File object or Node.js Buffer
 
 **Returns:**
 
-- `dict`: Dictionary containing metadata such as:
+- `Promise<PDFMetadata>`: Object containing metadata such as:
   - `title`: Document title
   - `author`: Author name
   - `creator`: Creator application
   - `producer`: Producer application
-  - `creation_date`: Date when the document was created
-  - `modification_date`: Date when the document was last modified
-  - `page_count`: Number of pages in the document
+  - `creationDate`: Date when the document was created
+  - `modificationDate`: Date when the document was last modified
+  - `pageCount`: Number of pages in the document
 
 **Example:**
 
-```python
-from pdf_processor import extract_metadata
+```typescript
+import { extractMetadata } from '@/services/pdf';
 
-metadata = extract_metadata("path/to/document.pdf")
-print(f"Document title: {metadata['title']}")
-print(f"Author: {metadata['author']}")
-print(f"Pages: {metadata['page_count']}")
+async function getDocumentInfo(file: File) {
+  const metadata = await extractMetadata(file);
+  console.log(`Document title: ${metadata.title}`);
+  console.log(`Author: ${metadata.author}`);
+  console.log(`Pages: ${metadata.pageCount}`);
+}
 ```
 
-### `process_pdf(file_path, options=None)`
+### `processPDF(file: File | Buffer, options?: ProcessOptions): Promise<ProcessedPDF>`
 
 Processes a PDF document and returns both text content and metadata.
 
 **Parameters:**
 
-- `file_path` (str): Path to the PDF file
-- `options` (dict, optional): Configuration options for processing:
-  - `extract_images` (bool): Whether to extract embedded images
-  - `ocr` (bool): Whether to apply OCR on image-based content
-  - `page_range` (tuple): Range of pages to process (e.g., `(1, 10)`)
+- `file` (File | Buffer): PDF file as either a browser File object or Node.js Buffer
+- `options` (ProcessOptions, optional): Configuration options for processing:
+  - `extractImages` (boolean): Whether to extract embedded images
+  - `useOCR` (boolean): Whether to apply OCR on image-based content
+  - `pageRange` (array): Range of pages to process (e.g., `[1, 10]`)
 
 **Returns:**
 
-- `dict`: Dictionary containing:
+- `Promise<ProcessedPDF>`: Object containing:
   - `text`: Extracted text content
   - `metadata`: Document metadata
   - `pages`: List of page-specific content
 
 **Example:**
 
-```python
-from pdf_processor import process_pdf
+```typescript
+import { processPDF } from '@/services/pdf';
 
-options = {
-    "extract_images": False,
-    "ocr": True,
-    "page_range": (1, 5)
+async function analyzePDF(file: File) {
+  const options = {
+    extractImages: false,
+    useOCR: true,
+    pageRange: [1, 5]
+  };
+
+  const result = await processPDF(file, options);
+  console.log(`Document text: ${result.text.substring(0, 100)}...`);  // First 100 chars
+  console.log(`Total pages processed: ${result.pages.length}`);
+}
+```
+
+## Utility Functions
+
+### `validatePDF(file: File): Promise<boolean>`
+
+Validates if a file is a valid PDF.
+
+**Parameters:**
+
+- `file` (File): File to validate
+
+**Returns:**
+
+- `Promise<boolean>`: Whether the file is a valid PDF
+
+**Example:**
+
+```typescript
+import { validatePDF } from '@/utils/fileValidation';
+
+async function handleFileUpload(file: File) {
+  if (await validatePDF(file)) {
+    console.log('Valid PDF file');
+    // Process the file
+  } else {
+    console.error('Invalid PDF file');
+    // Show error message
+  }
+}
+```
+
+## Type Definitions
+
+The module uses TypeScript interfaces to define data structures:
+
+```typescript
+interface PDFMetadata {
+  title?: string;
+  author?: string;
+  creator?: string;
+  producer?: string;
+  creationDate?: Date;
+  modificationDate?: Date;
+  pageCount: number;
 }
 
-result = process_pdf("path/to/document.pdf", options)
-print(f"Document text: {result['text'][:100]}...")  # First 100 chars
-print(f"Total pages processed: {len(result['pages'])}")
-```
+interface ProcessOptions {
+  extractImages?: boolean;
+  useOCR?: boolean;
+  pageRange?: [number, number];
+}
+
+interface PageContent {
+  pageNumber: number;
+  text: string;
+  images?: string[];  // Base64 encoded images if extractImages is true
+}
+
+interface ProcessedPDF {
+  text: string;
+  metadata: PDFMetadata;
+  pages: PageContent[];
+}
