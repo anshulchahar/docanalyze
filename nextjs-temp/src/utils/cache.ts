@@ -57,18 +57,18 @@ const cacheTimestamps = new Map<string, number>();
 export function getCachedAnalysis(id: string): AnalysisResult | null {
     const cached = analysisCache.get(id);
     const timestamp = cacheTimestamps.get(id) || 0;
-    
+
     // Check if cache exists and is still valid
     if (cached && (Date.now() - timestamp) < CACHE_EXPIRY) {
         return cached;
     }
-    
+
     // Expired or not found
     if (cached) {
         analysisCache.delete(id);
         cacheTimestamps.delete(id);
     }
-    
+
     return null;
 }
 
