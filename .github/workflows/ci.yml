@@ -24,10 +24,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
+          # Remove the cache property to avoid errors when lock file doesn't exist
       
       - name: Install dependencies
-        run: npm ci
+        working-directory: ./nextjs-temp
+        run: npm install # Using 'install' will generate a package-lock.json if it doesn't exist
         timeout-minutes: 5
       
       - name: Get changed TS/JS files
@@ -38,18 +39,30 @@ jobs:
       
       - name: Run ESLint on changed files
         if: github.event_name == 'pull_request' && steps.changed-ts-files.outputs.files != ''
+        working-directory: ./nextjs-temp
         run: |
           echo "Linting changed TS/JS files: ${{ steps.changed-ts-files.outputs.files }}"
           npx eslint ${{ steps.changed-ts-files.outputs.files }}
         timeout-minutes: 2
       
       - name: Run Next.js lint
+        working-directory: ./nextjs-temp
         run: npx next lint
         timeout-minutes: 2
         
       - name: TypeScript type checking
+        working-directory: ./nextjs-temp
         run: npx tsc --noEmit
         timeout-minutes: 2
+
+      # Enable caching for future runs now that we have a package-lock.json
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
   test:
     name: Jest Tests
@@ -64,13 +77,15 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20.x'
-        cache: 'npm'
+        # Remove the cache property to avoid errors when lock file doesn't exist
     
     - name: Install Node.js dependencies
-      run: npm ci
+      working-directory: ./nextjs-temp
+      run: npm install
       timeout-minutes: 5
       
     - name: Test frontend with Jest
+      working-directory: ./nextjs-temp
       run: |
         npm test -- --coverage
       timeout-minutes: 5
@@ -78,9 +93,18 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
-        file: ./coverage/coverage-final.json
+        file: ./nextjs-temp/coverage/coverage-final.json
         fail_ci_if_error: false
         token: ${{ secrets.CODECOV_TOKEN }}
+
+      # Enable caching for future runs now that we have a package-lock.json
+    - name: Cache npm dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+           ${{ runner.os }}-node-
 
   build:
     name: Build Next.js App
@@ -93,22 +117,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
+          # Remove the cache property to avoid errors when lock file doesn't exist
       
       - name: Install dependencies
-        run: npm ci
+        working-directory: ./nextjs-temp
+        run: npm install
         
       - name: Setup Prisma
+        working-directory: ./nextjs-temp
         run: npx prisma generate
         
       - name: Build Next.js app
+        working-directory: ./nextjs-temp
         run: npm run build
         
       - name: Cache Next.js build
         uses: actions/cache@v4
         with:
           path: |
-            .next/cache
+            ./nextjs-temp/.next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-

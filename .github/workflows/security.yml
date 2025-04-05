@@ -19,15 +19,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          # Remove cache property to avoid errors when lock file doesn't exist
 
       - name: Install npm dependencies
-        run: npm ci
+        working-directory: ./nextjs-temp
+        run: npm install  # Using install instead of ci to generate package-lock.json if missing
   
       - name: Run npm audit
+        working-directory: ./nextjs-temp
         run: npm audit --production
 
       - name: Run Next.js ESLint security checks
+        working-directory: ./nextjs-temp
         run: npx next lint --dir src
 
       - name: Check for hardcoded secrets
@@ -41,7 +44,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high
+          args: --severity-threshold=high --file=./nextjs-temp/package.json
 
       - name: Notify on failure
         if: ${{ failure() }}
