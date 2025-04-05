@@ -35,7 +35,7 @@ jobs:
         id: changed-ts-files
         if: github.event_name == 'pull_request'
         run: |
-          echo "files=$(git diff --name-only --diff-filter=ACMRTUXB origin/${{ github.base_ref }} ${{ github.sha }} | grep -E '\.(js|jsx|ts|tsx)$' | xargs)" >> $GITHUB_OUTPUT
+          echo "files=$(git diff --name-only --diff-filter=ACMRTUXB origin/${{ github.base_ref }} ${{ github.sha }} | grep -E '\.(js|jsx|ts|tsx)$' | grep '^nextjs-temp/' | sed 's/^nextjs-temp\///' | xargs)" >> $GITHUB_OUTPUT
       
       - name: Run ESLint on changed files
         if: github.event_name == 'pull_request' && steps.changed-ts-files.outputs.files != ''
