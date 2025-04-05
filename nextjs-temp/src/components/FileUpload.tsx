@@ -102,10 +102,10 @@ export default function FileUpload({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={`border-2 border-dashed rounded-lg p-12 my-8 text-center cursor-pointer transition-colors ${isDragging
-                    ? 'border-blue-500 bg-blue-50'
+                    ? 'border-gold-500'
                     : disabled
                         ? 'border-gray-300 bg-gray-50 cursor-not-allowed'
-                        : 'border-gray-300 hover:border-blue-500 hover:bg-blue-50'
+                        : 'border-gray-300 hover:border-gold-500'
                     }`}
             >
                 <input
@@ -136,7 +136,7 @@ export default function FileUpload({
                         'Upload in progress...'
                     ) : (
                         <>
-                            Drag & drop PDF files or <span className="text-blue-600">browse</span>
+                            Drag & drop PDF files or <span className="text-gold-500">browse</span>
                         </>
                     )}
                 </p>

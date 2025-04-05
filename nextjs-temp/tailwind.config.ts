@@ -9,15 +9,30 @@ const config: Config = {
     darkMode: 'class',
     theme: {
         extend: {
+            colors: {
+                gold: {
+                    50: '#fffaeb',
+                    100: '#fef0c7',
+                    200: '#fee189',
+                    300: '#fecb4c',
+                    400: '#febc2e',
+                    500: '#f59e0b', // More vibrant gold
+                    600: '#d97706', // Amber gold
+                    700: '#b45309',
+                    800: '#92400e',
+                    900: '#783610',
+                    950: '#451f06',
+                },
+            },
             typography: {
                 DEFAULT: {
                     css: {
                         maxWidth: 'none',
                         color: '#333',
                         a: {
-                            color: '#3182ce',
+                            color: '#f59e0b',
                             '&:hover': {
-                                color: '#2c5282',
+                                color: '#d97706',
                             },
                         },
                     },
@@ -26,9 +41,9 @@ const config: Config = {
                     css: {
                         color: '#d1d5db',
                         a: {
-                            color: '#60a5fa',
+                            color: '#fecb4c',
                             '&:hover': {
-                                color: '#93c5fd',
+                                color: '#fee189',
                             },
                         },
                         h1: {

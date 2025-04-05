@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AnalysisHistory } from '@/types/api';
@@ -21,7 +21,7 @@ export default function HistoryPage() {
 
         // Redirect to sign-in if not authenticated
         if (status === 'unauthenticated') {
-            router.push('/auth/signin?callbackUrl=/history');
+            signIn('google', { callbackUrl: '/history' });
             return;
         }
 
@@ -61,7 +61,11 @@ export default function HistoryPage() {
             <ErrorDisplay
                 message="Please sign in to view your history"
                 fullScreen
-                action={{ label: 'Sign In', href: '/auth/signin?callbackUrl=/history' }}
+                action={{
+                    label: 'Sign In',
+                    href: '#',
+                    onClick: () => signIn('google', { callbackUrl: '/history' })
+                }}
             />
         );
     }

@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 
 export const authOptions: AuthOptions = {
     adapter: PrismaAdapter(prisma),
+    debug: process.env.NODE_ENV !== "production", // Enable debug mode in development
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -41,8 +42,10 @@ export const authOptions: AuthOptions = {
             }
             return token;
         },
+        async redirect({ url, baseUrl }) {
+            // Always redirect to home page after sign in, ignoring the callback URL
+            return baseUrl;
+        },
     },
-    pages: {
-        signIn: '/auth/signin',
-    },
+    useSecureCookies: process.env.NODE_ENV === "production",
 };
