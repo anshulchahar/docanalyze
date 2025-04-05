@@ -277,39 +277,86 @@ export class GeminiService {
             fileInfo: []
         };
 
+        // Add logging to see what text we're trying to parse
+        console.log('Raw response from Gemini API (first 500 chars):', text.substring(0, 500));
+
         try {
             // Extract summary
             const summaryMatch = text.match(/## Summary\s*\n([\s\S]*?)(?=\n## Key Points|\n## Detailed Analysis|$)/i);
             if (summaryMatch && summaryMatch[1]) {
                 result.summary = summaryMatch[1].trim();
+                console.log('Found summary section, length:', result.summary.length);
+            } else {
+                console.warn('No summary section found in response');
             }
 
             // Extract key points
             const keyPointsMatch = text.match(/## Key Points\s*\n([\s\S]*?)(?=\n## Detailed Analysis|$)/i);
             if (keyPointsMatch && keyPointsMatch[1]) {
-                result.keyPoints = keyPointsMatch[1]
+                const keyPointsText = keyPointsMatch[1].trim();
+                console.log('Found key points section, raw text:', keyPointsText);
+
+                result.keyPoints = keyPointsText
                     .split('\n')
                     .filter(line => line.trim().startsWith('-') || line.trim().startsWith('*'))
                     .map(point => point.replace(/^[-*]\s*/, '').trim())
                     .filter(point => point.length > 0);
+
+                console.log('Extracted key points count:', result.keyPoints.length);
+
+                // If no bullet points found but there's content, try to parse it differently
+                if (result.keyPoints.length === 0 && keyPointsText.length > 0) {
+                    console.log('No bullet points found but content exists, trying alternate parsing');
+                    // Split by newlines and filter out empty lines as a fallback
+                    result.keyPoints = keyPointsText
+                        .split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0);
+                }
+            } else {
+                console.warn('No key points section found in response');
             }
 
             // Extract detailed analysis
             const detailedAnalysisMatch = text.match(/## Detailed Analysis\s*\n([\s\S]*?)(?=\n## Recommendations|$)/i);
             if (detailedAnalysisMatch && detailedAnalysisMatch[1]) {
                 result.detailedAnalysis = detailedAnalysisMatch[1].trim();
+                console.log('Found detailed analysis section, length:', result.detailedAnalysis.length);
+            } else {
+                console.warn('No detailed analysis section found in response');
             }
 
             // Extract recommendations
             const recommendationsMatch = text.match(/## Recommendations\s*\n([\s\S]*?)(?=\n## Document Comparison|$)/i);
             if (recommendationsMatch && recommendationsMatch[1]) {
                 result.recommendations = recommendationsMatch[1].trim();
+                console.log('Found recommendations section, length:', result.recommendations.length);
+            } else {
+                console.warn('No recommendations section found in response');
             }
 
             // Extract document comparison if multiple documents
             const comparisonMatch = text.match(/## Document Comparison\s*\n([\s\S]*?)$/i);
             if (comparisonMatch && comparisonMatch[1]) {
                 result.documentComparison = comparisonMatch[1].trim();
+                console.log('Found document comparison section, length:', result.documentComparison.length);
+            }
+
+            // If everything is empty, fallback to simple text division
+            if (!result.summary && !result.keyPoints.length && !result.detailedAnalysis && !result.recommendations) {
+                console.warn('All sections are empty, applying fallback parsing');
+
+                // Split the text into paragraphs
+                const paragraphs = text.split('\n\n').filter(p => p.trim().length > 0);
+
+                if (paragraphs.length >= 3) {
+                    result.summary = paragraphs[0];
+                    result.keyPoints = [paragraphs[1]];
+                    result.detailedAnalysis = paragraphs.slice(2).join('\n\n');
+                } else if (paragraphs.length > 0) {
+                    // Just put everything in summary if we don't have enough paragraphs
+                    result.summary = paragraphs.join('\n\n');
+                }
             }
 
         } catch (error) {

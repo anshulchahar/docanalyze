@@ -1,19 +1,41 @@
 export const ANALYSIS_PROMPTS = {
-    SINGLE_DOCUMENT: `Analyze the following document and provide:
-1. A concise executive summary (2-3 paragraphs)
-2. Key points in bullet form
-3. A detailed analysis of the main themes and arguments
-4. Specific, actionable recommendations based on the content
+    SINGLE_DOCUMENT: `Analyze the following document and provide your analysis in the exact format below with these exact section headings:
+
+## Summary
+Write a concise executive summary (2-3 paragraphs)
+
+## Key Points
+- Key point 1
+- Key point 2
+- Add more bullet points as needed
+
+## Detailed Analysis
+Provide a detailed analysis of the main themes and arguments
+
+## Recommendations
+List specific, actionable recommendations based on the content
 
 Document:
 {text}`,
 
-    MULTIPLE_DOCUMENTS: `Analyze the following documents and provide:
-1. A concise executive summary (2-3 paragraphs)
-2. Key points in bullet form
-3. A detailed analysis of the main themes and arguments
-4. A comparison of the documents, highlighting similarities and differences
-5. Comprehensive recommendations based on all documents
+    MULTIPLE_DOCUMENTS: `Analyze the following documents and provide your analysis in the exact format below with these exact section headings:
+
+## Summary
+Write a concise executive summary (2-3 paragraphs)
+
+## Key Points
+- Key point 1
+- Key point 2
+- Add more bullet points as needed
+
+## Detailed Analysis
+Provide a detailed analysis of the main themes and arguments
+
+## Recommendations
+List specific, actionable recommendations based on the content
+
+## Document Comparison
+Compare the documents, highlighting similarities and differences
 
 Documents:
 {text}`,
