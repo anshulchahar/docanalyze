@@ -1,21 +1,21 @@
-version: 2
-updates:
-  # Maintain dependencies for Python
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "python"
+# version: 2
+# updates:
+#   # Maintain dependencies for Python
+#   - package-ecosystem: "pip"
+#     directory: "/"
+#     schedule:
+#       interval: "weekly"
+#     open-pull-requests-limit: 10
+#     labels:
+#       - "dependencies"
+#       - "python"
 
-  # Maintain dependencies for npm
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "javascript"
+#   # Maintain dependencies for npm
+#   - package-ecosystem: "npm"
+#     directory: "/"
+#     schedule:
+#       interval: "weekly"
+#     open-pull-requests-limit: 10
+#     labels:
+#       - "dependencies"
+#       - "javascript"
