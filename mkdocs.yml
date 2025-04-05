@@ -1,6 +1,6 @@
-site_name: DocAnalyze
-site_description: Documentation for the DocAnalyze application
-site_url: https://anshulchahar.github.io/docanalyze/
+site_name: Solva
+site_description: Documentation for the Solva application
+site_url: https://anshulchahar.github.io/solva/
 
 theme:
   name: material
@@ -26,8 +26,8 @@ theme:
     - search.highlight
     - content.code.copy
 
-repo_name: docanalyze
-repo_url: https://github.com/anshulchahar/docanalyze
+repo_name: solva
+repo_url: https://github.com/anshulchahar/solva
 
 markdown_extensions:
   - pymdownx.highlight:

@@ -110,7 +110,7 @@ export default function Home() {
         {!analysisResult ? (
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">DocAnalyze</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Solva</h1>
               <p className="mt-2 text-lg text-gray-600">
                 Upload PDF documents to analyze with AI
               </p>

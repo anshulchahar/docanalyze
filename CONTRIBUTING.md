@@ -1,6 +1,6 @@
-# Contributing to DocAnalyze
+# Contributing to Solva
 
-Thank you for your interest in contributing to DocAnalyze! This document provides guidelines and instructions to help you get started.
+Thank you for your interest in contributing to Solva! This document provides guidelines and instructions to help you get started.
 
 ## Code of Conduct
 
@@ -86,4 +86,4 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 ### Questions or Need Help?
 Feel free to open an issue with your questions or reach out to the maintainers.
 
-Thank you for contributing to DocAnalyze!
+Thank you for contributing to Solva!
