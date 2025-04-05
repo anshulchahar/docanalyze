@@ -7,9 +7,19 @@ type TextContent = {
     text: string;
 };
 
+// API versions to try in order
+const API_VERSIONS = ["v1", "v1beta", "v1beta2", "v1beta3"];
+
+// Model name variations to try
+const MODEL_VARIATIONS = [
+    "gemini-2.0-flash",
+    "gemini-1.5-pro",
+    "gemini-1.5-flash"
+];
+
 export class GeminiService {
     private apiKey: string;
-    private modelName = 'gemini-pro';
+    private modelName = 'gemini-2.0-flash'; // Using the model that's available according to ListModels response
     private genAI: GoogleGenerativeAI;
     private model: GenerativeModel;
 
@@ -33,10 +43,91 @@ export class GeminiService {
         this.model = this.genAI.getGenerativeModel({ model: this.modelName });
     }
 
+    // Attempt to call Gemini API with multiple versions and model names
+    private async callGeminiApiWithFallbacks(prompt: string): Promise<string> {
+        let lastError = null;
+
+        // First try the SDK approach
+        try {
+            console.log(`Trying SDK with model ${this.modelName}`);
+            const result = await this.model.generateContent({
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: ANALYSIS_OPTIONS.TEMPERATURE,
+                    topP: ANALYSIS_OPTIONS.TOP_P,
+                    maxOutputTokens: ANALYSIS_OPTIONS.MAX_OUTPUT_TOKENS,
+                }
+            });
+
+            console.log('SDK call successful');
+            return result.response.text();
+        } catch (sdkError) {
+            console.error('SDK approach failed:', sdkError);
+            lastError = sdkError;
+        }
+
+        // If SDK fails, try direct API calls with different API versions and models
+        for (const version of API_VERSIONS) {
+            for (const model of MODEL_VARIATIONS) {
+                try {
+                    console.log(`Trying direct API call with ${version} and model ${model}`);
+                    const url = `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${this.apiKey}`;
+
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            generationConfig: {
+                                temperature: ANALYSIS_OPTIONS.TEMPERATURE,
+                                maxOutputTokens: ANALYSIS_OPTIONS.MAX_OUTPUT_TOKENS,
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+
+                        if (!data.candidates || !data.candidates[0]?.content?.parts) {
+                            console.log(`Got response from ${version}/${model} but unexpected structure`);
+                            continue;
+                        }
+
+                        const textContent = data.candidates[0].content.parts.find(
+                            (part: TextContent) => part.text
+                        );
+
+                        if (!textContent || !textContent.text) {
+                            console.log(`Got response from ${version}/${model} but no text content`);
+                            continue;
+                        }
+
+                        console.log(`Successfully used ${version}/models/${model}`);
+
+                        // Update the model name for future calls
+                        this.modelName = model;
+                        this.model = this.genAI.getGenerativeModel({ model });
+
+                        return textContent.text;
+                    } else {
+                        const errorText = await response.text();
+                        console.log(`Failed with ${version}/${model}: ${errorText}`);
+                    }
+                } catch (error) {
+                    console.error(`Error with ${version}/${model}:`, error);
+                    lastError = error;
+                }
+            }
+        }
+
+        // If we get here, all attempts failed
+        throw lastError || new Error('Failed to call Gemini API with all attempted configurations');
+    }
+
     // Process text documents and generate analysis
     async analyzeDocuments(documents: string[]): Promise<string> {
         try {
-            const url = `https://generativelanguage.googleapis.com/v1/models/${this.modelName}:generateContent?key=${this.apiKey}`;
+            console.log(`Using Gemini ${this.modelName} with API version v1`);
 
             // Format the documents for the prompt
             const formattedDocs = documents.map((doc, i) =>
@@ -48,39 +139,58 @@ export class GeminiService {
                 ? ANALYSIS_PROMPTS.MULTIPLE_DOCUMENTS.replace('{text}', formattedDocs)
                 : ANALYSIS_PROMPTS.SINGLE_DOCUMENT.replace('{text}', documents[0]);
 
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
+            try {
+                // First try using the SDK
+                console.log('Attempting to use the Google Generative AI SDK...');
+                const result = await this.model.generateContent({
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
                     generationConfig: {
                         temperature: ANALYSIS_OPTIONS.TEMPERATURE,
                         maxOutputTokens: ANALYSIS_OPTIONS.MAX_OUTPUT_TOKENS,
                     }
-                })
-            });
+                });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Gemini API error: ${response.status} ${errorText}`);
+                return result.response.text();
+            } catch (sdkError) {
+                // If SDK fails, fall back to direct API call
+                console.error('SDK approach failed, falling back to direct API call:', sdkError);
+
+                const url = `https://generativelanguage.googleapis.com/v1/models/${this.modelName}:generateContent?key=${this.apiKey}`;
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: {
+                            temperature: ANALYSIS_OPTIONS.TEMPERATURE,
+                            maxOutputTokens: ANALYSIS_OPTIONS.MAX_OUTPUT_TOKENS,
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Gemini API error: ${response.status} ${errorText}`);
+                }
+
+                const data = await response.json();
+
+                // Extract text content
+                if (!data.candidates || !data.candidates[0]?.content?.parts) {
+                    throw new Error('Unexpected API response structure');
+                }
+
+                const textContent = data.candidates[0].content.parts.find(
+                    (part: TextContent) => part.text
+                );
+
+                if (!textContent || !textContent.text) {
+                    throw new Error('No text content found in the API response');
+                }
+
+                return textContent.text;
             }
-
-            const data = await response.json();
-
-            // Extract text content
-            if (!data.candidates || !data.candidates[0]?.content?.parts) {
-                throw new Error('Unexpected API response structure');
-            }
-
-            const textContent = data.candidates[0].content.parts.find(
-                (part: TextContent) => part.text
-            );
-
-            if (!textContent || !textContent.text) {
-                throw new Error('No text content found in the API response');
-            }
-
-            return textContent.text;
         } catch (error) {
             console.error('Error calling Gemini API:', error);
             throw error;
@@ -96,17 +206,58 @@ export class GeminiService {
             const prompt = ANALYSIS_PROMPTS.EXTRACT_METADATA;
             const promptText = prompt.replace('{text}', text);
 
-            // Use the model instance correctly
-            const result = await this.model.generateContent({
-                contents: [{ role: 'user', parts: [{ text: promptText }] }],
-                generationConfig: {
-                    temperature: ANALYSIS_OPTIONS.TEMPERATURE,
-                    topP: ANALYSIS_OPTIONS.TOP_P,
-                    maxOutputTokens: ANALYSIS_OPTIONS.MAX_OUTPUT_TOKENS,
-                }
-            });
+            try {
+                // Try using the SDK first
+                console.log(`Using SDK with model ${this.modelName}`);
+                const result = await this.model.generateContent({
+                    contents: [{ role: 'user', parts: [{ text: promptText }] }],
+                    generationConfig: {
+                        temperature: ANALYSIS_OPTIONS.TEMPERATURE,
+                        topP: ANALYSIS_OPTIONS.TOP_P,
+                        maxOutputTokens: ANALYSIS_OPTIONS.MAX_OUTPUT_TOKENS,
+                    }
+                });
 
-            return result.response.text();
+                return result.response.text();
+            } catch (sdkError) {
+                console.error('SDK approach failed, trying direct API call:', sdkError);
+
+                // Fall back to direct API call
+                const url = `https://generativelanguage.googleapis.com/v1/models/${this.modelName}:generateContent?key=${this.apiKey}`;
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptText }] }],
+                        generationConfig: {
+                            temperature: ANALYSIS_OPTIONS.TEMPERATURE,
+                            topP: ANALYSIS_OPTIONS.TOP_P,
+                            maxOutputTokens: ANALYSIS_OPTIONS.MAX_OUTPUT_TOKENS,
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Gemini API error: ${response.status} ${errorText}`);
+                }
+
+                const data = await response.json();
+                if (!data.candidates || !data.candidates[0]?.content?.parts) {
+                    throw new Error('Unexpected API response structure');
+                }
+
+                const textContent = data.candidates[0].content.parts.find(
+                    (part: TextContent) => part.text
+                );
+
+                if (!textContent || !textContent.text) {
+                    throw new Error('No text content found in the API response');
+                }
+
+                return textContent.text;
+            }
         } catch (error) {
             console.error('Error extracting metadata with Gemini:', error);
             throw new Error(error instanceof Error
