@@ -2,14 +2,20 @@ declare module 'pdf-parse' {
   interface PDFData {
     numpages: number;
     numrender: number;
-    info: Record<string, any>;
-    metadata: Record<string, any>;
+    info: Record<string, unknown>;
+    metadata: Record<string, unknown>;
     text: string;
     version: string;
   }
 
+  interface PageData {
+    pageIndex: number;
+    pageId: string;
+    pageContent?: string;
+  }
+
   function parse(dataBuffer: Buffer, options?: {
-    pagerender?: (pageData: any) => string;
+    pagerender?: (pageData: PageData) => string;
     max?: number;
     version?: string;
   }): Promise<PDFData>;

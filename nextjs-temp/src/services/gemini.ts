@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import { ANALYSIS_PROMPTS, ANALYSIS_OPTIONS } from '@/config/prompts';
 import { AnalysisResult } from '@/types/api';
 
@@ -11,7 +11,7 @@ export class GeminiService {
     private apiKey: string;
     private modelName = 'gemini-pro';
     private genAI: GoogleGenerativeAI;
-    private model: any;
+    private model: GenerativeModel;
 
     constructor() {
         const apiKey = process.env.GEMINI_API_KEY;
