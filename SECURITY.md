@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-The DocAnalyze team takes security issues seriously. We appreciate your efforts to responsibly disclose your findings and will make every effort to acknowledge your contributions.
+The Solva team takes security issues seriously. We appreciate your efforts to responsibly disclose your findings and will make every effort to acknowledge your contributions.
 
 ### How to Report a Security Vulnerability
 
@@ -40,7 +40,7 @@ Include the following information (as much as you can provide):
 
 ## Security Measures
 
-DocAnalyze implements several security measures:
+Solva implements several security measures:
 - Regular code security scanning via GitHub Actions
 - Dependency vulnerability monitoring
 - Code review requirements for all changes

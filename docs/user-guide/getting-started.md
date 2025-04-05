@@ -1,12 +1,12 @@
-# Getting Started with DocAnalyze
+# Getting Started with Solva
 
-This guide will help you install, configure, and start using DocAnalyze for your document analysis needs.
+This guide will help you install, configure, and start using Solva for your document analysis needs.
 
 ## Installation
 
 ### Prerequisites
 
-Before installing DocAnalyze, ensure you have the following:
+Before installing Solva, ensure you have the following:
 
 - Python 3.9 or higher
 - pip package manager
@@ -15,8 +15,8 @@ Before installing DocAnalyze, ensure you have the following:
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/docanalyze.git
-cd docanalyze
+git clone https://github.com/yourusername/solva.git
+cd solva
 ```
 
 ### Step 2: Install Dependencies
@@ -58,6 +58,6 @@ The application will be available at `http://localhost:5000`.
 
 ## Next Steps
 
-- Learn about the different [Features](features.md) available in DocAnalyze
+- Learn about the different [Features](features.md) available in Solva
 - See [Usage Examples](examples.md) for common use cases
 - Explore the [API Reference](../api-reference/pdf-processor.md) for programmatic usage

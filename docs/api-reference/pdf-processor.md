@@ -1,6 +1,6 @@
-# PDF Processor API Reference
+# PDF Processor
 
-This page documents the PDF processing functionality available in DocAnalyze.
+This page documents the PDF processing functionality available in Solva.
 
 ## PDF Processor Module
 

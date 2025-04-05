@@ -1,6 +1,6 @@
-# Contributing to DocAnalyze
+# Contributing to Solva
 
-This guide provides information for developers who want to contribute to the DocAnalyze project.
+This guide provides information for developers who want to contribute to the Solva project.
 
 ## Development Environment Setup
 

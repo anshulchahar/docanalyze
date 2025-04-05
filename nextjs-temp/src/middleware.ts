@@ -1,20 +1,8 @@
-import { withAuth } from "next-auth/middleware";
-
-export default withAuth({
-    callbacks: {
-        authorized: ({ token }) => !!token,
-    },
-    pages: {
-        signIn: "/auth/signin",
-    },
-});
-
 export const config = {
-    matcher: [
-        "/history",
-        "/analysis/:path*",
-        "/api/analyze",
-        "/api/history",
-        "/api/analysis/:path*",
-    ],
+    matcher: [], // Empty array disables the middleware entirely
 };
+
+export default function middleware() {
+    // This will never run since matcher is empty
+    return;
+}

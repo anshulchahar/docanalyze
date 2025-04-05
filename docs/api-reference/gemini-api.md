@@ -1,6 +1,6 @@
-# Gemini API Integration Reference
+# Gemini API Integration
 
-This page documents the Google Gemini API integration in DocAnalyze.
+This page documents the Google Gemini API integration in Solva.
 
 ## Gemini API Handler Module
 

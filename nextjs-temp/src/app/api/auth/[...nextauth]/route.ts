@@ -13,12 +13,33 @@ export const authOptions = {
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         }),
     ],
+    session: {
+        strategy: "jwt",
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+    },
+    cookies: {
+        sessionToken: {
+            name: `next-auth.session-token`,
+            options: {
+                httpOnly: true,
+                sameSite: "lax",
+                path: "/",
+                secure: process.env.NODE_ENV === "production",
+            },
+        },
+    },
     callbacks: {
-        async session({ session, user }) {
-            if (session.user) {
-                session.user.id = user.id;
+        async session({ session, token }) {
+            if (session.user && token.sub) {
+                session.user.id = token.sub;
             }
             return session;
+        },
+        async jwt({ token, user }) {
+            if (user) {
+                token.id = user.id;
+            }
+            return token;
         },
     },
     pages: {

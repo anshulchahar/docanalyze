@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AnalysisHistory } from '@/types/api';
 import { formatDate, truncateText } from '@/utils/formatters';
@@ -10,6 +11,7 @@ import ErrorDisplay from '@/components/ErrorDisplay';
 
 export default function HistoryPage() {
     const { data: session, status } = useSession();
+    const router = useRouter();
     const [history, setHistory] = useState<AnalysisHistory[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -17,15 +19,19 @@ export default function HistoryPage() {
     useEffect(() => {
         if (status === 'loading') return;
 
-        if (!session) {
-            setError('Please sign in to view your history');
-            setLoading(false);
+        // Redirect to sign-in if not authenticated
+        if (status === 'unauthenticated') {
+            router.push('/auth/signin?callbackUrl=/history');
             return;
         }
 
         async function fetchHistory() {
             try {
-                const response = await fetch('/api/history');
+                const response = await fetch('/api/history', {
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                    },
+                });
 
                 if (!response.ok) {
                     const data = await response.json();
@@ -36,24 +42,26 @@ export default function HistoryPage() {
                 setHistory(data);
             } catch (error) {
                 setError(error instanceof Error ? error.message : 'An error occurred');
+                console.error('Error fetching history:', error);
             } finally {
                 setLoading(false);
             }
         }
 
         fetchHistory();
-    }, [session, status]);
+    }, [session, status, router]);
 
     if (status === 'loading' || loading) {
         return <LoadingSpinner fullScreen message="Loading history..." />;
     }
 
-    if (!session) {
+    // This should not happen due to the redirect in useEffect, but just in case
+    if (status === 'unauthenticated') {
         return (
             <ErrorDisplay
                 message="Please sign in to view your history"
                 fullScreen
-                action={{ label: 'Sign In', href: '/api/auth/signin' }}
+                action={{ label: 'Sign In', href: '/auth/signin?callbackUrl=/history' }}
             />
         );
     }

@@ -109,13 +109,6 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {!analysisResult ? (
           <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Solva</h1>
-              <p className="mt-2 text-lg text-gray-600">
-                Upload PDF documents to analyze with AI
-              </p>
-            </div>
-
             {isAnalyzing ? (
               <div className="space-y-6">
                 <ProgressBar progress={progress} />

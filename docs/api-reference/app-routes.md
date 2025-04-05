@@ -1,6 +1,6 @@
 # Application Routes Reference
 
-This page documents the Flask application routes and API endpoints available in DocAnalyze.
+This page documents the Flask application routes and API endpoints available in Solva.
 
 ## Web Interface Routes
 

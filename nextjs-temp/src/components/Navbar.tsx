@@ -21,7 +21,7 @@ export default function Navbar() {
     ];
 
     return (
-        <nav className="bg-white shadow">
+        <nav className="bg-gray-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex">
@@ -29,10 +29,10 @@ export default function Navbar() {
                             <Link href="/" className="flex items-center">
                                 <img
                                     className="h-8 w-auto"
-                                    src="/file.svg"
-                                    alt="DocAnalyze"
+                                    src="/solva.png"
+                                    alt="Solva"
                                 />
-                                <span className="ml-2 text-xl font-bold text-gray-900">DocAnalyze</span>
+                                <span className="ml-2 text-xl font-bold text-gray-900">Solva</span>
                             </Link>
                         </div>
                         <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

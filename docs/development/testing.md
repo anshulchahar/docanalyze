@@ -1,10 +1,10 @@
 # Testing Guide
 
-This guide provides information about testing the DocAnalyze application.
+This guide provides information about testing the Solva application.
 
 ## Test Structure
 
-The DocAnalyze test suite is divided into several categories:
+The Solva test suite is divided into several categories:
 
 - **Unit Tests**: Test individual components in isolation
 - **Integration Tests**: Test interactions between multiple components
