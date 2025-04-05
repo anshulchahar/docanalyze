@@ -101,11 +101,11 @@ export default function FileUpload({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isDragging
-                        ? 'border-blue-500 bg-blue-50'
-                        : disabled
-                            ? 'border-gray-300 bg-gray-50 cursor-not-allowed'
-                            : 'border-gray-300 hover:border-blue-500 hover:bg-blue-50'
+                className={`border-2 border-dashed rounded-lg p-12 my-8 text-center cursor-pointer transition-colors ${isDragging
+                    ? 'border-blue-500 bg-blue-50'
+                    : disabled
+                        ? 'border-gray-300 bg-gray-50 cursor-not-allowed'
+                        : 'border-gray-300 hover:border-blue-500 hover:bg-blue-50'
                     }`}
             >
                 <input

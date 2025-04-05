@@ -6,6 +6,7 @@ const config: Config = {
         "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
         "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     ],
+    darkMode: 'class',
     theme: {
         extend: {
             typography: {
@@ -18,6 +19,29 @@ const config: Config = {
                             '&:hover': {
                                 color: '#2c5282',
                             },
+                        },
+                    },
+                },
+                dark: {
+                    css: {
+                        color: '#d1d5db',
+                        a: {
+                            color: '#60a5fa',
+                            '&:hover': {
+                                color: '#93c5fd',
+                            },
+                        },
+                        h1: {
+                            color: '#f3f4f6',
+                        },
+                        h2: {
+                            color: '#f3f4f6',
+                        },
+                        h3: {
+                            color: '#f3f4f6',
+                        },
+                        h4: {
+                            color: '#f3f4f6',
                         },
                     },
                 },

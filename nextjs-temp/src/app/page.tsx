@@ -105,10 +105,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
         {!analysisResult ? (
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="bg-gray-100 dark:bg-gray-900 p-6 pb-8 mt-16">
             {isAnalyzing ? (
               <div className="space-y-6">
                 <ProgressBar progress={progress} />

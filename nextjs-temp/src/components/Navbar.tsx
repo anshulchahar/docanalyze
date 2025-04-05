@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
+import DarkModeToggle from './DarkModeToggle';
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,7 +22,7 @@ export default function Navbar() {
     ];
 
     return (
-        <nav className="bg-gray-100">
+        <nav className="bg-gray-100 dark:bg-gray-800 transition-colors duration-200">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex">
@@ -32,7 +33,7 @@ export default function Navbar() {
                                     src="/solva.png"
                                     alt="Solva"
                                 />
-                                <span className="ml-2 text-xl font-bold text-gray-900">Solva</span>
+                                <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">Solva</span>
                             </Link>
                         </div>
                         <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -41,8 +42,8 @@ export default function Navbar() {
                                     key={link.href}
                                     href={link.href}
                                     className={`${isActive(link.href)
-                                            ? 'border-blue-500 text-gray-900'
-                                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                        ? 'border-blue-500 text-gray-900 dark:text-white'
+                                        : 'border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-white'
                                         } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
                                 >
                                     {link.name}
@@ -50,15 +51,17 @@ export default function Navbar() {
                             ))}
                         </div>
                     </div>
-                    <div className="hidden sm:ml-6 sm:flex sm:items-center">
+                    <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
+                        <DarkModeToggle />
+
                         {session ? (
                             <div className="ml-3 relative flex items-center space-x-4">
-                                <span className="text-sm text-gray-700">
+                                <span className="text-sm text-gray-700 dark:text-gray-300">
                                     {session.user?.name || session.user?.email}
                                 </span>
                                 <button
                                     onClick={() => signOut({ callbackUrl: '/' })}
-                                    className="text-sm text-gray-500 hover:text-gray-700"
+                                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                                 >
                                     Sign out
                                 </button>
@@ -66,17 +69,19 @@ export default function Navbar() {
                         ) : (
                             <Link
                                 href="/auth/signin"
-                                className="text-sm text-gray-500 hover:text-gray-700"
+                                className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                             >
                                 Sign in
                             </Link>
                         )}
                     </div>
                     <div className="-mr-2 flex items-center sm:hidden">
+                        <DarkModeToggle />
+
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             type="button"
-                            className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="ml-2 bg-white dark:bg-gray-700 inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-300 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             aria-expanded="false"
                         >
                             <span className="sr-only">Open main menu</span>
@@ -129,29 +134,29 @@ export default function Navbar() {
                                 key={link.href}
                                 href={link.href}
                                 className={`${isActive(link.href)
-                                        ? 'bg-blue-50 border-blue-500 text-blue-700'
-                                        : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+                                    ? 'bg-blue-50 dark:bg-blue-900 border-blue-500 text-blue-700 dark:text-blue-100'
+                                    : 'border-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 hover:text-gray-800 dark:hover:text-white'
                                     } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
                             >
                                 {link.name}
                             </Link>
                         ))}
                     </div>
-                    <div className="pt-4 pb-3 border-t border-gray-200">
+                    <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
                         {session ? (
                             <>
                                 <div className="px-4">
-                                    <div className="text-base font-medium text-gray-800">
+                                    <div className="text-base font-medium text-gray-800 dark:text-gray-200">
                                         {session.user?.name || 'User'}
                                     </div>
-                                    <div className="text-sm font-medium text-gray-500">
+                                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
                                         {session.user?.email || ''}
                                     </div>
                                 </div>
                                 <div className="mt-3 space-y-1">
                                     <button
                                         onClick={() => signOut({ callbackUrl: '/' })}
-                                        className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 w-full text-left"
+                                        className="block px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
                                     >
                                         Sign out
                                     </button>
@@ -161,7 +166,7 @@ export default function Navbar() {
                             <div className="px-4 py-2">
                                 <Link
                                     href="/auth/signin"
-                                    className="block text-base font-medium text-gray-500 hover:text-gray-800"
+                                    className="block text-base font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
                                 >
                                     Sign in
                                 </Link>
