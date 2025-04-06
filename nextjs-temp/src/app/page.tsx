@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import FileUpload from '@/components/FileUpload';
 import AnalysisResults from '@/components/AnalysisResults';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import ProgressBar from '@/components/ProgressBar';
-import { AnalysisResult } from '@/types/api';
+import Navigation from '@/components/Navigation';
+import { AnalysisResult, AnalysisHistory } from '@/types/api';
+import { useSidebar } from '@/contexts/SidebarContext';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -17,6 +19,32 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
+  const [history, setHistory] = useState<AnalysisHistory[]>([]);
+  const { isOpen } = useSidebar();
+
+  useEffect(() => {
+    // Fetch user's history when logged in
+    if (session?.user) {
+      fetchHistory();
+    }
+  }, [session]);
+
+  const fetchHistory = async () => {
+    try {
+      const response = await fetch('/api/history', {
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setHistory(data);
+      }
+    } catch (error) {
+      console.error('Error fetching history:', error);
+    }
+  };
 
   const handleFilesAdded = (newFiles: File[]) => {
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
@@ -31,74 +59,66 @@ export default function Home() {
   };
 
   const handleAnalyze = async () => {
-    if (files.length === 0) {
-      setError('Please select at least one PDF file to analyze');
-      return;
-    }
+    if (files.length === 0) return;
 
+    setIsAnalyzing(true);
+    setProgress(0);
     setError(null);
     setDebugInfo(null);
-    setIsAnalyzing(true);
-    setProgress(10); // Start progress at 10%
-
-    const formData = new FormData();
-    files.forEach((file) => {
-      formData.append('pdfFiles', file);
-    });
 
     try {
-      console.log('Starting analysis request with files:', files.map(f => `${f.name} (${f.size} bytes)`));
-
-      // Simulate progress for UI feedback
-      const progressInterval = setInterval(() => {
-        setProgress((prevProgress) => {
-          const newProgress = prevProgress + 5;
-          return newProgress >= 90 ? 90 : newProgress; // Cap at 90% until actual completion
-        });
-      }, 1000);
-
-      // Use the analyze-complete endpoint that was working previously
-      const response = await fetch('/api/analyze-complete', {
-        method: 'POST',
-        body: formData,
+      const formData = new FormData();
+      files.forEach((file) => {
+        formData.append('pdfFiles', file);
       });
 
-      clearInterval(progressInterval);
+      // Add a progress event listener
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/analyze-complete', true);
 
-      // Get response details for debugging
-      const contentType = response.headers.get('content-type');
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          setProgress(percentComplete);
+        }
+      };
 
-      // For any non-JSON response, show the raw response
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        console.error('Non-JSON response:', text);
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          const result = JSON.parse(xhr.responseText);
+          setAnalysisResult(result);
+          // If user is logged in, refresh history to include the new analysis
+          if (session?.user) {
+            fetchHistory();
+          }
+        } else {
+          try {
+            const errorResponse = JSON.parse(xhr.responseText);
+            setError(errorResponse.error || 'An error occurred during analysis');
+            setDebugInfo(errorResponse.details || null);
+          } catch (e) {
+            setError('Failed to analyze document');
+          }
+        }
+        setIsAnalyzing(false);
+      };
 
-        // Keep first 500 chars of response for debugging
-        const preview = text.substring(0, 500) + (text.length > 500 ? '...' : '');
-        setDebugInfo(`Status: ${response.status}, Content-Type: ${contentType}, Response: ${preview}`);
+      xhr.onerror = function () {
+        setError('Failed to connect to the server');
+        setIsAnalyzing(false);
+      };
 
-        throw new Error('Server returned an invalid response format');
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to process document');
-      }
-
-      setProgress(100);
-      setAnalysisResult(data as AnalysisResult);
+      // Send the form data
+      xhr.send(formData);
     } catch (error) {
-      console.error('Analysis error:', error);
-      setError(error instanceof Error ? error.message : 'An error occurred during analysis');
-    } finally {
+      setError('An error occurred');
       setIsAnalyzing(false);
     }
   };
 
-  const resetAnalysis = () => {
-    setFiles([]);
+  const handleReset = () => {
     setAnalysisResult(null);
+    setFiles([]);
     setProgress(0);
     setError(null);
     setDebugInfo(null);
@@ -106,7 +126,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 2xl:px-24 pt-16 pb-8 w-full">
+      <Navigation
+        history={history}
+      />
+
+      <div className={`mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 2xl:px-24 pt-16 pb-8 w-full transition-all duration-300 ${isOpen ? 'ml-[300px]' : 'ml-0'}`}>
         <div className="mx-auto w-full md:w-[90%] lg:w-[85%] xl:w-[90%] 2xl:w-[95%]">
           {!analysisResult ? (
             <div className="shadow-sm rounded-lg p-6 pb-8 mt-8 dark:bg-gray-900 bg-gray-50">
@@ -163,24 +187,10 @@ export default function Home() {
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Results</h2>
                 <button
-                  onClick={resetAnalysis}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-gray-700 dark:text-gray-200 flex items-center transition-colors"
+                  onClick={handleReset}
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark transition-colors duration-200"
                 >
-                  <svg
-                    className="w-5 h-5 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    ></path>
-                  </svg>
-                  New Analysis
+                  Analyze Another Document
                 </button>
               </div>
               <AnalysisResults analysis={analysisResult} />
