@@ -109,7 +109,7 @@ export default function FileUpload({
         const validTypeFiles = newFiles.filter(file => {
             const isValid = isValidFileType(file);
             if (!isValid) {
-                setError('Only PDF, Markdown, DOCX, and text files are allowed');
+                setError(`Unsupported file type. Please upload PDF (.pdf), Markdown (.md), DOCX (.docx), or text (.txt) files only.`);
                 return false;
             }
             return true;
@@ -237,7 +237,12 @@ export default function FileUpload({
                         </>
                     )}
                 </p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">PDF, Markdown, DOCX, or text files up to {maxFileSizeMb}MB</p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    PDF, Markdown, DOCX, or text files up to {maxFileSizeMb}MB
+                    <span className="block mt-1">
+                        <strong>Note:</strong> Some PDFs with security features, scanned content, or embedded fonts may have extraction issues
+                    </span>
+                </p>
             </div>
 
             <ErrorMessage message={error || ''} className="mb-4" />

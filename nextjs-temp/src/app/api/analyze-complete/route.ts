@@ -184,20 +184,51 @@ function createFileResult(file: File, text: string, pageCount: number) {
 
 // Process PDF files
 async function processPdfFile(file: File, buffer: ArrayBuffer) {
-    // Convert to Buffer instead of Uint8Array for pdf-parse
-    const pdfData = Buffer.from(buffer);
+    try {
+        // Convert to Buffer instead of Uint8Array for pdf-parse
+        const pdfData = Buffer.from(buffer);
 
-    // Dynamically import pdf-parse with proper options
-    const pdfParse = (await import('pdf-parse')).default;
+        // Dynamically import pdf-parse with proper options
+        const pdfParse = (await import('pdf-parse')).default;
 
-    // Use options to avoid file system dependency issues
-    const result = await pdfParse(pdfData, {
-        // Use pagerender instead of renderPdf
-        pagerender: () => '',    // Don't attempt to render pages
-        max: 0                   // No page limitation
-    });
+        // Use options to avoid file system dependency issues
+        const result = await pdfParse(pdfData, {
+            // Use pagerender instead of renderPdf
+            pagerender: () => '',    // Don't attempt to render pages
+            max: 0                   // No page limitation
+        });
 
-    return createFileResult(file, result.text, result.numpages);
+        // Check if we got any text content
+        if (!result.text || result.text.trim().length === 0) {
+            console.warn(`PDF extraction resulted in empty text for ${file.name}`);
+            throw new Error('PDF extraction resulted in empty text');
+        }
+
+        return createFileResult(file, result.text, result.numpages);
+    } catch (error) {
+        console.error(`PDF parsing error for ${file.name}:`, error);
+
+        // Instead of failing completely, provide a helpful message that can be analyzed
+        const errorMessage = `
+The document, "${file.name}," is inaccessible due to an extraction error encountered by the library used to process it. 
+The error was: ${error instanceof Error ? error.message : 'Unknown error'}
+
+This could be due to:
+1. The PDF being password protected
+2. The PDF containing scanned images rather than text
+3. The PDF using uncommon encoding or fonts
+4. Corruption in the PDF file structure
+
+Please try:
+- Ensuring the PDF is not password protected
+- Converting the document using OCR software if it contains scanned content
+- Saving the PDF with a different PDF creator
+- Converting to a different format and back to PDF
+`;
+
+        // Return the error message as text to be analyzed
+        return createFileResult(file, errorMessage, 1);
+    }
 }
 
 // Process Markdown files
@@ -232,14 +263,39 @@ async function processDocxFile(file: File, buffer: ArrayBuffer) {
         // Convert the buffer to a Node.js Buffer for mammoth
         const nodeBuffer = Buffer.from(buffer);
 
-        // Extract text from the DOCX using the buffer directly
+        // Extract text from the DOCX
         const result = await mammoth.extractRawText({
             buffer: nodeBuffer
         });
 
+        // Check if we got any text content
+        if (!result.value || result.value.trim().length === 0) {
+            console.warn(`DOCX extraction resulted in empty text for ${file.name}`);
+            throw new Error('DOCX extraction resulted in empty text');
+        }
+
         return createFileResult(file, result.value, 1); // DOCX doesn't have a standard page count
     } catch (error) {
-        console.error('Error processing DOCX file:', error);
-        throw new Error(`Failed to process DOCX file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        console.error(`DOCX parsing error for ${file.name}:`, error);
+
+        // Instead of failing completely, provide a helpful message that can be analyzed
+        const errorMessage = `
+The document, "${file.name}," is inaccessible due to an extraction error encountered by the library used to process it. 
+The error was: ${error instanceof Error ? error.message : 'Unknown error'}
+
+This could be due to:
+1. The DOCX file being password protected
+2. The DOCX file containing complex elements that couldn't be processed
+3. Corruption in the DOCX file structure
+4. Incompatible format version
+
+Please try:
+- Ensuring the DOCX is not password protected
+- Saving the document as a simpler DOCX format
+- Converting to a different format like PDF or plain text
+`;
+
+        // Return the error message as text to be analyzed
+        return createFileResult(file, errorMessage, 1);
     }
 }
