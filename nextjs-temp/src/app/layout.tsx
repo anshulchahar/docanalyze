@@ -5,6 +5,7 @@ import "./globals.css";
 import { Providers } from '@/app/providers';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { SidebarProvider } from '@/contexts/SidebarContext';
+import HelpButton from '@/components/HelpButton';
 
 export const metadata: Metadata = {
   title: "DocAnalyze - AI Document Analysis",
@@ -23,6 +24,7 @@ export default function RootLayout({
           <ErrorBoundary>
             <Providers>
               <main>{children}</main>
+              <HelpButton />
             </Providers>
           </ErrorBoundary>
         </SidebarProvider>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { AnalysisResult } from '@/types/api';
+import DownloadButton from './DownloadButton';
 
 interface AnalysisResultsProps {
     analysis: AnalysisResult;
@@ -22,11 +23,27 @@ export default function AnalysisResults({ analysis }: AnalysisResultsProps) {
         tabs.push({ id: 'comparison', label: 'Comparison' });
     }
 
+    // Convert the AnalysisResult to the format expected by the DownloadButton
+    const downloadData = {
+        title: `Document Analysis Report`,
+        summary: analysis.summary,
+        keyPoints: analysis.keyPoints,
+        detailedAnalysis: analysis.detailedAnalysis,
+        recommendations: Array.isArray(analysis.recommendations)
+            ? analysis.recommendations
+            : analysis.recommendations ? [analysis.recommendations] : [],
+        documentComparison: analysis.documentComparison,
+        fileInfo: analysis.fileInfo,
+    };
+
     return (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden transition-colors duration-200">
+        <div className="bg-white dark:bg-[#2C2C2C] shadow-lg rounded-lg overflow-hidden transition-colors duration-200 border dark:border-[#333333]">
             {/* Document Info */}
-            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">Document Information</h3>
+            <div className="px-6 py-4 bg-gray-50 dark:bg-[#1E1E1E] border-b border-gray-200 dark:border-[#333333]">
+                <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">Document Information</h3>
+                    <DownloadButton analysisData={downloadData} className="ml-4" />
+                </div>
                 <div className="mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {analysis.fileInfo?.map((file, index) => (
                         <div key={index} className="flex items-start space-x-3">
@@ -58,7 +75,7 @@ export default function AnalysisResults({ analysis }: AnalysisResultsProps) {
             </div>
 
             {/* Tabs */}
-            <div className="border-b border-gray-200 dark:border-gray-700">
+            <div className="border-b border-gray-200 dark:border-[#333333]">
                 <nav className="flex -mb-px overflow-x-auto">
                     {tabs.map((tab) => (
                         <button
