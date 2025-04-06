@@ -2,12 +2,13 @@
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
-export default function AuthError() {
+function ErrorContent() {
     const searchParams = useSearchParams();
     const error = searchParams.get('error');
 
-    // Get detailed error information
+    // Get detailed error message logic
     const getErrorMessage = (errorCode: string | null) => {
         switch (errorCode) {
             case 'OAuthSignin':
@@ -85,5 +86,27 @@ export default function AuthError() {
                 </div>
             </div>
         </div>
+    );
+}
+
+// Fallback component for Suspense
+function ErrorFallback() {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-md">
+                <div className="text-center">
+                    <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Authentication Error</h2>
+                    <p className="mt-2 text-sm text-gray-600">Loading error details...</p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default function AuthError() {
+    return (
+        <Suspense fallback={<ErrorFallback />}>
+            <ErrorContent />
+        </Suspense>
     );
 } 
