@@ -132,7 +132,10 @@ export default function AnalysisDetailPage() {
                             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Details</h1>
                         </div>
 
-                        <AnalysisResults analysis={analysis} />
+                        <AnalysisResults analysis={{
+                            ...analysis,
+                            recommendations: analysis.recommendations ? [analysis.recommendations] : []
+                        }} />
                     </div>
                 </div>
             </main>

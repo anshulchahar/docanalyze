@@ -11,5 +11,10 @@ export interface AnalysisData {
         pages?: number;
         fileSize?: string;
     }>;
-    [key: string]: string | string[] | number | boolean | undefined | Record<string, unknown> | Array<Record<string, unknown>>;
+    [key: string]: string | string[] | number | boolean | undefined | Record<string, unknown> | Array<Record<string, unknown>> | Array<{
+        filename: string;
+        character_count: number;
+        pages?: number;
+        fileSize?: string;
+    }>;
 } 

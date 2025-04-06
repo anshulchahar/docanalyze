@@ -291,7 +291,10 @@ export default function Home() {
                     Analyze Another Document
                   </button>
                 </div>
-                <AnalysisResults analysis={analysisResult} />
+                <AnalysisResults analysis={{
+                  ...analysisResult,
+                  recommendations: analysisResult.recommendations ? [analysisResult.recommendations] : []
+                }} />
               </div>
             )}
           </div>
