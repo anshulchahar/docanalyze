@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, DragEvent, ChangeEvent } from 'react';
+import ErrorMessage from './ErrorMessage';
 
 interface FileUploadProps {
     files: File[];
@@ -9,6 +10,22 @@ interface FileUploadProps {
     disabled?: boolean;
     maxFileSizeMb?: number;
 }
+
+// Valid file types and their display names
+const VALID_FILE_TYPES = {
+    'application/pdf': 'PDF',
+    'text/markdown': 'Markdown',
+    'text/plain': 'Text',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'DOCX',
+};
+
+// File type by extension mapping (for cases where MIME type is not reliable)
+const FILE_EXTENSIONS: Record<string, string> = {
+    'pdf': 'application/pdf',
+    'md': 'text/markdown',
+    'txt': 'text/plain',
+    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+};
 
 export default function FileUpload({
     files,
@@ -62,19 +79,44 @@ export default function FileUpload({
         }
     };
 
+    // Check if the file is valid based on extension or MIME type
+    const isValidFileType = (file: File): boolean => {
+        // Get file extension
+        const fileName = file.name.toLowerCase();
+        const fileExtension = fileName.split('.').pop() || '';
+
+        // First check by MIME type
+        if (file.type in VALID_FILE_TYPES) {
+            return true;
+        }
+
+        // Then check by extension if MIME type not recognized
+        return fileExtension in FILE_EXTENSIONS;
+    };
+
+    // Get the standardized MIME type for a file
+    const getStandardizedType = (file: File): string => {
+        if (file.type in VALID_FILE_TYPES) {
+            return file.type;
+        }
+
+        const fileExtension = file.name.toLowerCase().split('.').pop() || '';
+        return FILE_EXTENSIONS[fileExtension] || file.type;
+    };
+
     const processFiles = (newFiles: File[]) => {
-        // Filter for PDF files
-        const pdfFiles = newFiles.filter(file => {
-            const isPdf = file.type === 'application/pdf';
-            if (!isPdf) {
-                setError('Only PDF files are allowed');
+        // Filter for valid file types
+        const validTypeFiles = newFiles.filter(file => {
+            const isValid = isValidFileType(file);
+            if (!isValid) {
+                setError('Only PDF, Markdown, DOCX, and text files are allowed');
                 return false;
             }
             return true;
         });
 
         // Check file size
-        const validFiles = pdfFiles.filter(file => {
+        const validFiles = validTypeFiles.filter(file => {
             const isValidSize = file.size <= maxSizeBytes;
             if (!isValidSize) {
                 setError(`File size must be less than ${maxFileSizeMb}MB`);
@@ -84,7 +126,17 @@ export default function FileUpload({
         });
 
         if (validFiles.length > 0) {
-            onFilesAdded(validFiles);
+            // Add standardized type to files to ensure consistent processing
+            const filesWithType = validFiles.map(file => {
+                const standardizedType = getStandardizedType(file);
+                // Create a new File object with the standardized type if needed
+                if (file.type !== standardizedType) {
+                    return new File([file], file.name, { type: standardizedType });
+                }
+                return file;
+            });
+
+            onFilesAdded(filesWithType);
         }
     };
 
@@ -94,6 +146,50 @@ export default function FileUpload({
         return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     };
 
+    // Get a display name for the file type
+    const getFileTypeName = (file: File): string => {
+        const standardizedType = getStandardizedType(file);
+        return VALID_FILE_TYPES[standardizedType as keyof typeof VALID_FILE_TYPES] || 'File';
+    };
+
+    // Get appropriate icon for file type
+    const getFileIcon = (file: File) => {
+        const standardizedType = getStandardizedType(file);
+
+        switch (standardizedType) {
+            case 'application/pdf':
+                return (
+                    <svg className="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                );
+            case 'text/markdown':
+                return (
+                    <svg className="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                );
+            case 'text/plain':
+                return (
+                    <svg className="h-6 w-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                );
+            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                return (
+                    <svg className="h-6 w-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                );
+            default:
+                return (
+                    <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                );
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div
@@ -101,11 +197,12 @@ export default function FileUpload({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${isDragging
-                    ? 'border-gold-500'
-                    : disabled
-                        ? 'border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800/30 cursor-not-allowed'
-                        : 'border-gray-300 dark:border-gray-600 hover:border-gold-500 dark:hover:border-gold-400'
+                className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${error ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10' :
+                    isDragging
+                        ? 'border-gold-500'
+                        : disabled
+                            ? 'border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800/30 cursor-not-allowed'
+                            : 'border-gray-300 dark:border-gray-600 hover:border-gold-500 dark:hover:border-gold-400'
                     }`}
             >
                 <input
@@ -113,7 +210,7 @@ export default function FileUpload({
                     ref={fileInputRef}
                     className="hidden"
                     onChange={handleFileSelect}
-                    accept=".pdf,application/pdf"
+                    accept=".pdf,.md,.txt,.docx,application/pdf,text/markdown,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     multiple
                     disabled={disabled}
                 />
@@ -136,18 +233,14 @@ export default function FileUpload({
                         'Upload in progress...'
                     ) : (
                         <>
-                            Drag & drop PDF files or <span className="text-gold-500">browse</span>
+                            Drag & drop files or <span className="text-gold-500">browse</span>
                         </>
                     )}
                 </p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">PDF files up to {maxFileSizeMb}MB</p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">PDF, Markdown, DOCX, or text files up to {maxFileSizeMb}MB</p>
             </div>
 
-            {error && (
-                <div className="p-3 rounded-md bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">
-                    {error}
-                </div>
-            )}
+            <ErrorMessage message={error || ''} className="mb-4" />
 
             {files.length > 0 && (
                 <div className="space-y-2">
@@ -156,25 +249,17 @@ export default function FileUpload({
                         {files.map((file, index) => (
                             <li key={index} className="px-4 py-3 flex items-center justify-between bg-white dark:bg-[#2C2C2C]">
                                 <div className="flex items-center">
-                                    <svg
-                                        className="h-6 w-6 text-red-500"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                                        />
-                                    </svg>
+                                    {getFileIcon(file)}
                                     <div className="ml-3">
                                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-xs">
                                             {file.name}
                                         </p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(file.size)}</p>
+                                        <div className="flex items-center space-x-2">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(file.size)}</p>
+                                            <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
+                                                {getFileTypeName(file)}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 {!disabled && (

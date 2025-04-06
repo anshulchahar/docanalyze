@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import FileUpload from '@/components/FileUpload';
 import AnalysisResults from '@/components/AnalysisResults';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import ErrorDisplay from '@/components/ErrorDisplay';
+import ErrorMessage from '@/components/ErrorMessage';
 import ProgressBar from '@/components/ProgressBar';
 import Navigation from '@/components/Navigation';
 import PromptInputBar from '@/components/PromptInputBar';
@@ -20,6 +20,8 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
+  const [promptError, setPromptError] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [history, setHistory] = useState<AnalysisHistory[]>([]);
@@ -32,6 +34,13 @@ export default function Home() {
       fetchHistory();
     }
   }, [session]);
+
+  // Clear errors when files change
+  useEffect(() => {
+    if (files.length > 0) {
+      setAnalyzeError(null);
+    }
+  }, [files]);
 
   const fetchHistory = async () => {
     try {
@@ -53,32 +62,43 @@ export default function Home() {
   const handleFilesAdded = (newFiles: File[]) => {
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
     setError(null);
+    setAnalyzeError(null);
     setDebugInfo(null);
   };
 
   const handleFileRemoved = (index: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
     setError(null);
+    setAnalyzeError(null);
     setDebugInfo(null);
   };
 
   const handleCustomPromptChange = (prompt: string) => {
     setCustomPrompt(prompt);
+    setPromptError(null);
   };
 
   const handleSendPrompt = () => {
     if (customPrompt.trim()) {
       setSavedPrompt(customPrompt.trim());
       setCustomPrompt(''); // Clear the input after sending
+      setPromptError(null);
+    } else {
+      setPromptError('Please enter instructions before sending');
     }
   };
 
   const handleAnalyze = async () => {
-    if (files.length === 0) return;
+    if (files.length === 0) {
+      setAnalyzeError('Please upload at least one document before analyzing');
+      return;
+    }
 
     setIsAnalyzing(true);
     setProgress(0);
     setError(null);
+    setAnalyzeError(null);
+    setPromptError(null);
     setDebugInfo(null);
 
     // Track whether a custom prompt was used
@@ -146,6 +166,8 @@ export default function Home() {
     setSavedPrompt('');
     setProgress(0);
     setError(null);
+    setAnalyzeError(null);
+    setPromptError(null);
     setDebugInfo(null);
     setCustomPromptUsed(false);
   };
@@ -186,7 +208,7 @@ export default function Home() {
 
                     {error && (
                       <div className="mt-4">
-                        <ErrorDisplay message={error} />
+                        <ErrorMessage message={error} />
 
                         {debugInfo && (
                           <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-700 text-xs font-mono text-gray-700 dark:text-gray-200 rounded overflow-auto max-h-40">
@@ -227,16 +249,20 @@ export default function Home() {
                       </div>
                     )}
 
-                    <div className="mt-6 flex justify-center">
-                      <button
-                        onClick={handleAnalyze}
-                        disabled={files.length === 0 || isAnalyzing}
-                        className={`px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 ${files.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                      >
-                        <span className="brightness-110">Analyze Document</span>
-                        {!session && <span className="brightness-110"> (Sign in to save results)</span>}
-                      </button>
+                    <div className="mt-6">
+                      <ErrorMessage message={analyzeError || ''} className="mb-3" />
+
+                      <div className="flex justify-center">
+                        <button
+                          onClick={handleAnalyze}
+                          disabled={isAnalyzing}
+                          className={`px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
+                        >
+                          <span className="brightness-110">Analyze Document</span>
+                          {!session && <span className="brightness-110"> (Sign in to save results)</span>}
+                        </button>
+                      </div>
                     </div>
 
                     {!session && (
@@ -282,6 +308,7 @@ export default function Home() {
           buttonText="Send"
           placeholder="Add specific instructions for analyzing your document (optional)..."
           helperText="Use this to add custom instructions for your analysis"
+          errorMessage={promptError || ''}
         />
       )}
     </div>

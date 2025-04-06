@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import { useSidebar } from '@/contexts/SidebarContext';
 import { EnvelopeIcon, PhoneIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import CustomSelect, { SelectOption } from '@/components/CustomSelect';
+import ValidatedInput from '@/components/ValidatedInput';
+import ErrorMessage from '@/components/ErrorMessage';
 
 export default function ContactPage() {
     const { isOpen } = useSidebar();
@@ -14,7 +16,14 @@ export default function ContactPage() {
         subject: '',
         message: ''
     });
+    const [formErrors, setFormErrors] = useState({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+    });
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+    const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
 
     const subjectOptions: SelectOption[] = [
         { value: 'general', label: 'General Inquiry' },
@@ -26,14 +35,99 @@ export default function ContactPage() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Mark field as touched
+        if (!touchedFields[name]) {
+            setTouchedFields(prev => ({ ...prev, [name]: true }));
+        }
+
+        // Clear error when user types
+        if (formErrors[name as keyof typeof formErrors]) {
+            setFormErrors(prev => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name } = e.target;
+
+        // Mark field as touched
+        setTouchedFields(prev => ({ ...prev, [name]: true }));
+
+        // Validate field on blur
+        validateField(name, formData[name as keyof typeof formData]);
+    };
+
+    const validateField = (name: string, value: string) => {
+        let error = '';
+
+        switch (name) {
+            case 'name':
+                if (!value.trim()) {
+                    error = 'Name is required';
+                } else if (value.trim().length < 2) {
+                    error = 'Name must be at least 2 characters';
+                }
+                break;
+            case 'email':
+                if (!value.trim()) {
+                    error = 'Email is required';
+                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    error = 'Please enter a valid email address';
+                }
+                break;
+            case 'subject':
+                if (!value) {
+                    error = 'Please select a subject';
+                }
+                break;
+            case 'message':
+                if (!value.trim()) {
+                    error = 'Message is required';
+                } else if (value.trim().length < 10) {
+                    error = 'Message must be at least 10 characters';
+                }
+                break;
+            default:
+                break;
+        }
+
+        setFormErrors(prev => ({ ...prev, [name]: error }));
+        return error === '';
+    };
+
+    const validateForm = () => {
+        // Mark all fields as touched
+        const allFields = { name: true, email: true, subject: true, message: true };
+        setTouchedFields(allFields);
+
+        // Validate all fields
+        let isValid = true;
+        Object.entries(formData).forEach(([name, value]) => {
+            const fieldValid = validateField(name, value);
+            if (!fieldValid) isValid = false;
+        });
+
+        return isValid;
     };
 
     const handleSelectChange = (name: string) => (value: string) => {
         setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Mark field as touched
+        setTouchedFields(prev => ({ ...prev, [name]: true }));
+
+        // Validate select field
+        validateField(name, value);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validate all fields before submitting
+        if (!validateForm()) {
+            return;
+        }
+
         setSubmitStatus('submitting');
 
         // Simulate form submission
@@ -45,6 +139,8 @@ export default function ContactPage() {
                 subject: '',
                 message: ''
             });
+            // Reset touched fields
+            setTouchedFields({});
         }, 1500);
     };
 
@@ -148,37 +244,35 @@ export default function ContactPage() {
                                         ) : (
                                             <form onSubmit={handleSubmit} className="space-y-6">
                                                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                                    <div>
-                                                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                                                            Your Name
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            id="name"
-                                                            name="name"
-                                                            value={formData.name}
-                                                            onChange={handleChange}
-                                                            required
-                                                            className="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-[#333333] rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-[#3A3A3A] text-gray-900 dark:text-white transition-colors"
-                                                            placeholder="John Doe"
-                                                        />
-                                                    </div>
+                                                    <ValidatedInput
+                                                        label="Your Name"
+                                                        type="text"
+                                                        id="name"
+                                                        name="name"
+                                                        value={formData.name}
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        error={touchedFields.name ? formErrors.name : ''}
+                                                        required
+                                                        placeholder="John Doe"
+                                                        helpText="Enter your full name"
+                                                        className="px-4 py-3 bg-white dark:bg-[#3A3A3A] text-gray-900 dark:text-white transition-colors"
+                                                    />
 
-                                                    <div>
-                                                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                                                            Email Address
-                                                        </label>
-                                                        <input
-                                                            type="email"
-                                                            id="email"
-                                                            name="email"
-                                                            value={formData.email}
-                                                            onChange={handleChange}
-                                                            required
-                                                            className="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-[#333333] rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-[#3A3A3A] text-gray-900 dark:text-white transition-colors"
-                                                            placeholder="john@example.com"
-                                                        />
-                                                    </div>
+                                                    <ValidatedInput
+                                                        label="Email Address"
+                                                        type="email"
+                                                        id="email"
+                                                        name="email"
+                                                        value={formData.email}
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        error={touchedFields.email ? formErrors.email : ''}
+                                                        required
+                                                        placeholder="john@example.com"
+                                                        helpText="We'll never share your email"
+                                                        className="px-4 py-3 bg-white dark:bg-[#3A3A3A] text-gray-900 dark:text-white transition-colors"
+                                                    />
                                                 </div>
 
                                                 <div>
@@ -192,11 +286,14 @@ export default function ContactPage() {
                                                         required
                                                         placeholder="Please select"
                                                     />
+                                                    {touchedFields.subject && formErrors.subject && (
+                                                        <ErrorMessage message={formErrors.subject} className="mt-1" />
+                                                    )}
                                                 </div>
 
                                                 <div>
-                                                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                                                        Message
+                                                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                                                        Message <span className="text-red-500">*</span>
                                                     </label>
                                                     <textarea
                                                         id="message"
@@ -204,10 +301,17 @@ export default function ContactPage() {
                                                         rows={5}
                                                         value={formData.message}
                                                         onChange={handleChange}
+                                                        onBlur={handleBlur}
                                                         required
                                                         placeholder="How can we help you?"
-                                                        className="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-[#333333] rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-[#3A3A3A] text-gray-900 dark:text-white transition-colors"
+                                                        className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm focus:outline-none bg-white dark:bg-[#3A3A3A] text-gray-900 dark:text-white transition-colors ${touchedFields.message && formErrors.message
+                                                                ? 'border-red-300 dark:border-red-700 focus:ring-red-500 focus:border-red-500'
+                                                                : 'border-gray-300 dark:border-[#333333] focus:ring-primary focus:border-primary'
+                                                            }`}
                                                     />
+                                                    {touchedFields.message && formErrors.message && (
+                                                        <ErrorMessage message={formErrors.message} className="mt-1" />
+                                                    )}
                                                 </div>
 
                                                 <div>

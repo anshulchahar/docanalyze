@@ -112,6 +112,47 @@ const config: Config = {
                     },
                 },
             }),
+            keyframes: {
+                fadeIn: {
+                    '0%': { opacity: '0' },
+                    '100%': { opacity: '1' },
+                },
+                ping: {
+                    '75%, 100%': {
+                        transform: 'scale(2)',
+                        opacity: '0',
+                    },
+                },
+                pulse: {
+                    '50%': {
+                        opacity: '.5',
+                    },
+                },
+                bounce: {
+                    '0%, 100%': {
+                        transform: 'translateY(-10%)',
+                        animationTimingFunction: 'cubic-bezier(0.8,0,1,1)',
+                    },
+                    '50%': {
+                        transform: 'none',
+                        animationTimingFunction: 'cubic-bezier(0,0,0.2,1)',
+                    },
+                },
+                errorShake: {
+                    '0%, 100%': { transform: 'translateX(0)' },
+                    '25%': { transform: 'translateX(-5px)' },
+                    '50%': { transform: 'translateX(5px)' },
+                    '75%': { transform: 'translateX(-5px)' },
+                },
+            },
+            animation: {
+                bounce: 'bounce 1s infinite',
+                ping: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite',
+                pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                spin: 'spin 1s linear infinite',
+                fadeIn: 'fadeIn 0.3s ease-in-out',
+                errorShake: 'errorShake 0.3s ease-in-out',
+            },
         },
     },
     plugins: [
