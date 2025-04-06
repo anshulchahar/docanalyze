@@ -2,14 +2,14 @@
 
 import { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
-import { exportToPDF, exportToMarkdown, downloadFile } from '@/utils/exportUtils';
+import { exportAnalysis } from '@/utils/exportUtils';
 
 interface ExportButtonProps {
     analysis: {
         summary: string;
         keyPoints: string[];
         detailedAnalysis: string;
-        recommendations: string;
+        recommendations: string[];
         documentComparison?: string;
         fileInfo: Array<{
             filename: string;
@@ -21,26 +21,7 @@ interface ExportButtonProps {
 export default function ExportButton({ analysis }: ExportButtonProps) {
     const handleExport = async (format: 'pdf' | 'md' | 'txt') => {
         try {
-            const timestamp = new Date().toISOString().split('T')[0];
-            const baseFilename = `docanalyze-analysis-${timestamp}`;
-
-            switch (format) {
-                case 'pdf': {
-                    const pdfBytes = await exportToPDF(analysis);
-                    downloadFile(pdfBytes, `${baseFilename}.pdf`, 'application/pdf');
-                    break;
-                }
-                case 'md': {
-                    const markdown = exportToMarkdown(analysis);
-                    downloadFile(markdown, `${baseFilename}.md`, 'text/markdown');
-                    break;
-                }
-                case 'txt': {
-                    const text = exportToMarkdown(analysis);
-                    downloadFile(text, `${baseFilename}.txt`, 'text/plain');
-                    break;
-                }
-            }
+            await exportAnalysis(format, analysis);
         } catch (error) {
             console.error('Export failed:', error);
             // You might want to add error handling UI here

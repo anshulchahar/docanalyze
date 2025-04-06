@@ -2,28 +2,105 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base Theme Variables */
 :root {
+  /* Light theme colors */
+  --color-primary: #f59e0b;
+  --color-primary-dark: #d97706;
+  --color-primary-light: #fcd34d;
+
   --background: #ffffff;
   --foreground: #171717;
+  --card: #f9fafb;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+  --primary: var(--color-primary);
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #111827;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --accent-foreground: #111827;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: var(--color-primary);
+  --radius: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark,
+.dark-theme {
+  --background: #0a0a0a;
+  --foreground: #f3f4f6;
+  --card: #1c1c1c;
+  --card-foreground: #f3f4f6;
+  --popover: #1c1c1c;
+  --popover-foreground: #f3f4f6;
+  --primary: var(--color-primary);
+  --primary-foreground: #18181b;
+  --secondary: #27272a;
+  --secondary-foreground: #f3f4f6;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #f3f4f6;
+  --destructive: #7f1d1d;
+  --destructive-foreground: #f3f4f6;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: var(--color-primary-light);
 }
 
+/* Apply smooth transitions when switching themes */
+.theme-transition {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Base Styles */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans, Arial, Helvetica, sans-serif);
+  min-height: 100vh;
 }
 
-/* Custom theme variables */
+/* Custom theme classes */
 @layer base {
-  :root {
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
+  * {
+    @apply border-gray-200 dark:border-gray-800;
   }
+
+  body {
+    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+  }
+}
+
+/* Dark mode selection styles */
+.dark ::selection {
+  background-color: var(--color-primary-dark);
+  color: var(--background);
+}
+
+/* Custom scrollbar for dark mode */
+.dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: var(--card);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 5px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
 }

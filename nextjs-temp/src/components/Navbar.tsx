@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { signOut, useSession } from 'next-auth/react';
+import { signOut, signIn, useSession } from 'next-auth/react';
 import DarkModeToggle from './DarkModeToggle';
 import Image from 'next/image';
 
@@ -21,6 +21,11 @@ export default function Navbar() {
         { name: 'History', href: '/history' },
         { name: 'About', href: '/about' },
     ];
+
+    // Handle sign in directly with Google
+    const handleSignIn = () => {
+        signIn('google', { callbackUrl: '/' });
+    };
 
     return (
         <nav className="bg-gray-100 dark:bg-gray-800 transition-colors duration-200">
@@ -47,7 +52,7 @@ export default function Navbar() {
                                     key={link.href}
                                     href={link.href}
                                     className={`${isActive(link.href)
-                                        ? 'border-blue-500 text-gray-900 dark:text-white'
+                                        ? 'border-gold-500 text-gray-900 dark:text-white'
                                         : 'border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-white'
                                         } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
                                 >
@@ -72,12 +77,12 @@ export default function Navbar() {
                                 </button>
                             </div>
                         ) : (
-                            <Link
-                                href="/auth/signin"
+                            <button
+                                onClick={handleSignIn}
                                 className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                             >
                                 Sign in
-                            </Link>
+                            </button>
                         )}
                     </div>
                     <div className="-mr-2 flex items-center sm:hidden">
@@ -86,7 +91,7 @@ export default function Navbar() {
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             type="button"
-                            className="ml-2 bg-white dark:bg-gray-700 inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-300 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="ml-2 bg-white dark:bg-gray-700 inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-300 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500"
                             aria-expanded="false"
                         >
                             <span className="sr-only">Open main menu</span>
@@ -139,7 +144,7 @@ export default function Navbar() {
                                 key={link.href}
                                 href={link.href}
                                 className={`${isActive(link.href)
-                                    ? 'bg-blue-50 dark:bg-blue-900 border-blue-500 text-blue-700 dark:text-blue-100'
+                                    ? 'border-gold-500 bg-gold-50 dark:bg-gold-900/20 text-gold-700 dark:text-gold-300'
                                     : 'border-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 hover:text-gray-800 dark:hover:text-white'
                                     } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
                             >
@@ -169,12 +174,12 @@ export default function Navbar() {
                             </>
                         ) : (
                             <div className="px-4 py-2">
-                                <Link
-                                    href="/auth/signin"
+                                <button
+                                    onClick={handleSignIn}
                                     className="block text-base font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
                                 >
                                     Sign in
-                                </Link>
+                                </button>
                             </div>
                         )}
                     </div>

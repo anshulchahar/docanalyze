@@ -52,5 +52,6 @@ model Analysis {
   summary     String   @default("")
   keyPoints   String   @default("[]")
   analysis    String   @default("")
+  customPrompt String?  @default("")
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -3,6 +3,9 @@ import { PrismaClient } from '@prisma/client';
 import { withAuth } from '@/utils/apiMiddleware';
 import { AnalysisHistory } from '@/types/api';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 const prisma = new PrismaClient();
 
 export const GET = withAuth(async (req, session) => {
