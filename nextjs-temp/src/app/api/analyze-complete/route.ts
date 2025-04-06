@@ -60,7 +60,6 @@ export async function POST(req: NextRequest) {
             try {
                 const buffer = await file.arrayBuffer();
                 let text = '';
-                let pageCount = 1;
 
                 switch (file.type) {
                     case FILE_TYPES.PDF:
@@ -141,14 +140,19 @@ export async function POST(req: NextRequest) {
 
             // Save to database if user is authenticated
             if (session?.user?.id) {
+                // Store the customPrompt in the analysis JSON data instead of as a separate field
+                const analysisData = {
+                    ...result,
+                    customPrompt: customPrompt || ""
+                };
+
                 await prisma.analysis.create({
                     data: {
                         userId: session.user.id,
                         filename: files.map(f => f.name).join(', '),
                         summary: result.summary,
                         keyPoints: JSON.stringify(result.keyPoints),
-                        analysis: JSON.stringify(result),
-                        customPrompt: customPrompt || ""
+                        analysis: JSON.stringify(analysisData)
                     },
                 });
                 console.log('Analysis saved to database for user:', session.user.id);
@@ -237,18 +241,8 @@ async function processMarkdownFile(buffer: ArrayBuffer): Promise<string> {
     const decoder = new TextDecoder('utf-8');
     const markdownText = decoder.decode(buffer);
 
-    // Optional: Convert markdown to plain text by removing common markdown syntax
-    // This is a simple implementation - use a proper markdown parser for more complex needs
-    const plainText = markdownText
-        .replace(/#{1,6}\s+/g, '') // Remove headings
-        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-        .replace(/\*(.*?)\*/g, '$1') // Remove italic
-        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links but keep description
-        .replace(/`{1,3}([\s\S]*?)`{1,3}/g, '$1') // Remove code blocks
-        .replace(/> /g, '') // Remove blockquotes
-        .replace(/- /g, ''); // Remove list markers
-
-    return markdownText; // Return original markdown for better analysis context
+    // We'll return the original markdown for better analysis context
+    return markdownText;
 }
 
 // Process plain text files
