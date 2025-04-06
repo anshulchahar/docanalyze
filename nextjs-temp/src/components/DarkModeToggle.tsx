@@ -1,60 +1,50 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTheme } from './ThemeProvider';
 import { motion } from 'framer-motion';
+
+// Create a simple theme hook that doesn't throw
+const useLocalTheme = () => {
+    const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+    // Initialize from localStorage on mount
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+            if (storedTheme && (storedTheme === 'light' || storedTheme === 'dark')) {
+                setTheme(storedTheme);
+                document.documentElement.classList.toggle('dark', storedTheme === 'dark');
+            } else {
+                // Check system preference
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                setTheme(isDark ? 'dark' : 'light');
+                document.documentElement.classList.toggle('dark', isDark);
+            }
+        }
+    }, []);
+
+    const toggleTheme = () => {
+        const nextTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(nextTheme);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('theme', nextTheme);
+            document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+        }
+    };
+
+    return { theme, toggleTheme };
+};
 
 export default function DarkModeToggle({ className = '' }: { className?: string }) {
     const [mounted, setMounted] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
-    const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>('light');
 
-    // Try to use the theme context, but provide fallbacks for error cases
-    let themeContext: {
-        theme: 'light' | 'dark';
-        resolvedTheme: 'light' | 'dark';
-        toggleTheme: () => void;
-        setTheme: (theme: 'light' | 'dark') => void;
-    };
-
-    try {
-        themeContext = useTheme();
-    } catch (e) {
-        // Fallback if ThemeProvider is not available
-        themeContext = {
-            theme: currentTheme,
-            resolvedTheme: currentTheme,
-            toggleTheme: () => {
-                const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
-                setCurrentTheme(nextTheme);
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('theme', nextTheme);
-                    document.documentElement.classList.toggle('dark', nextTheme === 'dark');
-                }
-            },
-            setTheme: (newTheme) => {
-                setCurrentTheme(newTheme);
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('theme', newTheme);
-                    document.documentElement.classList.toggle('dark', newTheme === 'dark');
-                }
-            }
-        };
-    }
-
-    const { theme, toggleTheme } = themeContext;
+    // Always use our local hook that doesn't throw
+    const { theme, toggleTheme } = useLocalTheme();
 
     // After mounting, we can safely show the UI
     useEffect(() => {
         setMounted(true);
-
-        // Initialize theme based on localStorage if using the fallback
-        if (!mounted && currentTheme === 'light' && typeof window !== 'undefined') {
-            const storedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-            if (storedTheme && (storedTheme === 'light' || storedTheme === 'dark')) {
-                setCurrentTheme(storedTheme);
-            }
-        }
     }, []);
 
     if (!mounted) {

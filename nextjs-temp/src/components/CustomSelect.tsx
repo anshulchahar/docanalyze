@@ -19,7 +19,6 @@ type CustomSelectProps = {
     id?: string;
     name?: string;
     error?: string;
-    multiple?: boolean;
 };
 
 export default function CustomSelect({
@@ -32,7 +31,6 @@ export default function CustomSelect({
     id,
     name,
     error,
-    multiple = false,
 }: CustomSelectProps) {
     const [selectedOption, setSelectedOption] = useState<SelectOption | null>(null);
     const listboxRef = useRef<HTMLDivElement>(null);

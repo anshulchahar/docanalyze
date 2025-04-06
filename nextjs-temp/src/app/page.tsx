@@ -139,7 +139,7 @@ export default function Home() {
             const errorResponse = JSON.parse(xhr.responseText);
             setError(errorResponse.error || 'An error occurred during analysis');
             setDebugInfo(errorResponse.details || null);
-          } catch (e) {
+          } catch {
             setError('Failed to analyze document');
           }
         }
@@ -153,7 +153,7 @@ export default function Home() {
 
       // Send the form data
       xhr.send(formData);
-    } catch (error) {
+    } catch {
       setError('An error occurred');
       setIsAnalyzing(false);
     }

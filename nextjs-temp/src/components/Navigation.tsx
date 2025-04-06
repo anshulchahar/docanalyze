@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import Image from 'next/image';
 import DarkModeToggle from './DarkModeToggle';
@@ -15,14 +14,9 @@ interface NavigationProps {
 }
 
 export default function Navigation({ history = [] }: NavigationProps) {
-    const pathname = usePathname();
     const { data: session, status } = useSession();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { isOpen, close } = useSidebar();
-
-    const isActive = (path: string) => {
-        return pathname === path;
-    };
 
     const handleSignIn = () => {
         signIn('google', { callbackUrl: '/' });

@@ -17,7 +17,7 @@ export default function HelpPage() {
         },
         {
             question: 'What file formats are supported?',
-            answer: 'Currently, we support PDF documents. We\'re working on expanding to other formats like DOCX, TXT, and more in the future.'
+            answer: 'Currently, we support PDF documents. We&apos;re working on expanding to other formats like DOCX, TXT, and more in the future.'
         },
         {
             question: 'How secure is my data?',
@@ -25,7 +25,7 @@ export default function HelpPage() {
         },
         {
             question: 'Can I save my analysis results?',
-            answer: 'Yes! When you\'re signed in, all your document analyses are automatically saved to your history, and you can access them anytime.'
+            answer: 'Yes! When you&apos;re signed in, all your document analyses are automatically saved to your history, and you can access them anytime.'
         },
         {
             question: 'Is there a limit to how many documents I can analyze?',
@@ -57,10 +57,10 @@ export default function HelpPage() {
                             <div className="space-y-6">
                                 <div className="text-lg text-gray-700 dark:text-gray-200">
                                     <p className="mb-4">
-                                        Welcome to DocAnalyze Help Center. Here you'll find answers to common questions and guidance on using our platform.
+                                        Welcome to DocAnalyze Help Center. Here you&apos;ll find answers to common questions and guidance on using our platform.
                                     </p>
                                     <p>
-                                        If you can't find what you're looking for, please visit our{' '}
+                                        If you can&apos;t find what you&apos;re looking for, please visit our{' '}
                                         <Link href="/contact" className="text-primary hover:underline transition-colors">
                                             Contact page
                                         </Link>{' '}

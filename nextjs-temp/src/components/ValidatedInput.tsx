@@ -33,7 +33,7 @@ const ValidatedInput = forwardRef<HTMLInputElement, ValidatedInputProps>(({
             const timer = setTimeout(() => setIsAnimating(false), 300);
             return () => clearTimeout(timer);
         }
-    }, [error]);
+    }, [error, hasError]);
 
     return (
         <div className="mb-4">

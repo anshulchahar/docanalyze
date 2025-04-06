@@ -27,7 +27,6 @@ export default function PromptInputBar({
     errorMessage = ''
 }: PromptInputBarProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const [isMultiline, setIsMultiline] = useState(false);
     const [localError, setLocalError] = useState('');
 
     // Auto-resize the textarea as content grows
@@ -38,9 +37,6 @@ export default function PromptInputBar({
         textarea.style.height = 'auto';
         const newHeight = Math.min(textarea.scrollHeight, 150); // Max height of 150px
         textarea.style.height = `${newHeight}px`;
-
-        // Check if content has multiple lines
-        setIsMultiline(textarea.scrollHeight > 60);
     }, [customPrompt]);
 
     const handlePromptChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -113,8 +109,8 @@ export default function PromptInputBar({
                         title={canAnalyze ? `Press Enter to ${buttonText.toLowerCase()}` : "Upload a document first"}
                         aria-label={buttonText}
                         className={`absolute right-2 bottom-2 p-2 rounded-lg flex items-center justify-center text-white transition-colors ${!isAnalyzing
-                                ? 'bg-primary hover:bg-primary-dark focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800'
-                                : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                            ? 'bg-primary hover:bg-primary-dark focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+                            : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
                             }`}
                     >
                         {isAnalyzing ? (

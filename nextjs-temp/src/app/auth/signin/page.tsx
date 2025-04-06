@@ -2,14 +2,12 @@
 
 import { signIn, useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function SignIn() {
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get('callbackUrl') || '/';
 
     // If already signed in, redirect to home page
     useEffect(() => {

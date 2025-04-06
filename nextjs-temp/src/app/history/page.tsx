@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AnalysisHistory } from '@/types/api';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import ErrorDisplay from '@/components/ErrorDisplay';
 import Navigation from '@/components/Navigation';
 import { useSidebar } from '@/contexts/SidebarContext';
 

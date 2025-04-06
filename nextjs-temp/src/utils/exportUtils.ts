@@ -1,7 +1,6 @@
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import { saveAs } from 'file-saver';
-import HtmlToMarkdown from 'html-to-markdown';
 
 interface AnalysisData {
     title?: string;
@@ -9,7 +8,7 @@ interface AnalysisData {
     keyPoints?: string[];
     detailedAnalysis?: string;
     recommendations?: string[];
-    [key: string]: any; // For any additional properties
+    [key: string]: string | string[] | number | boolean | undefined | Record<string, unknown> | Array<Record<string, unknown>>;
 }
 
 /**
@@ -82,7 +81,7 @@ export const exportToPdf = (data: AnalysisData): void => {
         yPosition += 7;
 
         doc.setFont('helvetica', 'normal');
-        data.keyPoints.forEach((point, index) => {
+        data.keyPoints.forEach((point) => {
             const bulletPoint = `• ${point}`;
             const pointLines = doc.splitTextToSize(bulletPoint, textWidth);
 
@@ -145,8 +144,8 @@ export const exportToPdf = (data: AnalysisData): void => {
         yPosition += 7;
 
         doc.setFont('helvetica', 'normal');
-        data.recommendations.forEach((recommendation, index) => {
-            const numberedRec = `${index + 1}. ${recommendation}`;
+        data.recommendations.forEach((recommendation, i) => {
+            const numberedRec = `${i + 1}. ${recommendation}`;
             const recLines = doc.splitTextToSize(numberedRec, textWidth);
 
             // Check if we need a new page
@@ -203,8 +202,8 @@ export const exportToMarkdown = (data: AnalysisData): void => {
     // Add recommendations
     if (data.recommendations && data.recommendations.length > 0) {
         markdown += `## Recommendations\n\n`;
-        data.recommendations.forEach((recommendation, index) => {
-            markdown += `${index + 1}. ${recommendation}\n`;
+        data.recommendations.forEach((recommendation, i) => {
+            markdown += `${i + 1}. ${recommendation}\n`;
         });
         markdown += '\n';
     }
@@ -293,8 +292,8 @@ export const exportToDocx = async (data: AnalysisData): Promise<void> => {
                         text: 'Recommendations',
                         heading: HeadingLevel.HEADING_2,
                     }),
-                    ...data.recommendations.map((recommendation, index) => new Paragraph({
-                        text: `${index + 1}. ${recommendation}`,
+                    ...data.recommendations.map((recommendation, i) => new Paragraph({
+                        text: `${i + 1}. ${recommendation}`,
                         spacing: {
                             after: 120,
                         },
@@ -349,8 +348,8 @@ export const exportToTxt = (data: AnalysisData): void => {
     // Add recommendations
     if (data.recommendations && data.recommendations.length > 0) {
         text += `RECOMMENDATIONS\n${'='.repeat(15)}\n\n`;
-        data.recommendations.forEach((recommendation, index) => {
-            text += `${index + 1}. ${recommendation}\n`;
+        data.recommendations.forEach((recommendation, i) => {
+            text += `${i + 1}. ${recommendation}\n`;
         });
         text += '\n';
     }

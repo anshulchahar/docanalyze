@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import { useSidebar } from '@/contexts/SidebarContext';
 import { EnvelopeIcon, PhoneIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
@@ -149,7 +149,7 @@ export default function ContactPage() {
             icon: <EnvelopeIcon className="h-6 w-6" />,
             title: 'Email',
             description: 'support@docanalyze.example.com',
-            detail: 'We\'ll respond within 24 hours'
+            detail: 'We&apos;ll respond within 24 hours'
         },
         {
             icon: <PhoneIcon className="h-6 w-6" />,
@@ -233,7 +233,7 @@ export default function ContactPage() {
                                         {submitStatus === 'success' ? (
                                             <div className="bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 p-6 rounded-lg border border-green-200 dark:border-green-800/30">
                                                 <h3 className="text-lg font-medium">Message sent successfully!</h3>
-                                                <p className="mt-2">Thank you for contacting us. We'll get back to you as soon as possible.</p>
+                                                <p className="mt-2">Thank you for contacting us. We&apos;ll get back to you as soon as possible.</p>
                                                 <button
                                                     onClick={() => setSubmitStatus('idle')}
                                                     className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
@@ -305,8 +305,8 @@ export default function ContactPage() {
                                                         required
                                                         placeholder="How can we help you?"
                                                         className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm focus:outline-none bg-white dark:bg-[#3A3A3A] text-gray-900 dark:text-white transition-colors ${touchedFields.message && formErrors.message
-                                                                ? 'border-red-300 dark:border-red-700 focus:ring-red-500 focus:border-red-500'
-                                                                : 'border-gray-300 dark:border-[#333333] focus:ring-primary focus:border-primary'
+                                                            ? 'border-red-300 dark:border-red-700 focus:ring-red-500 focus:border-red-500'
+                                                            : 'border-gray-300 dark:border-[#333333] focus:ring-primary focus:border-primary'
                                                             }`}
                                                     />
                                                     {touchedFields.message && formErrors.message && (

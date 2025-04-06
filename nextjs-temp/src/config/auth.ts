@@ -42,7 +42,7 @@ export const authOptions: AuthOptions = {
             }
             return token;
         },
-        async redirect({ url, baseUrl }) {
+        async redirect({ baseUrl }) {
             // Always redirect to home page after sign in, ignoring the callback URL
             return baseUrl;
         },

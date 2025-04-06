@@ -11,5 +11,5 @@ export interface AnalysisData {
         pages?: number;
         fileSize?: string;
     }>;
-    [key: string]: any; // For any additional properties
+    [key: string]: string | string[] | number | boolean | undefined | Record<string, unknown> | Array<Record<string, unknown>>;
 } 
