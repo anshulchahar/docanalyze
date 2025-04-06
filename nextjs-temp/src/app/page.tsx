@@ -125,77 +125,79 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#1E1E1E] transition-colors duration-200">
       <Navigation
         history={history}
       />
 
-      <div className={`mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 2xl:px-24 pt-16 pb-8 w-full transition-all duration-300 ${isOpen ? 'ml-[300px]' : 'ml-0'}`}>
-        <div className="mx-auto w-full md:w-[90%] lg:w-[85%] xl:w-[90%] 2xl:w-[95%]">
-          {!analysisResult ? (
-            <div className="shadow-sm rounded-lg p-6 pb-8 mt-8 dark:bg-gray-900 bg-gray-50">
-              {isAnalyzing ? (
-                <div className="space-y-6">
-                  <ProgressBar progress={progress} />
-                  <div className="text-center">
-                    <LoadingSpinner message="Analyzing your document..." />
-                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                      This may take a minute depending on the document size
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <FileUpload
-                    files={files}
-                    onFilesAdded={handleFilesAdded}
-                    onFileRemoved={handleFileRemoved}
-                    disabled={isAnalyzing}
-                  />
-
-                  {error && (
-                    <div className="mt-4">
-                      <ErrorDisplay message={error} />
-
-                      {debugInfo && (
-                        <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-700 text-xs font-mono text-gray-700 dark:text-gray-200 rounded overflow-auto max-h-40">
-                          <details>
-                            <summary className="cursor-pointer text-gray-800 dark:text-gray-100">Debug Info</summary>
-                            <div className="text-gray-700 dark:text-gray-200">{debugInfo}</div>
-                          </details>
-                        </div>
-                      )}
+      <div className={`pt-16 pb-8 w-full transition-all duration-300 ease-in-out ${isOpen ? 'pl-64' : 'pl-16'}`}>
+        <div className="px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 w-full">
+          <div className="mx-auto w-full md:w-[90%] lg:w-[85%] xl:w-[90%] 2xl:w-[95%]">
+            {!analysisResult ? (
+              <div className="shadow-sm rounded-lg p-6 pb-8 mt-8 dark:bg-[#1E1E1E] bg-gray-50">
+                {isAnalyzing ? (
+                  <div className="space-y-6">
+                    <ProgressBar progress={progress} />
+                    <div className="text-center">
+                      <LoadingSpinner message="Analyzing your document..." />
+                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                        This may take a minute depending on the document size
+                      </p>
                     </div>
-                  )}
-
-                  <div className="mt-6 flex justify-center">
-                    <button
-                      onClick={handleAnalyze}
-                      disabled={files.length === 0 || isAnalyzing}
-                      className={`px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 ${files.length === 0 || isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                    >
-                      <span className="brightness-110">Analyze Document</span>
-                      {!session && <span className="brightness-110"> (Sign in to save results)</span>}
-                    </button>
                   </div>
-                </>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-6 shadow-sm rounded-lg p-6 dark:bg-gray-900 bg-gray-50">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Results</h2>
-                <button
-                  onClick={handleReset}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark transition-colors duration-200"
-                >
-                  Analyze Another Document
-                </button>
+                ) : (
+                  <>
+                    <FileUpload
+                      files={files}
+                      onFilesAdded={handleFilesAdded}
+                      onFileRemoved={handleFileRemoved}
+                      disabled={isAnalyzing}
+                    />
+
+                    {error && (
+                      <div className="mt-4">
+                        <ErrorDisplay message={error} />
+
+                        {debugInfo && (
+                          <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-700 text-xs font-mono text-gray-700 dark:text-gray-200 rounded overflow-auto max-h-40">
+                            <details>
+                              <summary className="cursor-pointer text-gray-800 dark:text-gray-100">Debug Info</summary>
+                              <div className="text-gray-700 dark:text-gray-200">{debugInfo}</div>
+                            </details>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="mt-6 flex justify-center">
+                      <button
+                        onClick={handleAnalyze}
+                        disabled={files.length === 0 || isAnalyzing}
+                        className={`px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 ${files.length === 0 || isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                      >
+                        <span className="brightness-110">Analyze Document</span>
+                        {!session && <span className="brightness-110"> (Sign in to save results)</span>}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
-              <AnalysisResults analysis={analysisResult} />
-            </div>
-          )}
+            ) : (
+              <div className="space-y-6 shadow-sm rounded-lg p-6 dark:bg-[#1E1E1E] bg-gray-50">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Results</h2>
+                  <button
+                    onClick={handleReset}
+                    className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark transition-colors duration-200"
+                  >
+                    Analyze Another Document
+                  </button>
+                </div>
+                <AnalysisResults analysis={analysisResult} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

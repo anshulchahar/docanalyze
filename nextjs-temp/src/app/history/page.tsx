@@ -57,10 +57,10 @@ export default function HistoryPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors duration-200">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#1E1E1E] flex flex-col transition-colors duration-200">
             <Navigation history={history} />
 
-            <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${isOpen ? 'ml-[300px]' : 'ml-0'}`}>
+            <div className={`pt-16 flex-1 flex items-center justify-center transition-all duration-300 ease-in-out ${isOpen ? 'pl-64' : 'pl-16'}`}>
                 <div className="text-center">
                     <h2 className="text-xl font-medium text-gray-900 dark:text-white mb-4">Redirecting to home page...</h2>
                     <Link

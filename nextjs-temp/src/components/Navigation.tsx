@@ -6,9 +6,8 @@ import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import Image from 'next/image';
 import DarkModeToggle from './DarkModeToggle';
-import HistorySidebar from './HistorySidebar';
+import ChatGptStyleSidebar from './ChatGptStyleSidebar';
 import { AnalysisHistory } from '@/types/api';
-import { ClockIcon } from '@heroicons/react/24/outline';
 import { useSidebar } from '@/contexts/SidebarContext';
 
 interface NavigationProps {
@@ -19,7 +18,7 @@ export default function Navigation({ history = [] }: NavigationProps) {
     const pathname = usePathname();
     const { data: session, status } = useSession();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { isOpen, toggle, close } = useSidebar();
+    const { isOpen, close } = useSidebar();
 
     const isActive = (path: string) => {
         return pathname === path;
@@ -31,30 +30,17 @@ export default function Navigation({ history = [] }: NavigationProps) {
 
     return (
         <>
-            <HistorySidebar
+            <ChatGptStyleSidebar
                 history={history}
                 isOpen={isOpen}
                 onClose={close}
             />
 
-            <nav className={`bg-gray-100 dark:bg-gray-900 transition-all duration-300 ${isOpen ? 'pl-[300px]' : 'pl-0'}`}>
-                <div className="mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 2xl:px-24 w-full">
+            <nav className={`fixed top-0 right-0 left-0 z-30 bg-gray-100 dark:bg-[#1E1E1E] transition-all duration-300 ease-in-out ${isOpen ? 'pl-64' : 'pl-16'}`}>
+                <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
-                            {session && (
-                                <button
-                                    onClick={toggle}
-                                    className="mr-3 p-2 rounded-full text-white bg-primary hover:bg-primary-dark dark:bg-primary dark:hover:bg-primary-dark transition-all duration-200 transform hover:scale-105 relative"
-                                    aria-label="Toggle History"
-                                >
-                                    <ClockIcon className="h-5 w-5" />
-                                    {history.length > 0 && (
-                                        <span className="absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center transform translate-x-1/2 -translate-y-1/3">
-                                            {history.length}
-                                        </span>
-                                    )}
-                                </button>
-                            )}
+                            {/* Logo - shifted right when sidebar opens */}
                             <div className="flex-shrink-0 flex items-center">
                                 <Link href="/" className="flex items-center">
                                     <Image
@@ -115,20 +101,6 @@ export default function Navigation({ history = [] }: NavigationProps) {
                             )}
                         </div>
                         <div className="-mr-2 flex items-center sm:hidden space-x-1">
-                            {session && (
-                                <button
-                                    onClick={toggle}
-                                    className="p-2 rounded-full text-white bg-primary hover:bg-primary-dark dark:bg-primary dark:hover:bg-primary-dark relative"
-                                    aria-label="Toggle History"
-                                >
-                                    <ClockIcon className="h-5 w-5" />
-                                    {history.length > 0 && (
-                                        <span className="absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center transform translate-x-1/2 -translate-y-1/3">
-                                            {history.length}
-                                        </span>
-                                    )}
-                                </button>
-                            )}
                             <DarkModeToggle />
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

@@ -102,36 +102,38 @@ export default function AnalysisDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#1E1E1E] transition-colors duration-200">
             <Navigation history={history} />
 
-            <main className={`w-full px-4 sm:px-6 lg:px-8 xl:px-16 2xl:px-24 py-8 transition-all duration-300 ${isOpen ? 'ml-[300px]' : 'ml-0'}`}>
-                <div className="w-full max-w-6xl mx-auto">
-                    <div className="flex items-center mb-6">
-                        <Link
-                            href="/"
-                            className="mr-4 text-primary dark:text-primary-light hover:text-primary-dark dark:hover:text-primary flex items-center"
-                        >
-                            <svg
-                                className="w-5 h-5 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
+            <main className={`pt-16 pb-8 w-full transition-all duration-300 ease-in-out ${isOpen ? 'pl-64' : 'pl-16'}`}>
+                <div className="px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 w-full">
+                    <div className="w-full max-w-6xl mx-auto">
+                        <div className="flex items-center mb-6">
+                            <Link
+                                href="/"
+                                className="mr-4 text-primary dark:text-primary-light hover:text-primary-dark dark:hover:text-primary flex items-center"
                             >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                                />
-                            </svg>
-                            Back to Home
-                        </Link>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Details</h1>
-                    </div>
+                                <svg
+                                    className="w-5 h-5 mr-1"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                                    />
+                                </svg>
+                                Back to Home
+                            </Link>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Details</h1>
+                        </div>
 
-                    <AnalysisResults analysis={analysis} />
+                        <AnalysisResults analysis={analysis} />
+                    </div>
                 </div>
             </main>
         </div>
