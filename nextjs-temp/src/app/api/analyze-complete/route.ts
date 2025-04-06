@@ -40,6 +40,10 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // Get custom prompt if provided
+        const customPrompt = formData.get('customPrompt') as string | null;
+        console.log(`Custom prompt provided: ${customPrompt ? 'Yes' : 'No'}`);
+
         console.log(`Processing ${files.length} files:`, files.map(f => `${f.name} (${f.size} bytes)`));
 
         // Extract text from PDFs
@@ -103,7 +107,7 @@ export async function POST(req: NextRequest) {
             const geminiService = new GeminiService();
 
             console.log(`Sending ${texts.length} documents to Gemini API for analysis...`);
-            const analysisText = await geminiService.analyzeDocuments(texts);
+            const analysisText = await geminiService.analyzeDocuments(texts, customPrompt);
 
             console.log('Parsing Gemini analysis response...');
             analysisResult = GeminiService.parseAnalysisResponse(analysisText);
@@ -118,7 +122,8 @@ export async function POST(req: NextRequest) {
         // Create final result
         const result = {
             ...analysisResult,
-            fileInfo
+            fileInfo,
+            customPromptUsed: !!customPrompt // Add flag to indicate if a custom prompt was used
         };
 
         // Get session for database storage
@@ -134,6 +139,7 @@ export async function POST(req: NextRequest) {
                         summary: result.summary,
                         keyPoints: JSON.stringify(result.keyPoints),
                         analysis: JSON.stringify(result),
+                        customPrompt: customPrompt || undefined
                     },
                 });
                 console.log('Analysis saved to database for user:', session.user.id);

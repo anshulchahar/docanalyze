@@ -49,7 +49,7 @@ Documents:
 
 Document:
 {text}`,
-} as const;
+};
 
 export const SUMMARY_LENGTH = {
     SHORT: 150,

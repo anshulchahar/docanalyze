@@ -125,7 +125,7 @@ export class GeminiService {
     }
 
     // Process text documents and generate analysis
-    async analyzeDocuments(documents: string[]): Promise<string> {
+    async analyzeDocuments(documents: string[], customPrompt?: string | null): Promise<string> {
         try {
             console.log(`Using Gemini ${this.modelName} with API version v1`);
 
@@ -134,10 +134,33 @@ export class GeminiService {
                 `DOCUMENT ${i + 1}:\n${doc.slice(0, 15000)}`
             ).join('\n\n');
 
-            // Create the prompt with docs
-            const prompt = documents.length > 1
-                ? ANALYSIS_PROMPTS.MULTIPLE_DOCUMENTS.replace('{text}', formattedDocs)
-                : ANALYSIS_PROMPTS.SINGLE_DOCUMENT.replace('{text}', documents[0]);
+            // Get the base prompt based on document count
+            let basePrompt = documents.length > 1
+                ? ANALYSIS_PROMPTS.MULTIPLE_DOCUMENTS
+                : ANALYSIS_PROMPTS.SINGLE_DOCUMENT;
+
+            // Add custom prompt if provided
+            if (customPrompt && customPrompt.trim()) {
+                // Insert the custom prompt after the format specification but before the document
+                const promptParts = basePrompt.split('Document:');
+                if (promptParts.length === 2) {
+                    basePrompt = `${promptParts[0]}User-Specified Instructions: ${customPrompt.trim()}\n\nDocument:${promptParts[1]}`;
+                } else {
+                    // For multiple documents case
+                    const multiPartsSplit = basePrompt.split('Documents:');
+                    if (multiPartsSplit.length === 2) {
+                        basePrompt = `${multiPartsSplit[0]}User-Specified Instructions: ${customPrompt.trim()}\n\nDocuments:${multiPartsSplit[1]}`;
+                    } else {
+                        // Fallback - append to the end of the prompt
+                        basePrompt = `${basePrompt}\n\nAdditional Instructions: ${customPrompt.trim()}`;
+                    }
+                }
+
+                console.log('Added custom prompt to analysis instructions');
+            }
+
+            // Replace the document placeholder
+            const prompt = basePrompt.replace('{text}', documents.length > 1 ? formattedDocs : documents[0]);
 
             try {
                 // First try using the SDK

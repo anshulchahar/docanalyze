@@ -95,13 +95,13 @@ export default function FileUpload({
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <div
                 onClick={() => fileInputRef.current?.click()}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-lg p-12 my-8 text-center cursor-pointer transition-colors ${isDragging
+                className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${isDragging
                     ? 'border-gold-500'
                     : disabled
                         ? 'border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800/30 cursor-not-allowed'
@@ -154,7 +154,7 @@ export default function FileUpload({
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200">Selected Files</h4>
                     <ul className="divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
                         {files.map((file, index) => (
-                            <li key={index} className="px-4 py-3 flex items-center justify-between bg-white dark:bg-gray-800">
+                            <li key={index} className="px-4 py-3 flex items-center justify-between bg-white dark:bg-[#2C2C2C]">
                                 <div className="flex items-center">
                                     <svg
                                         className="h-6 w-6 text-red-500"

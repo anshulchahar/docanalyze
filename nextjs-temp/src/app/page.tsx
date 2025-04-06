@@ -8,18 +8,22 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import ProgressBar from '@/components/ProgressBar';
 import Navigation from '@/components/Navigation';
+import PromptInputBar from '@/components/PromptInputBar';
 import { AnalysisResult, AnalysisHistory } from '@/types/api';
 import { useSidebar } from '@/contexts/SidebarContext';
 
 export default function Home() {
   const { data: session } = useSession();
   const [files, setFiles] = useState<File[]>([]);
+  const [customPrompt, setCustomPrompt] = useState('');
+  const [savedPrompt, setSavedPrompt] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [history, setHistory] = useState<AnalysisHistory[]>([]);
+  const [customPromptUsed, setCustomPromptUsed] = useState(false);
   const { isOpen } = useSidebar();
 
   useEffect(() => {
@@ -58,6 +62,17 @@ export default function Home() {
     setDebugInfo(null);
   };
 
+  const handleCustomPromptChange = (prompt: string) => {
+    setCustomPrompt(prompt);
+  };
+
+  const handleSendPrompt = () => {
+    if (customPrompt.trim()) {
+      setSavedPrompt(customPrompt.trim());
+      setCustomPrompt(''); // Clear the input after sending
+    }
+  };
+
   const handleAnalyze = async () => {
     if (files.length === 0) return;
 
@@ -66,11 +81,19 @@ export default function Home() {
     setError(null);
     setDebugInfo(null);
 
+    // Track whether a custom prompt was used
+    setCustomPromptUsed(savedPrompt.length > 0);
+
     try {
       const formData = new FormData();
       files.forEach((file) => {
         formData.append('pdfFiles', file);
       });
+
+      // Add the saved custom prompt to the formData if provided
+      if (savedPrompt) {
+        formData.append('customPrompt', savedPrompt);
+      }
 
       // Add a progress event listener
       const xhr = new XMLHttpRequest();
@@ -119,9 +142,12 @@ export default function Home() {
   const handleReset = () => {
     setAnalysisResult(null);
     setFiles([]);
+    setCustomPrompt('');
+    setSavedPrompt('');
     setProgress(0);
     setError(null);
     setDebugInfo(null);
+    setCustomPromptUsed(false);
   };
 
   return (
@@ -130,7 +156,7 @@ export default function Home() {
         history={history}
       />
 
-      <div className={`pt-16 pb-8 w-full transition-all duration-300 ease-in-out ${isOpen ? 'pl-64' : 'pl-16'}`}>
+      <div className={`pt-16 pb-24 w-full transition-all duration-300 ease-in-out ${isOpen ? 'pl-64' : 'pl-16'}`}>
         <div className="px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 w-full">
           <div className="mx-auto w-full md:w-[90%] lg:w-[85%] xl:w-[90%] 2xl:w-[95%]">
             {!analysisResult ? (
@@ -147,6 +173,10 @@ export default function Home() {
                   </div>
                 ) : (
                   <>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                      Document Analysis
+                    </h2>
+
                     <FileUpload
                       files={files}
                       onFilesAdded={handleFilesAdded}
@@ -169,24 +199,65 @@ export default function Home() {
                       </div>
                     )}
 
+                    {/* Custom Prompt Indicator */}
+                    {savedPrompt && (
+                      <div className="mt-4 p-3 rounded-md bg-primary/10 border border-primary/20 dark:bg-primary/5">
+                        <div className="flex items-start">
+                          <div className="flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M18 10c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zm-1.25 0c0 3.726-3.024 6.75-6.75 6.75s-6.75-3.024-6.75-6.75S7.274 3.25 11 3.25s6.75 3.024 6.75 6.75zM10.47 7.72a.75.75 0 00-1.44 0l-1 3.5a.75.75 0 001.44.41L9.9 10h2.2l.43 1.63a.75.75 0 101.44-.41l-1-3.5zM10.57 8.33L11 9.5h-2l.43-1.17.57-1.5.57 1.5z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <div className="ml-3 flex-1">
+                            <h3 className="text-sm font-medium text-primary">Custom Instructions Added</h3>
+                            <div className="mt-1 text-sm text-gray-700 dark:text-gray-300">
+                              <p className="line-clamp-2">{savedPrompt}</p>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setCustomPrompt(savedPrompt);
+                                setSavedPrompt('');
+                              }}
+                              className="mt-1 text-xs text-primary hover:text-primary-dark"
+                            >
+                              Edit instructions
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="mt-6 flex justify-center">
                       <button
                         onClick={handleAnalyze}
                         disabled={files.length === 0 || isAnalyzing}
-                        className={`px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 ${files.length === 0 || isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''
+                        className={`px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 ${files.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
                           }`}
                       >
                         <span className="brightness-110">Analyze Document</span>
                         {!session && <span className="brightness-110"> (Sign in to save results)</span>}
                       </button>
                     </div>
+
+                    {!session && (
+                      <div className="mt-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                        Sign in to save your analysis results for future reference
+                      </div>
+                    )}
                   </>
                 )}
               </div>
             ) : (
               <div className="space-y-6 shadow-sm rounded-lg p-6 dark:bg-[#1E1E1E] bg-gray-50">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Results</h2>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Results</h2>
+                    {customPromptUsed && (
+                      <p className="text-sm text-primary dark:text-primary-light mt-1">
+                        Custom instructions were applied to this analysis
+                      </p>
+                    )}
+                  </div>
                   <button
                     onClick={handleReset}
                     className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark transition-colors duration-200"
@@ -200,6 +271,19 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {!analysisResult && !isAnalyzing && (
+        <PromptInputBar
+          customPrompt={customPrompt}
+          onCustomPromptChange={handleCustomPromptChange}
+          onAnalyze={handleSendPrompt}
+          canAnalyze={true} // Always allow sending a prompt
+          isAnalyzing={isAnalyzing}
+          buttonText="Send"
+          placeholder="Add specific instructions for analyzing your document (optional)..."
+          helperText="Use this to add custom instructions for your analysis"
+        />
+      )}
     </div>
   );
 }
