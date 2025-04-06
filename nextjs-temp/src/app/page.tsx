@@ -134,7 +134,7 @@ export default function Home() {
       // Send the form data
       xhr.send(formData);
     } catch (error) {
-      setError(error.message || 'An error occurred');
+      setError('An error occurred');
       setIsAnalyzing(false);
     }
   };
