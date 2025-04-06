@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 // import { GeistMono } from "geist/font/mono";
 import "./globals.css";
-import { Providers } from './providers';
+import { Providers } from '@/app/providers';
 import Navigation from '@/components/Navigation';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="light">
       <body className={GeistSans.className}>
         <ErrorBoundary>
           <Providers>

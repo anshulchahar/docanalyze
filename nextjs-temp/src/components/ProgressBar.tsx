@@ -20,15 +20,15 @@ export default function ProgressBar({
         <div className={`w-full ${className}`}>
             {label && (
                 <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium text-gray-700">{label}</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>
                     {showPercentage && (
-                        <span className="text-sm font-medium text-gray-700">{normalizedProgress}%</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{normalizedProgress}%</span>
                     )}
                 </div>
             )}
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                 <div
-                    className="bg-gold-500 h-2.5 rounded-full transition-all duration-300 ease-in-out"
+                    className="bg-primary h-2.5 rounded-full transition-all duration-300 ease-in-out"
                     style={{ width: `${normalizedProgress}%` }}
                 ></div>
             </div>

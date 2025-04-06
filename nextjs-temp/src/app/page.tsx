@@ -105,86 +105,88 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
-        {!analysisResult ? (
-          <div className="bg-gray-100 dark:bg-gray-900 p-6 pb-8 mt-16">
-            {isAnalyzing ? (
-              <div className="space-y-6">
-                <ProgressBar progress={progress} />
-                <div className="text-center">
-                  <LoadingSpinner message="Analyzing your document..." />
-                  <p className="mt-2 text-sm text-gray-500">
-                    This may take a minute depending on the document size
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <>
-                <FileUpload
-                  files={files}
-                  onFilesAdded={handleFilesAdded}
-                  onFileRemoved={handleFileRemoved}
-                  disabled={isAnalyzing}
-                />
-
-                {error && (
-                  <div className="mt-4">
-                    <ErrorDisplay message={error} />
-
-                    {debugInfo && (
-                      <div className="mt-2 p-3 bg-gray-100 text-xs font-mono text-gray-700 rounded overflow-auto max-h-40">
-                        <details>
-                          <summary className="cursor-pointer">Debug Info</summary>
-                          {debugInfo}
-                        </details>
-                      </div>
-                    )}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 2xl:px-24 pt-16 pb-8 w-full">
+        <div className="mx-auto w-full md:w-[90%] lg:w-[85%] xl:w-[90%] 2xl:w-[95%]">
+          {!analysisResult ? (
+            <div className="shadow-sm rounded-lg p-6 pb-8 mt-8 dark:bg-gray-900 bg-gray-50">
+              {isAnalyzing ? (
+                <div className="space-y-6">
+                  <ProgressBar progress={progress} />
+                  <div className="text-center">
+                    <LoadingSpinner message="Analyzing your document..." />
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                      This may take a minute depending on the document size
+                    </p>
                   </div>
-                )}
-
-                <div className="mt-6 flex justify-center">
-                  <button
-                    onClick={handleAnalyze}
-                    disabled={files.length === 0 || isAnalyzing}
-                    className={`px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gold-500 hover:bg-gold-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 ${files.length === 0 || isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                  >
-                    Analyze Document
-                    {!session && " (Sign in to save results)"}
-                  </button>
                 </div>
-              </>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Analysis Results</h2>
-              <button
-                onClick={resetAnalysis}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-gray-700 dark:text-gray-200 flex items-center transition-colors"
-              >
-                <svg
-                  className="w-5 h-5 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  ></path>
-                </svg>
-                New Analysis
-              </button>
+              ) : (
+                <>
+                  <FileUpload
+                    files={files}
+                    onFilesAdded={handleFilesAdded}
+                    onFileRemoved={handleFileRemoved}
+                    disabled={isAnalyzing}
+                  />
+
+                  {error && (
+                    <div className="mt-4">
+                      <ErrorDisplay message={error} />
+
+                      {debugInfo && (
+                        <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-700 text-xs font-mono text-gray-700 dark:text-gray-200 rounded overflow-auto max-h-40">
+                          <details>
+                            <summary className="cursor-pointer text-gray-800 dark:text-gray-100">Debug Info</summary>
+                            <div className="text-gray-700 dark:text-gray-200">{debugInfo}</div>
+                          </details>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="mt-6 flex justify-center">
+                    <button
+                      onClick={handleAnalyze}
+                      disabled={files.length === 0 || isAnalyzing}
+                      className={`px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 ${files.length === 0 || isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                    >
+                      <span className="brightness-110">Analyze Document</span>
+                      {!session && <span className="brightness-110"> (Sign in to save results)</span>}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
-            <AnalysisResults analysis={analysisResult} />
-          </div>
-        )}
+          ) : (
+            <div className="space-y-6 shadow-sm rounded-lg p-6 dark:bg-gray-900 bg-gray-50">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Results</h2>
+                <button
+                  onClick={resetAnalysis}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-gray-700 dark:text-gray-200 flex items-center transition-colors"
+                >
+                  <svg
+                    className="w-5 h-5 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    ></path>
+                  </svg>
+                  New Analysis
+                </button>
+              </div>
+              <AnalysisResults analysis={analysisResult} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

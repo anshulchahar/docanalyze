@@ -104,8 +104,8 @@ export default function FileUpload({
                 className={`border-2 border-dashed rounded-lg p-12 my-8 text-center cursor-pointer transition-colors ${isDragging
                     ? 'border-gold-500'
                     : disabled
-                        ? 'border-gray-300 bg-gray-50 cursor-not-allowed'
-                        : 'border-gray-300 hover:border-gold-500'
+                        ? 'border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800/30 cursor-not-allowed'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gold-500 dark:hover:border-gold-400'
                     }`}
             >
                 <input
@@ -118,7 +118,7 @@ export default function FileUpload({
                     disabled={disabled}
                 />
                 <svg
-                    className="mx-auto h-12 w-12 text-gray-400"
+                    className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-300"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -131,7 +131,7 @@ export default function FileUpload({
                         d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                     />
                 </svg>
-                <p className="mt-2 text-sm font-medium text-gray-900">
+                <p className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
                     {disabled ? (
                         'Upload in progress...'
                     ) : (
@@ -140,21 +140,21 @@ export default function FileUpload({
                         </>
                     )}
                 </p>
-                <p className="mt-1 text-xs text-gray-500">PDF files up to {maxFileSizeMb}MB</p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">PDF files up to {maxFileSizeMb}MB</p>
             </div>
 
             {error && (
-                <div className="p-3 rounded-md bg-red-50 text-red-700 text-sm">
+                <div className="p-3 rounded-md bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">
                     {error}
                 </div>
             )}
 
             {files.length > 0 && (
                 <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-700">Selected Files</h4>
-                    <ul className="divide-y divide-gray-200 border border-gray-200 rounded-md overflow-hidden">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200">Selected Files</h4>
+                    <ul className="divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
                         {files.map((file, index) => (
-                            <li key={index} className="px-4 py-3 flex items-center justify-between bg-white">
+                            <li key={index} className="px-4 py-3 flex items-center justify-between bg-white dark:bg-gray-800">
                                 <div className="flex items-center">
                                     <svg
                                         className="h-6 w-6 text-red-500"
@@ -171,10 +171,10 @@ export default function FileUpload({
                                         />
                                     </svg>
                                     <div className="ml-3">
-                                        <p className="text-sm font-medium text-gray-900 truncate max-w-xs">
+                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-xs">
                                             {file.name}
                                         </p>
-                                        <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(file.size)}</p>
                                     </div>
                                 </div>
                                 {!disabled && (
@@ -183,7 +183,7 @@ export default function FileUpload({
                                             e.stopPropagation();
                                             onFileRemoved(index);
                                         }}
-                                        className="text-gray-400 hover:text-red-500 focus:outline-none"
+                                        className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 focus:outline-none"
                                     >
                                         <svg
                                             className="h-5 w-5"

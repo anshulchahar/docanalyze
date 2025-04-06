@@ -10,6 +10,11 @@ const config: Config = {
     theme: {
         extend: {
             colors: {
+                primary: {
+                    DEFAULT: '#f59e0b',
+                    light: '#fcd34d',
+                    dark: '#d97706',
+                },
                 gold: {
                     50: '#fffaeb',
                     100: '#fef0c7',
@@ -24,43 +29,89 @@ const config: Config = {
                     950: '#451f06',
                 },
             },
-            typography: {
+            typography: (theme: (path: string) => string) => ({
                 DEFAULT: {
                     css: {
                         maxWidth: 'none',
-                        color: '#333',
+                        color: theme('colors.gray.700'),
                         a: {
-                            color: '#f59e0b',
+                            color: theme('colors.primary.DEFAULT'),
                             '&:hover': {
-                                color: '#d97706',
+                                color: theme('colors.primary.dark'),
                             },
                         },
                     },
                 },
                 dark: {
                     css: {
-                        color: '#d1d5db',
+                        color: theme('colors.gray.300'),
                         a: {
-                            color: '#fecb4c',
+                            color: theme('colors.primary.light'),
                             '&:hover': {
-                                color: '#fee189',
+                                color: theme('colors.primary.DEFAULT'),
                             },
                         },
                         h1: {
-                            color: '#f3f4f6',
+                            color: theme('colors.gray.100'),
                         },
                         h2: {
-                            color: '#f3f4f6',
+                            color: theme('colors.gray.100'),
                         },
                         h3: {
-                            color: '#f3f4f6',
+                            color: theme('colors.gray.100'),
                         },
                         h4: {
-                            color: '#f3f4f6',
+                            color: theme('colors.gray.100'),
+                        },
+                        h5: {
+                            color: theme('colors.gray.100'),
+                        },
+                        h6: {
+                            color: theme('colors.gray.100'),
+                        },
+                        strong: {
+                            color: theme('colors.gray.100'),
+                        },
+                        code: {
+                            color: theme('colors.gray.300'),
+                            backgroundColor: theme('colors.gray.800'),
+                        },
+                        blockquote: {
+                            color: theme('colors.gray.300'),
+                            borderLeftColor: theme('colors.gray.700'),
+                        },
+                        hr: {
+                            borderColor: theme('colors.gray.700'),
+                        },
+                        ol: {
+                            li: {
+                                '&:before': {
+                                    color: theme('colors.gray.500'),
+                                },
+                            },
+                        },
+                        ul: {
+                            li: {
+                                '&:before': {
+                                    backgroundColor: theme('colors.gray.500'),
+                                },
+                            },
+                        },
+                        pre: {
+                            backgroundColor: theme('colors.gray.800'),
+                        },
+                        thead: {
+                            color: theme('colors.gray.100'),
+                            borderBottomColor: theme('colors.gray.700'),
+                        },
+                        tbody: {
+                            tr: {
+                                borderBottomColor: theme('colors.gray.700'),
+                            },
                         },
                     },
                 },
-            },
+            }),
         },
     },
     plugins: [
