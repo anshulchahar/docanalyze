@@ -55,115 +55,116 @@ export async function POST(req: NextRequest) {
 
         console.log(`Processing ${files.length} files:`, files.map(f => `${f.name} (${f.size} bytes, type: ${f.type})`));
 
-        // Process files based on their type
-        const processedFiles = await Promise.all(files.map(async (file) => {
+        try {
+            // Process files based on their type
+            const processedFiles = await Promise.all(files.map(async (file) => {
+                try {
+                    const buffer = await file.arrayBuffer();
+                    let text = '';
+
+                    switch (file.type) {
+                        case FILE_TYPES.PDF:
+                            return await processPdfFile(file, buffer);
+
+                        case FILE_TYPES.MARKDOWN:
+                            text = await processMarkdownFile(buffer);
+                            return createFileResult(file, text, 1);
+
+                        case FILE_TYPES.TEXT:
+                            text = await processTextFile(buffer);
+                            return createFileResult(file, text, 1);
+
+                        case FILE_TYPES.DOCX:
+                            return await processDocxFile(file, buffer);
+
+                        default:
+                            throw new Error(`Unsupported file type: ${file.type}`);
+                    }
+                } catch (error) {
+                    console.error(`Error processing file ${file.name}:`, error);
+
+                    // Handle the specific PDF processing error
+                    if (error instanceof Error && error.message === 'PDF_CANNOT_BE_PROCESSED') {
+                        throw new Error('PDF_CANNOT_BE_PROCESSED');
+                    }
+
+                    throw new Error(`Failed to process ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                }
+            }));
+
+            // Extract texts to pass to Gemini
+            const texts = processedFiles.map(file => file.text);
+            const fileInfo = processedFiles.map(file => file.info);
+
+            // Analyze with Gemini
+            let analysisResult;
             try {
-                const buffer = await file.arrayBuffer();
-                let text = '';
+                console.log('Initializing Gemini service...');
+                const geminiService = new GeminiService();
 
-                switch (file.type) {
-                    case FILE_TYPES.PDF:
-                        return await processPdfFile(file, buffer);
+                console.log(`Sending ${texts.length} documents to Gemini API for analysis...`);
+                const analysisText = await geminiService.analyzeDocuments(texts, customPrompt);
 
-                    case FILE_TYPES.MARKDOWN:
-                        text = await processMarkdownFile(buffer);
-                        return createFileResult(file, text, 1);
+                console.log('Parsing Gemini analysis response...');
+                analysisResult = GeminiService.parseAnalysisResponse(analysisText);
+            } catch (geminiError) {
+                console.error('Error with Gemini analysis:', geminiError);
+                return NextResponse.json(
+                    { error: geminiError instanceof Error ? geminiError.message : 'Failed to analyze documents with AI' },
+                    { status: 500 }
+                );
+            }
 
-                    case FILE_TYPES.TEXT:
-                        text = await processTextFile(buffer);
-                        return createFileResult(file, text, 1);
+            // Create final result
+            const result = {
+                ...analysisResult,
+                fileInfo,
+                customPromptUsed: !!customPrompt // Add flag to indicate if a custom prompt was used
+            };
 
-                    case FILE_TYPES.DOCX:
-                        return await processDocxFile(file, buffer);
+            // Get session for database storage
+            try {
+                const session = await getServerSession(authOptions);
 
-                    default:
-                        throw new Error(`Unsupported file type: ${file.type}`);
-                }
-            } catch (error) {
-                console.error(`Error processing file ${file.name}:`, error);
-
-                // Check if it's the specific ENOENT error for test files
-                if (error instanceof Error &&
-                    error.message.includes('ENOENT') &&
-                    error.message.includes('./test/data/')) {
-
-                    console.log('Handling pdf-parse test file not found error');
-
-                    // Create placeholder text for the file
-                    return {
-                        text: `This is placeholder text for ${file.name}. The extraction library encountered an issue with test files.`,
-                        info: {
-                            filename: file.name,
-                            character_count: 100,
-                            page_count: 1
-                        }
+                // Save to database if user is authenticated
+                if (session?.user?.id) {
+                    // Store the customPrompt in the analysis JSON data instead of as a separate field
+                    const analysisData = {
+                        ...result,
+                        customPrompt: customPrompt || ""
                     };
+
+                    await prisma.analysis.create({
+                        data: {
+                            userId: session.user.id,
+                            filename: files.map(f => f.name).join(', '),
+                            summary: result.summary,
+                            keyPoints: JSON.stringify(result.keyPoints),
+                            analysis: JSON.stringify(analysisData)
+                        },
+                    });
+                    console.log('Analysis saved to database for user:', session.user.id);
                 }
-
-                throw new Error(`Failed to process ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            } catch (dbError) {
+                console.error('Database error (non-critical):', dbError);
+                // Continue - DB errors shouldn't prevent returning the analysis
             }
-        }));
 
-        // Extract texts to pass to Gemini
-        const texts = processedFiles.map(file => file.text);
-        const fileInfo = processedFiles.map(file => file.info);
+            console.log('Returning complete analysis response');
+            return NextResponse.json(result);
 
-        // Analyze with Gemini
-        let analysisResult;
-        try {
-            console.log('Initializing Gemini service...');
-            const geminiService = new GeminiService();
-
-            console.log(`Sending ${texts.length} documents to Gemini API for analysis...`);
-            const analysisText = await geminiService.analyzeDocuments(texts, customPrompt);
-
-            console.log('Parsing Gemini analysis response...');
-            analysisResult = GeminiService.parseAnalysisResponse(analysisText);
-        } catch (geminiError) {
-            console.error('Error with Gemini analysis:', geminiError);
-            return NextResponse.json(
-                { error: geminiError instanceof Error ? geminiError.message : 'Failed to analyze documents with AI' },
-                { status: 500 }
-            );
-        }
-
-        // Create final result
-        const result = {
-            ...analysisResult,
-            fileInfo,
-            customPromptUsed: !!customPrompt // Add flag to indicate if a custom prompt was used
-        };
-
-        // Get session for database storage
-        try {
-            const session = await getServerSession(authOptions);
-
-            // Save to database if user is authenticated
-            if (session?.user?.id) {
-                // Store the customPrompt in the analysis JSON data instead of as a separate field
-                const analysisData = {
-                    ...result,
-                    customPrompt: customPrompt || ""
-                };
-
-                await prisma.analysis.create({
-                    data: {
-                        userId: session.user.id,
-                        filename: files.map(f => f.name).join(', '),
-                        summary: result.summary,
-                        keyPoints: JSON.stringify(result.keyPoints),
-                        analysis: JSON.stringify(analysisData)
+        } catch (error) {
+            if (error instanceof Error && error.message === 'PDF_CANNOT_BE_PROCESSED') {
+                return NextResponse.json(
+                    {
+                        error: 'PDF cannot be processed',
+                        details: 'File may be password protected, is a scanned image or corrupt.'
                     },
-                });
-                console.log('Analysis saved to database for user:', session.user.id);
+                    { status: 400 }
+                );
             }
-        } catch (dbError) {
-            console.error('Database error (non-critical):', dbError);
-            // Continue - DB errors shouldn't prevent returning the analysis
+            throw error;
         }
-
-        console.log('Returning complete analysis response');
-        return NextResponse.json(result);
 
     } catch (error) {
         console.error('Unhandled error in analyze-complete route:', error);
@@ -212,26 +213,13 @@ async function processPdfFile(file: File, buffer: ArrayBuffer) {
     } catch (error) {
         console.error(`PDF parsing error for ${file.name}:`, error);
 
-        // Instead of failing completely, provide a helpful message that can be analyzed
-        const errorMessage = `
-The document, "${file.name}," is inaccessible due to an extraction error encountered by the library used to process it. 
-The error was: ${error instanceof Error ? error.message : 'Unknown error'}
+        // Only throw PDF_CANNOT_BE_PROCESSED if the API call contains ENOENT
+        if (error instanceof Error && error.message === 'ENOENT') {
+            throw new Error('PDF_CANNOT_BE_PROCESSED');
+        }
 
-This could be due to:
-1. The PDF being password protected
-2. The PDF containing scanned images rather than text
-3. The PDF using uncommon encoding or fonts
-4. Corruption in the PDF file structure
-
-Please try:
-- Ensuring the PDF is not password protected
-- Converting the document using OCR software if it contains scanned content
-- Saving the PDF with a different PDF creator
-- Converting to a different format and back to PDF
-`;
-
-        // Return the error message as text to be analyzed
-        return createFileResult(file, errorMessage, 1);
+        // For other errors, return a simple error message
+        return createFileResult(file, `Unable to process "${file.name}". Please ensure the file is not password protected and contains readable text.`, 1);
     }
 }
 
