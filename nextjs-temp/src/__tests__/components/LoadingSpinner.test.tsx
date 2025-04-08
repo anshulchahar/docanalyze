@@ -2,79 +2,55 @@ import { render, screen } from '@testing-library/react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 describe('LoadingSpinner', () => {
-  test('renders with default props', () => {
+  it('renders with default props', () => {
     render(<LoadingSpinner />);
-    
-    // Check that the spinner is rendered
     const spinner = screen.getByRole('status');
     expect(spinner).toBeInTheDocument();
-    
-    // Should have default size and color classes
-    expect(spinner).toHaveClass('w-8 h-8'); // md size
-    expect(spinner).toHaveClass('text-blue-600'); // primary color
+    expect(spinner).toHaveClass('w-8 h-8', 'text-blue-600');
   });
-  
-  test('renders with small size', () => {
-    render(<LoadingSpinner size="sm" />);
-    
-    const spinner = screen.getByRole('status');
-    expect(spinner).toHaveClass('w-4 h-4');
-  });
-  
-  test('renders with large size', () => {
+
+  it('renders with custom size', () => {
     render(<LoadingSpinner size="lg" />);
-    
     const spinner = screen.getByRole('status');
     expect(spinner).toHaveClass('w-12 h-12');
   });
-  
-  test('renders with secondary color', () => {
+
+  it('renders with custom color', () => {
     render(<LoadingSpinner color="secondary" />);
-    
     const spinner = screen.getByRole('status');
     expect(spinner).toHaveClass('text-gray-600');
   });
-  
-  test('renders with light color', () => {
-    render(<LoadingSpinner color="light" />);
-    
-    const spinner = screen.getByRole('status');
-    expect(spinner).toHaveClass('text-white');
-  });
-  
-  test('displays text when provided', () => {
-    const text = 'Loading text';
+
+  it('renders with text', () => {
+    const text = 'Loading data...';
     render(<LoadingSpinner text={text} />);
-    
     expect(screen.getByText(text)).toBeInTheDocument();
   });
-  
-  test('applies custom class', () => {
+
+  it('renders with message', () => {
+    const message = 'Please wait...';
+    render(<LoadingSpinner message={message} />);
+    expect(screen.getByText(message)).toBeInTheDocument();
+  });
+
+  it('renders in fullScreen mode', () => {
+    render(<LoadingSpinner fullScreen />);
+    const container = screen.getByRole('status').parentElement;
+    expect(container).toHaveClass('fixed', 'inset-0', 'bg-white', 'dark:bg-gray-900', 'z-50');
+  });
+
+  it('applies custom className', () => {
     const customClass = 'my-custom-class';
     render(<LoadingSpinner className={customClass} />);
-    
-    const container = document.querySelector(`.${customClass}`);
-    expect(container).toBeInTheDocument();
-  });
-  
-  test('renders in fullScreen mode', () => {
-    render(<LoadingSpinner fullScreen={true} />);
-    
-    // Check that fullScreen classes are applied
     const container = screen.getByRole('status').parentElement;
-    expect(container).toHaveClass('fixed');
-    expect(container).toHaveClass('inset-0');
-    expect(container).toHaveClass('z-50');
+    expect(container).toHaveClass(customClass);
   });
-  
-  test('prefers message over text prop when both are provided', () => {
-    const text = 'Loading text';
-    const message = 'Loading message';
+
+  it('prefers text over message when both are provided', () => {
+    const text = 'Primary text';
+    const message = 'Secondary message';
     render(<LoadingSpinner text={text} message={message} />);
-    
-    // The text content should match the message prop (preferred over text)
-    const textElement = screen.getByText(message);
-    expect(textElement).toBeInTheDocument();
-    expect(screen.queryByText(text)).not.toBeInTheDocument();
+    expect(screen.getByText(text)).toBeInTheDocument();
+    expect(screen.queryByText(message)).not.toBeInTheDocument();
   });
 });

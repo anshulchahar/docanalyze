@@ -197,104 +197,71 @@ export default function FileUpload({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                data-testid="dropzone"
                 className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${error ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10' :
-                    isDragging
-                        ? 'border-gold-500'
-                        : disabled
-                            ? 'border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800/30 cursor-not-allowed'
-                            : 'border-gray-300 dark:border-gray-600 hover:border-gold-500 dark:hover:border-gold-400'
+                    isDragging ? 'border-primary-light bg-primary/5' :
+                        disabled ? 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 cursor-not-allowed' :
+                            'border-gray-300 dark:border-gray-700 hover:border-primary-light dark:hover:border-primary-light'
                     }`}
             >
                 <input
                     type="file"
                     ref={fileInputRef}
-                    className="hidden"
                     onChange={handleFileSelect}
-                    accept=".pdf,.md,.txt,.docx,application/pdf,text/markdown,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    className="hidden"
                     multiple
+                    accept=".pdf,.md,.txt,.docx"
                     disabled={disabled}
+                    data-testid="file-input"
                 />
-                <svg
-                    className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
-                </svg>
-                <p className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {disabled ? (
-                        'Upload in progress...'
-                    ) : (
-                        <>
-                            Drag & drop files or <span className="text-gold-500">browse</span>
-                        </>
-                    )}
-                </p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    PDF, Markdown, DOCX, or text files up to {maxFileSizeMb}MB
-                    <span className="block mt-1">
-                        <strong>Note:</strong> Some PDFs with security features, scanned content, or embedded fonts may have extraction issues
-                    </span>
-                </p>
+                <div className="space-y-2">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                        <path
+                            d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    </svg>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <span className="font-medium">Drag and drop files here</span> or click to select files
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                        PDF, Markdown, DOCX, or text files up to {maxFileSizeMb}MB
+                    </p>
+                </div>
             </div>
 
-            <ErrorMessage message={error || ''} className="mb-4" />
+            {error && <ErrorMessage message={error} />}
 
             {files.length > 0 && (
-                <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200">Selected Files</h4>
-                    <ul className="divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
-                        {files.map((file, index) => (
-                            <li key={index} className="px-4 py-3 flex items-center justify-between bg-white dark:bg-[#2C2C2C]">
-                                <div className="flex items-center">
-                                    {getFileIcon(file)}
-                                    <div className="ml-3">
-                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-xs">
-                                            {file.name}
-                                        </p>
-                                        <div className="flex items-center space-x-2">
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(file.size)}</p>
-                                            <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
-                                                {getFileTypeName(file)}
-                                            </span>
-                                        </div>
-                                    </div>
+                <ul className="divide-y divide-gray-200 dark:divide-gray-700 rounded-lg border border-gray-200 dark:border-gray-700">
+                    {files.map((file, index) => (
+                        <li
+                            key={`${file.name}-${index}`}
+                            className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800"
+                        >
+                            <div className="flex items-center space-x-4">
+                                {getFileIcon(file)}
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{file.name}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        {getFileTypeName(file)} • {formatFileSize(file.size)}
+                                    </p>
                                 </div>
-                                {!disabled && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onFileRemoved(index);
-                                        }}
-                                        className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 focus:outline-none"
-                                    >
-                                        <svg
-                                            className="h-5 w-5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                            />
-                                        </svg>
-                                    </button>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                            </div>
+                            <button
+                                onClick={() => onFileRemoved(index)}
+                                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                                aria-label="remove file"
+                            >
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </li>
+                    ))}
+                </ul>
             )}
         </div>
     );

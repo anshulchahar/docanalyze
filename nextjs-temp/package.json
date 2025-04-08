@@ -9,8 +9,10 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate",
-    "test": "jest"
+    "test": "jest --verbose --json --outputFile=test-results.json",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage --coverageReporters='text' --coverageReporters='html' --coverageDirectory=coverage",
+    "test:full": "jest --verbose --coverage --json --outputFile=test-results.json && node scripts/parse-test-results.js"
   },
   "overrides": {
     "@auth/core": {
@@ -46,7 +48,7 @@
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.3.0",
+    "@testing-library/react": "^14.2.1",
     "@testing-library/user-event": "^14.6.1",
     "@types/file-saver": "^2.0.7",
     "@types/jest": "^29.5.12",

@@ -1,6 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import ErrorMessage from '@/components/ErrorMessage';
-import { act } from 'react-dom/test-utils';
 
 // Mock heroicons
 jest.mock('@heroicons/react/20/solid', () => ({
@@ -8,69 +7,64 @@ jest.mock('@heroicons/react/20/solid', () => ({
 }));
 
 describe('ErrorMessage', () => {
-  test('renders nothing when message is empty', () => {
-    render(<ErrorMessage message="" />);
-    expect(document.body.textContent).toBe('');
-  });
-
-  test('renders message when provided', () => {
-    const testMessage = 'This is an error message';
-    render(<ErrorMessage message={testMessage} />);
-    expect(screen.getByText(testMessage)).toBeInTheDocument();
-  });
-
-  test('renders with icon by default', () => {
-    render(<ErrorMessage message="Test message" />);
-    expect(screen.getByTestId('exclamation-icon')).toBeInTheDocument();
-  });
-
-  test('hides icon when icon prop is false', () => {
-    render(<ErrorMessage message="Test message" icon={false} />);
-    expect(screen.queryByTestId('exclamation-icon')).not.toBeInTheDocument();
-  });
-
-  test('applies custom className', () => {
-    const customClass = 'custom-class';
-    render(<ErrorMessage message="Test message" className={customClass} />);
-    expect(screen.getByRole('alert')).toHaveClass(customClass);
-  });
-
-  test('has role="alert" for accessibility', () => {
-    render(<ErrorMessage message="Test message" />);
+  it('renders with message', () => {
+    const message = 'Test error message';
+    render(<ErrorMessage message={message} />);
+    expect(screen.getByText(message)).toBeInTheDocument();
     expect(screen.getByRole('alert')).toBeInTheDocument();
   });
 
-  test('sets custom id when provided', () => {
-    const customId = 'error-123';
-    render(<ErrorMessage message="Test message" id={customId} />);
-    expect(screen.getByRole('alert')).toHaveAttribute('id', customId);
+  it('does not render when message is empty', () => {
+    render(<ErrorMessage message="" />);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  test('animation state changes when message appears', () => {
-    jest.useFakeTimers();
-    
-    // Initial render with no message
-    const { rerender } = render(<ErrorMessage message="" animated={true} />);
-    
-    // Update with a message
-    rerender(<ErrorMessage message="New error" animated={true} />);
-    
-    // After useEffect runs
-    act(() => {
-      jest.runAllTimers();
-    });
-    
-    // Should have visible classes
+  it('renders with custom className', () => {
+    const message = 'Test error message';
+    const customClass = 'my-custom-class';
+    render(<ErrorMessage message={message} className={customClass} />);
+    expect(screen.getByRole('alert')).toHaveClass(customClass);
+  });
+
+  it('renders with icon by default', () => {
+    render(<ErrorMessage message="Test message" />);
+    const icon = screen.getByRole('alert').querySelector('svg');
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveClass('h-5', 'w-5');
+  });
+
+  it('hides icon when icon prop is false', () => {
+    render(<ErrorMessage message="Test message" icon={false} />);
+    const icon = screen.getByRole('alert').querySelector('svg');
+    expect(icon).not.toBeInTheDocument();
+  });
+
+  it('renders with custom id', () => {
+    const id = 'custom-error-id';
+    render(<ErrorMessage message="Test message" id={id} />);
+    expect(screen.getByRole('alert')).toHaveAttribute('id', id);
+  });
+
+  it('applies animation classes when animated is true', () => {
+    render(<ErrorMessage message="Test message" animated={true} />);
     const alert = screen.getByRole('alert');
-    expect(alert).toHaveClass('opacity-100');
-    expect(alert).not.toHaveClass('opacity-0');
-    
-    jest.useRealTimers();
+    expect(alert).toHaveClass('transition-all', 'duration-300', 'ease-in-out');
   });
 
-  test('no animation when animated prop is false', () => {
+  it('does not apply animation classes when animated is false', () => {
     render(<ErrorMessage message="Test message" animated={false} />);
     const alert = screen.getByRole('alert');
-    expect(alert).not.toHaveClass('transition-all');
+    expect(alert).not.toHaveClass('transition-all', 'duration-300', 'ease-in-out');
+  });
+
+  it('handles visibility state changes', async () => {
+    const { rerender } = render(<ErrorMessage message="Test message" animated={true} />);
+
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveClass('opacity-100', 'transform', 'translate-y-0');
+
+    // Test unmounting behavior
+    rerender(<ErrorMessage message="" animated={true} />);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });
