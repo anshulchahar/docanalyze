@@ -66,12 +66,19 @@ export default function CookieConsent() {
         }));
     };
 
+    const openSettings = () => {
+        // Function to reopen cookie settings if user wants to change preferences later
+        localStorage.removeItem('cookie-consent');
+        setShowConsent(true);
+        setShowSettings(true);
+    };
+
     if (!showConsent) return null;
 
     return (
         <AnimatePresence>
             {showConsent && (
-                <motion.div 
+                <moion.div
                     className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 md:px-6 md:pb-4"
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}

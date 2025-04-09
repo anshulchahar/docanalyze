@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import ErrorMessage from './ErrorMessage';
+import { useSidebar } from '@/contexts/SidebarContext';
 
 interface PromptInputBarProps {
     customPrompt: string;
@@ -28,6 +29,24 @@ export default function PromptInputBar({
 }: PromptInputBarProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [localError, setLocalError] = useState('');
+    const { isOpen } = useSidebar(); // Get sidebar state to adjust position
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Check if we're on a mobile device
+    useEffect(() => {
+        const checkIfMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        
+        // Initial check
+        checkIfMobile();
+        
+        // Listen for window resize
+        window.addEventListener('resize', checkIfMobile);
+        
+        // Cleanup
+        return () => window.removeEventListener('resize', checkIfMobile);
+    }, []);
 
     // Auto-resize the textarea as content grows
     useEffect(() => {
@@ -76,8 +95,38 @@ export default function PromptInputBar({
         </svg>
     );
 
+    // Calculate the centering style based on sidebar state and screen size
+    const getPromptBarStyle = () => {
+        // On mobile, don't adjust positioning
+        if (isMobile) {
+            return {};
+        }
+        
+        // On desktop/tablet with sidebar open, adjust to center in remaining space
+        if (isOpen) {
+            return {
+                width: 'calc(100% - 256px)', // Sidebar width is 256px (w-64)
+                left: '256px',
+            };
+        }
+        
+        // Default position when sidebar is closed
+        return {
+            width: '100%',
+            left: '0',
+        };
+    };
+
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-10 pb-4 px-4 sm:px-6 lg:px-8 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent dark:from-[#1E1E1E] dark:via-[#1E1E1E] dark:to-transparent">
+        <div 
+            className={`
+                fixed bottom-0 z-10 pb-4 px-4 sm:px-6 lg:px-8 
+                bg-gradient-to-t from-gray-50 via-gray-50 to-transparent 
+                dark:from-[#1E1E1E] dark:via-[#1E1E1E] dark:to-transparent 
+                transition-all duration-300 ease-in-out
+            `}
+            style={getPromptBarStyle()}
+        >
             <div className="max-w-3xl mx-auto">
                 <div className={`relative rounded-xl shadow-lg border ${displayError ? 'border-red-300 dark:border-red-700' : 'border-gray-200 dark:border-gray-700'} bg-white dark:bg-[#2C2C2C]`}>
                     <textarea
@@ -135,4 +184,4 @@ export default function PromptInputBar({
             </div>
         </div>
     );
-} 
+}
