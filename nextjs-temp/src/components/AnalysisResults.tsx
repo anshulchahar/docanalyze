@@ -124,11 +124,27 @@ export default function AnalysisResults({ analysis }: AnalysisResultsProps) {
                             <div className="prose dark:prose-invert max-w-none">
                                 <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-[var(--card-foreground)]">Recommendations</h3>
                                 {analysis.recommendations && analysis.recommendations.length > 0 ? (
-                                    <ol className="space-y-3 list-decimal pl-5">
+                                    <ul className="space-y-3">
                                         {analysis.recommendations.map((recommendation, index) => (
-                                            <li key={index} className="text-gray-700 dark:text-[var(--card-foreground)]">{recommendation}</li>
+                                            <li key={index} className="flex space-x-3">
+                                                <svg
+                                                    className="h-6 w-6 flex-shrink-0 text-[var(--primary)]"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                    />
+                                                </svg>
+                                                <span className="text-gray-700 dark:text-[var(--card-foreground)]">{recommendation}</span>
+                                            </li>
                                         ))}
-                                    </ol>
+                                    </ul>
                                 ) : (
                                     <p className="text-gray-700 dark:text-[var(--muted-foreground)]">No recommendations available.</p>
                                 )}

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import Image from 'next/image';
 import DarkModeToggle from './DarkModeToggle';
 import ChatGptStyleSidebar from './ChatGptStyleSidebar';
@@ -17,10 +17,32 @@ export default function Navigation({ history = [] }: NavigationProps) {
     const { data: session, status } = useSession();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { isOpen, close } = useSidebar();
+    const [showSignIn, setShowSignIn] = useState(true);
 
-    const handleSignIn = () => {
+    // Effect to handle authentication state
+    useEffect(() => {
+        // Show sign-in button if not authenticated
+        setShowSignIn(status !== 'authenticated');
+    }, [status]);
+
+    // Create a memoized sign-in handler
+    const handleSignIn = useCallback(() => {
         signIn('google', { callbackUrl: '/' });
-    };
+    }, []);
+
+    // Pre-initialize auth on component mount
+    useEffect(() => {
+        // Pre-fetch the session to ensure auth is initialized
+        const initAuth = async () => {
+            try {
+                await getSession();
+            } catch (error) {
+                console.error("Failed to initialize auth:", error);
+            }
+        };
+
+        initAuth();
+    }, []);
 
     return (
         <>
@@ -51,8 +73,13 @@ export default function Navigation({ history = [] }: NavigationProps) {
                         <div className="hidden sm:flex sm:items-center space-x-4 lg:space-x-6">
                             <DarkModeToggle className="mr-1" />
 
-                            {status === 'loading' ? (
-                                <div className="animate-pulse h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                            {status === 'loading' || showSignIn ? (
+                                <button
+                                    onClick={handleSignIn}
+                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark transition-colors duration-200"
+                                >
+                                    Sign in
+                                </button>
                             ) : session ? (
                                 <div className="flex items-center space-x-3 lg:space-x-4">
                                     <span className="text-sm text-gray-700 dark:text-gray-300 hidden md:inline">
@@ -85,14 +112,7 @@ export default function Navigation({ history = [] }: NavigationProps) {
                                         Sign out
                                     </button>
                                 </div>
-                            ) : (
-                                <button
-                                    onClick={handleSignIn}
-                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark transition-colors duration-200"
-                                >
-                                    Sign in
-                                </button>
-                            )}
+                            ) : null}
                         </div>
                         <div className="-mr-2 flex items-center sm:hidden space-x-1">
                             <DarkModeToggle />
@@ -143,7 +163,21 @@ export default function Navigation({ history = [] }: NavigationProps) {
                 {mobileMenuOpen && (
                     <div className="sm:hidden bg-white dark:bg-gray-900 shadow-lg">
                         <div className="pt-2 pb-3 space-y-1">
-                            {session ? (
+                            {status === 'loading' || showSignIn ? (
+                                <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+                                    <div className="px-4 py-2">
+                                        <button
+                                            onClick={() => {
+                                                handleSignIn();
+                                                setMobileMenuOpen(false);
+                                            }}
+                                            className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark transition-colors duration-200"
+                                        >
+                                            Sign in
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : session ? (
                                 <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
                                     <div className="flex items-center px-4">
                                         <div className="flex-shrink-0">
@@ -187,21 +221,7 @@ export default function Navigation({ history = [] }: NavigationProps) {
                                         </button>
                                     </div>
                                 </div>
-                            ) : (
-                                <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
-                                    <div className="px-4 py-2">
-                                        <button
-                                            onClick={() => {
-                                                handleSignIn();
-                                                setMobileMenuOpen(false);
-                                            }}
-                                            className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark transition-colors duration-200"
-                                        >
-                                            Sign in
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                            ) : null}
                         </div>
                     </div>
                 )}

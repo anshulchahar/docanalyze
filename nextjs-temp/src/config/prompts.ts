@@ -2,18 +2,29 @@ export const ANALYSIS_PROMPTS = {
     SINGLE_DOCUMENT: `Analyze the following document and provide your analysis in the exact format below with these exact section headings:
 
 ## Summary
-Write a concise executive summary (2-3 paragraphs)
+Provide a concise executive summary of 2-3 paragraphs that captures the main ideas and purpose of the document.
 
 ## Key Points
-- Key point 1
-- Key point 2
-- Add more bullet points as needed
+Include 3-5 bullet points highlighting the most important facts, insights, or conclusions from the document.
+Each bullet point should be a complete statement without placeholders or references to "key point X".
+Use dashes (-) for bullet points.
+Format exactly like this:
+- First key point here
+- Second key point here
+- Third key point here
 
 ## Detailed Analysis
-Provide a detailed analysis of the main themes and arguments
+Provide a thorough analysis of the main themes, arguments, and evidence presented in the document.
+Break this into paragraphs covering different aspects of the content.
 
 ## Recommendations
-List specific, actionable recommendations based on the content
+List specific, actionable recommendations based on the content.
+Each recommendation must be on a separate line starting with a dash (-).
+Format exactly like this:
+- First recommendation here
+- Second recommendation here
+- Third recommendation here
+Do not combine multiple recommendations into a single bullet point.
 
 Document:
 {text}`,
@@ -21,21 +32,32 @@ Document:
     MULTIPLE_DOCUMENTS: `Analyze the following documents and provide your analysis in the exact format below with these exact section headings:
 
 ## Summary
-Write a concise executive summary (2-3 paragraphs)
+Provide a concise executive summary of 2-3 paragraphs that captures the main ideas and purpose across all documents.
 
 ## Key Points
-- Key point 1
-- Key point 2
-- Add more bullet points as needed
+Include 3-5 bullet points highlighting the most important facts, insights, or conclusions from the documents.
+Each bullet point should be a complete statement without placeholders or references to "key point X".
+Use dashes (-) for bullet points.
+Format exactly like this:
+- First key point here
+- Second key point here
+- Third key point here
 
 ## Detailed Analysis
-Provide a detailed analysis of the main themes and arguments
+Provide a thorough analysis of the main themes, arguments, and evidence presented across all documents.
+Break this into paragraphs covering different aspects of the content.
 
 ## Recommendations
-List specific, actionable recommendations based on the content
+List specific, actionable recommendations based on the content.
+Each recommendation must be on a separate line starting with a dash (-).
+Format exactly like this:
+- First recommendation here
+- Second recommendation here
+- Third recommendation here
+Do not combine multiple recommendations into a single bullet point.
 
 ## Document Comparison
-Compare the documents, highlighting similarities and differences
+Compare the documents, highlighting important similarities and differences in content, approach, and conclusions.
 
 Documents:
 {text}`,

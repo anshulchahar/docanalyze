@@ -295,7 +295,7 @@ export class GeminiService {
             summary: '',
             keyPoints: [],
             detailedAnalysis: '',
-            recommendations: '',
+            recommendations: [],
             documentComparison: '',
             fileInfo: []
         };
@@ -321,8 +321,11 @@ export class GeminiService {
 
                 result.keyPoints = keyPointsText
                     .split('\n')
-                    .filter(line => line.trim().startsWith('-') || line.trim().startsWith('*'))
-                    .map(point => point.replace(/^[-*]\s*/, '').trim())
+                    .filter(line => line.trim().startsWith('-') || line.trim().startsWith('*') || line.trim().startsWith('**'))
+                    .map(point => point
+                        .replace(/^[-*]+\s*/, '') // Remove any leading dashes or asterisks
+                        .replace(/^\*\*\s*/, '') // Remove any leading ** specifically
+                        .trim())
                     .filter(point => point.length > 0);
 
                 console.log('Extracted key points count:', result.keyPoints.length);
@@ -333,7 +336,10 @@ export class GeminiService {
                     // Split by newlines and filter out empty lines as a fallback
                     result.keyPoints = keyPointsText
                         .split('\n')
-                        .map(line => line.trim())
+                        .map(line => line
+                            .replace(/^[-*]+\s*/, '') // Remove any leading dashes or asterisks  
+                            .replace(/^\*\*\s*/, '') // Remove any leading ** specifically
+                            .trim())
                         .filter(line => line.length > 0);
                 }
             } else {
@@ -343,7 +349,13 @@ export class GeminiService {
             // Extract detailed analysis
             const detailedAnalysisMatch = text.match(/## Detailed Analysis\s*\n([\s\S]*?)(?=\n## Recommendations|$)/i);
             if (detailedAnalysisMatch && detailedAnalysisMatch[1]) {
-                result.detailedAnalysis = detailedAnalysisMatch[1].trim();
+                // Clean up the detailed analysis - replace bullet points with proper dashes
+                const cleanedAnalysis = detailedAnalysisMatch[1]
+                    .trim()
+                    .replace(/^\*\*\s*([^*]+)/gm, '- $1') // Replace ** bullet points with -
+                    .replace(/^\*\s*([^*]+)/gm, '- $1');  // Replace * bullet points with -
+
+                result.detailedAnalysis = cleanedAnalysis;
                 console.log('Found detailed analysis section, length:', result.detailedAnalysis.length);
             } else {
                 console.warn('No detailed analysis section found in response');
@@ -352,21 +364,198 @@ export class GeminiService {
             // Extract recommendations
             const recommendationsMatch = text.match(/## Recommendations\s*\n([\s\S]*?)(?=\n## Document Comparison|$)/i);
             if (recommendationsMatch && recommendationsMatch[1]) {
-                result.recommendations = recommendationsMatch[1].trim();
-                console.log('Found recommendations section, length:', result.recommendations.length);
+                const recommendationsText = recommendationsMatch[1].trim();
+                console.log('Found recommendations section raw text:', recommendationsText);
+
+                // First try to find explicit bullet points or numbered items
+                const bulletPointLines = recommendationsText
+                    .split('\n')
+                    .filter(line => {
+                        const trimmed = line.trim();
+                        return trimmed.startsWith('-') ||
+                            trimmed.startsWith('*') ||
+                            trimmed.startsWith('**') ||
+                            /^\d+\.\s/.test(trimmed);
+                    });
+
+                if (bulletPointLines.length > 0) {
+                    // We found bullet points, use them directly
+                    console.log('Found bullet point recommendations:', bulletPointLines.length);
+                    result.recommendations = bulletPointLines
+                        .map(line => line
+                            .replace(/^[-*]+\s*/, '') // Remove any leading dashes or asterisks
+                            .replace(/^\*\*\s*/, '') // Remove any leading ** specifically
+                            .replace(/^\d+\.\s*/, '') // Remove any leading numbers (1., 2., etc.)
+                            .trim())
+                        .filter(line => line.length > 0);
+                } else {
+                    // No explicit bullet points - check if it's a paragraph with multiple sentences
+                    // Enhanced paragraph processing to split into separate bullet points
+                    console.log('No bullet points found, processing paragraph into separate recommendations');
+
+                    // Split paragraph into sentences
+                    const sentenceRegex = /[^.!?]+[.!?]+(\s+|$)/g;
+                    const sentences = [];
+                    let match;
+
+                    while ((match = sentenceRegex.exec(recommendationsText)) !== null) {
+                        const sentence = match[0].trim();
+                        // Don't add very short sentences that are likely not complete recommendations
+                        if (sentence.length > 15) {
+                            sentences.push(sentence);
+                        }
+                    }
+
+                    if (sentences.length > 0) {
+                        console.log(`Split paragraph into ${sentences.length} recommendation sentences`);
+                        result.recommendations = sentences;
+                    } else {
+                        // Fallback to existing advanced parsing for complex cases
+                        console.log('Sentence splitting failed, trying advanced parsing');
+
+                        // Try to find recommendation patterns in the text
+                        if (recommendationsText.includes("Start with") ||
+                            recommendationsText.includes("Begin with") ||
+                            recommendationsText.includes("Focus on") ||
+                            recommendationsText.includes("Explore") ||
+                            recommendationsText.includes("Use the")) {
+
+                            // This likely has implicit recommendations with key phrases
+                            // Look for common recommendation starter phrases and split on those
+                            const recPrefixes = [
+                                "Start with", "Begin with", "Focus on", "Explore",
+                                "Use the", "Consider", "Ensure", "Implement", "Try to",
+                                "For ", "Important", "Note"
+                            ];
+
+                            // Create a regex pattern from the prefixes
+                            const patternStr = `(${recPrefixes.join('|')})`;
+                            const pattern = new RegExp(patternStr, 'gi');
+
+                            // Define a type for the regex matches
+                            type RecommendationMatch = {
+                                index: number;
+                                prefix: string;
+                            };
+
+                            // Find all occurrences of recommendation starters
+                            const allMatches: RecommendationMatch[] = [];
+                            let matchPattern;
+
+                            while ((matchPattern = pattern.exec(recommendationsText)) !== null) {
+                                allMatches.push({
+                                    index: matchPattern.index,
+                                    prefix: matchPattern[0]
+                                });
+                            }
+
+                            // Extract recommendations based on the matches
+                            if (allMatches.length > 0) {
+                                result.recommendations = allMatches.map((match, i) => {
+                                    const start = match.index;
+                                    const end = i < allMatches.length - 1 ? allMatches[i + 1].index : recommendationsText.length;
+                                    const text = recommendationsText.substring(start, end).trim();
+                                    return text;
+                                });
+                                console.log(`Split recommendations using key phrases, found ${result.recommendations.length} recommendations`);
+                            } else {
+                                // Fallback: split by sentences or paragraphs
+                                const splitText = splitByParagraphsOrSentences(recommendationsText);
+                                result.recommendations = splitText;
+                                console.log(`Split by paragraphs/sentences, found ${result.recommendations.length} recommendations`);
+                            }
+                        } else {
+                            // Try to split by paragraphs or sentences as a fallback
+                            const splitText = splitByParagraphsOrSentences(recommendationsText);
+                            result.recommendations = splitText;
+                            console.log(`Split by paragraphs/sentences, found ${result.recommendations.length} recommendations`);
+                        }
+                    }
+                }
+
+                // Final safeguard: If we still only have one recommendation and it's long,
+                // try to split it by sentences and colons
+                if (result.recommendations.length === 1 && result.recommendations[0].length > 100) {
+                    const longRec = result.recommendations[0];
+                    console.log('Single long recommendation detected, attempting sentence-level splitting');
+                    result.recommendations = splitIntoSentences(longRec);
+                }
+
+                console.log('Final extracted recommendations count:', result.recommendations.length);
             } else {
                 console.warn('No recommendations section found in response');
+            }
+
+            // Helper function to split text into paragraphs or sentences
+            function splitByParagraphsOrSentences(text: string): string[] {
+                // First try paragraphs
+                const paragraphs = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0);
+                if (paragraphs.length > 1) {
+                    return paragraphs;
+                }
+
+                // If only one paragraph or none, try splitting by sentences
+                return splitIntoSentences(text);
+            }
+
+            // Helper function to split text into sentences
+            function splitIntoSentences(text: string): string[] {
+                // Use a proper sentence splitting approach
+                const sentences: string[] = [];
+                // Match sentences ending with ., !, or ? followed by space and capital letter or end of string
+                const sentenceRegex = /[^.!?]+[.!?]+(\s+|$)/g;
+                let match;
+
+                while ((match = sentenceRegex.exec(text)) !== null) {
+                    sentences.push(match[0].trim());
+                }
+
+                // If we couldn't extract any sentences, try another approach with colons
+                if (sentences.length === 0) {
+                    if (text.includes(':')) {
+                        // Split by colons which often separate recommendations
+                        const colonParts = text.split(':');
+                        if (colonParts.length > 1) {
+                            // The first part is likely a heading, so we keep it with the first item
+                            const results = [colonParts[0] + ':' + colonParts[1]];
+
+                            // Add remaining parts as separate recommendations
+                            for (let i = 2; i < colonParts.length; i++) {
+                                results.push(colonParts[i].trim());
+                            }
+
+                            return results.filter(s => s.length > 0);
+                        }
+                    }
+
+                    // Try splitting by breaks implied by capital letters
+                    const roughSentences = text.split(/\.\s+(?=[A-Z])/);
+                    if (roughSentences.length > 1) {
+                        return roughSentences.map(s => s.trim()).filter(s => s.length > 0);
+                    }
+
+                    // Last resort - return the whole text as one item
+                    return [text];
+                }
+
+                return sentences.filter(s => s.length > 0);
             }
 
             // Extract document comparison if multiple documents
             const comparisonMatch = text.match(/## Document Comparison\s*\n([\s\S]*?)$/i);
             if (comparisonMatch && comparisonMatch[1]) {
-                result.documentComparison = comparisonMatch[1].trim();
+                // Clean up the comparison text - replace bullet points with proper dashes
+                const cleanedComparison = comparisonMatch[1]
+                    .trim()
+                    .replace(/^\*\*\s*([^*]+)/gm, '- $1') // Replace ** bullet points with -
+                    .replace(/^\*\s*([^*]+)/gm, '- $1');  // Replace * bullet points with -
+
+                result.documentComparison = cleanedComparison;
                 console.log('Found document comparison section, length:', result.documentComparison.length);
             }
 
             // If everything is empty, fallback to simple text division
-            if (!result.summary && !result.keyPoints.length && !result.detailedAnalysis && !result.recommendations) {
+            if (!result.summary && !result.keyPoints.length && !result.detailedAnalysis && !result.recommendations.length) {
                 console.warn('All sections are empty, applying fallback parsing');
 
                 // Split the text into paragraphs

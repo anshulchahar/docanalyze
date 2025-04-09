@@ -9,7 +9,7 @@ export interface AnalysisResult {
     summary: string;
     keyPoints: string[];
     detailedAnalysis: string;
-    recommendations: string;
+    recommendations: string[];  // Changed from string to string[]
     documentComparison?: string;
     fileInfo: FileInfo[];
 }
