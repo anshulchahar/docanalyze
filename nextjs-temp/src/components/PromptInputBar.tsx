@@ -120,7 +120,6 @@ export default function PromptInputBar({
         if (isMobile) {
             return {};
         }
-
         // On desktop/tablet with sidebar open, adjust to center in remaining space
         if (isOpen) {
             return {
@@ -128,7 +127,6 @@ export default function PromptInputBar({
                 left: '256px',
             };
         }
-
         // Default position when sidebar is closed
         return {
             width: '100%',
@@ -137,7 +135,15 @@ export default function PromptInputBar({
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-10 pb-4 px-4 sm:px-6 lg:px-8 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent dark:from-[#1E1E1E] dark:via-[#1E1E1E] dark:to-transparent">
+        <div
+            className={`
+                fixed bottom-0 z-10 pb-4 px-4 sm:px-6 lg:px-8 
+                bg-gradient-to-t from-gray-50 via-gray-50 to-transparent 
+                dark:from-[#1E1E1E] dark:via-[#1E1E1E] dark:to-transparent 
+                transition-all duration-300 ease-in-out
+            `}
+            style={getPromptBarStyle()}
+        >
             <div className="max-w-3xl mx-auto">
                 {showSettings && (
                     <div className="mb-3 p-4 rounded-xl bg-white dark:bg-[#2C2C2C] border border-gray-200 dark:border-gray-700 shadow-lg transition-all">
@@ -184,8 +190,8 @@ export default function PromptInputBar({
                         title="Output settings"
                         aria-label="Output settings"
                         className={`absolute right-14 bottom-2 p-2 rounded-lg flex items-center justify-center transition-colors ${!isAnalyzing
-                                ? 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                : 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                            ? 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            : 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
                             }`}
                     >
                         <SettingsIcon />
@@ -234,4 +240,4 @@ export default function PromptInputBar({
             </div>
         </div>
     );
-} 
+}
