@@ -137,8 +137,15 @@ export default function Home() {
         } else {
           try {
             const errorResponse = JSON.parse(xhr.responseText);
-            setError(errorResponse.error || 'An error occurred during analysis');
-            setDebugInfo(errorResponse.details || null);
+            if (errorResponse.error === 'PDF cannot be processed') {
+              // Show toast message for PDF processing error
+              setError('PDF cannot be processed; Reasons: File may be password protected, is a scanned image or corrupt.');
+              // Clear files to allow new upload
+              setFiles([]);
+            } else {
+              setError(errorResponse.error || 'An error occurred during analysis');
+              setDebugInfo(errorResponse.details || null);
+            }
           } catch {
             setError('Failed to analyze document');
           }
