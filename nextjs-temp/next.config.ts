@@ -1,5 +1,5 @@
 import type { NextConfig } from 'next';
-const deploymentConfig = require('./deployment.config');
+import deploymentConfig from './deployment.config.mjs';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
