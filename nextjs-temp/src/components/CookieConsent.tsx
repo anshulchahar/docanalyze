@@ -78,7 +78,7 @@ export default function CookieConsent() {
     return (
         <AnimatePresence>
             {showConsent && (
-                <moion.div
+                <motion.div
                     className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 md:px-6 md:pb-4"
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
