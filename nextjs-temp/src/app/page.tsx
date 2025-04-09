@@ -309,7 +309,7 @@ export default function Home() {
                 </div>
                 <AnalysisResults analysis={{
                   ...analysisResult,
-                  recommendations: analysisResult.recommendations ? [analysisResult.recommendations] : []
+                  recommendations: analysisResult.recommendations || []
                 }} />
               </div>
             )}
