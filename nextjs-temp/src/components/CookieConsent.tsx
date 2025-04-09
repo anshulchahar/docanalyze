@@ -66,13 +66,6 @@ export default function CookieConsent() {
         }));
     };
 
-    const openSettings = () => {
-        // Function to reopen cookie settings if user wants to change preferences later
-        localStorage.removeItem('cookie-consent');
-        setShowConsent(true);
-        setShowSettings(true);
-    };
-
     if (!showConsent) return null;
 
     return (
