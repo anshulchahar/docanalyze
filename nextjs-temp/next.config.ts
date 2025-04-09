@@ -1,11 +1,17 @@
 import type { NextConfig } from 'next';
-const deploymentConfig = require('./deployment.config');
+import deploymentConfig from './deployment.config.mjs';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    domains: ['lh3.googleusercontent.com'], // For Google auth profile images
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '**',
+      },
+    ],
   },
   async headers() {
     const headers = [

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import ErrorMessage from './ErrorMessage';
 import { useSidebar } from '@/contexts/SidebarContext';
+import OutputLengthSlider from './OutputLengthSlider';
 
 interface PromptInputBarProps {
     customPrompt: string;
@@ -14,6 +15,8 @@ interface PromptInputBarProps {
     placeholder?: string;
     helperText?: string;
     errorMessage?: string;
+    outputLength?: number;
+    onOutputLengthChange?: (length: number) => void;
 }
 
 export default function PromptInputBar({
@@ -25,25 +28,28 @@ export default function PromptInputBar({
     buttonText = 'Analyze',
     placeholder = 'Type additional instructions for analyzing your document...',
     helperText = 'Press Enter to submit • Shift+Enter for new line',
-    errorMessage = ''
+    errorMessage = '',
+    outputLength = 500,
+    onOutputLengthChange = () => { }
 }: PromptInputBarProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [localError, setLocalError] = useState('');
     const { isOpen } = useSidebar(); // Get sidebar state to adjust position
     const [isMobile, setIsMobile] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
 
     // Check if we're on a mobile device
     useEffect(() => {
         const checkIfMobile = () => {
             setIsMobile(window.innerWidth < 768);
         };
-        
+
         // Initial check
         checkIfMobile();
-        
+
         // Listen for window resize
         window.addEventListener('resize', checkIfMobile);
-        
+
         // Cleanup
         return () => window.removeEventListener('resize', checkIfMobile);
     }, []);
@@ -95,13 +101,25 @@ export default function PromptInputBar({
         </svg>
     );
 
+    // Settings icon SVG
+    const SettingsIcon = () => (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="w-5 h-5"
+            aria-hidden="true"
+        >
+            <path fillRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.986.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" clipRule="evenodd" />
+        </svg>
+    );
+
     // Calculate the centering style based on sidebar state and screen size
     const getPromptBarStyle = () => {
         // On mobile, don't adjust positioning
         if (isMobile) {
             return {};
         }
-        
         // On desktop/tablet with sidebar open, adjust to center in remaining space
         if (isOpen) {
             return {
@@ -109,7 +127,6 @@ export default function PromptInputBar({
                 left: '256px',
             };
         }
-        
         // Default position when sidebar is closed
         return {
             width: '100%',
@@ -118,7 +135,7 @@ export default function PromptInputBar({
     };
 
     return (
-        <div 
+        <div
             className={`
                 fixed bottom-0 z-10 pb-4 px-4 sm:px-6 lg:px-8 
                 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent 
@@ -128,6 +145,29 @@ export default function PromptInputBar({
             style={getPromptBarStyle()}
         >
             <div className="max-w-3xl mx-auto">
+                {showSettings && (
+                    <div className="mb-3 p-4 rounded-xl bg-white dark:bg-[#2C2C2C] border border-gray-200 dark:border-gray-700 shadow-lg transition-all">
+                        <div className="mb-2 flex justify-between items-center">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-white">Output Settings</h3>
+                            <button
+                                onClick={() => setShowSettings(false)}
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <OutputLengthSlider
+                            value={outputLength}
+                            onChange={onOutputLengthChange}
+                            min={100}
+                            max={1000}
+                            step={50}
+                        />
+                    </div>
+                )}
+
                 <div className={`relative rounded-xl shadow-lg border ${displayError ? 'border-red-300 dark:border-red-700' : 'border-gray-200 dark:border-gray-700'} bg-white dark:bg-[#2C2C2C]`}>
                     <textarea
                         ref={textareaRef}
@@ -136,12 +176,28 @@ export default function PromptInputBar({
                         onChange={handlePromptChange}
                         onKeyDown={handleKeyDown}
                         disabled={isAnalyzing}
-                        className={`w-full px-4 py-3 pr-16 text-base resize-none overflow-hidden focus:outline-none rounded-xl bg-white dark:bg-[#2C2C2C] text-gray-900 dark:text-white ${displayError ? 'focus:ring-red-500 border-red-300 dark:border-red-700' : ''}`}
+                        className={`w-full px-4 py-3 pr-24 text-base resize-none overflow-hidden focus:outline-none rounded-xl bg-white dark:bg-[#2C2C2C] text-gray-900 dark:text-white ${displayError ? 'focus:ring-red-500 border-red-300 dark:border-red-700' : ''}`}
                         style={{ maxHeight: '150px', minHeight: '52px' }}
                         rows={1}
                         aria-label="Custom analysis instructions"
                         aria-invalid={!!displayError}
                     />
+
+                    {/* Settings button */}
+                    <button
+                        onClick={() => setShowSettings(prev => !prev)}
+                        disabled={isAnalyzing}
+                        title="Output settings"
+                        aria-label="Output settings"
+                        className={`absolute right-14 bottom-2 p-2 rounded-lg flex items-center justify-center transition-colors ${!isAnalyzing
+                            ? 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            : 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                            }`}
+                    >
+                        <SettingsIcon />
+                    </button>
+
+                    {/* Submit button */}
                     <button
                         onClick={() => {
                             if (!canAnalyze && !isAnalyzing) {

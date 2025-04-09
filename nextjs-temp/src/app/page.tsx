@@ -26,6 +26,7 @@ export default function Home() {
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [history, setHistory] = useState<AnalysisHistory[]>([]);
   const [customPromptUsed, setCustomPromptUsed] = useState(false);
+  const [outputLength, setOutputLength] = useState(500); // Default output length
   const { isOpen } = useSidebar();
 
   useEffect(() => {
@@ -78,6 +79,10 @@ export default function Home() {
     setPromptError(null);
   };
 
+  const handleOutputLengthChange = (length: number) => {
+    setOutputLength(length);
+  };
+
   const handleSendPrompt = () => {
     if (customPrompt.trim()) {
       setSavedPrompt(customPrompt.trim());
@@ -114,6 +119,9 @@ export default function Home() {
       if (savedPrompt) {
         formData.append('customPrompt', savedPrompt);
       }
+
+      // Add output length parameter to the request
+      formData.append('outputLength', outputLength.toString());
 
       // Add a progress event listener
       const xhr = new XMLHttpRequest();
@@ -177,6 +185,7 @@ export default function Home() {
     setPromptError(null);
     setDebugInfo(null);
     setCustomPromptUsed(false);
+    // Don't reset output length to preserve user preference
   };
 
   return (
@@ -300,7 +309,7 @@ export default function Home() {
                 </div>
                 <AnalysisResults analysis={{
                   ...analysisResult,
-                  recommendations: analysisResult.recommendations ? [analysisResult.recommendations] : []
+                  recommendations: analysisResult.recommendations || []
                 }} />
               </div>
             )}
@@ -319,6 +328,8 @@ export default function Home() {
           placeholder="Add specific instructions for analyzing your document (optional)..."
           helperText="Use this to add custom instructions for your analysis"
           errorMessage={promptError || ''}
+          outputLength={outputLength}
+          onOutputLengthChange={handleOutputLengthChange}
         />
       )}
     </div>
