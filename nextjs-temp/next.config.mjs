@@ -8,6 +8,10 @@ const nextConfig = {
     images: {
         domains: ['lh3.googleusercontent.com'], // For Google auth profile images
     },
+    // Explicitly expose environment variables
+    env: {
+        GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    },
     async headers() {
         const headers = [
             {
