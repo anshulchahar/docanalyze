@@ -9,6 +9,7 @@ export default {
             'img-src': ["'self'", 'data:', 'https://lh3.googleusercontent.com'],
             'font-src': ["'self'"],
             'object-src': ["'none'"],
+            'connect-src': ["'self'", 'https://api.emailjs.com'], // Added EmailJS API endpoint
         },
     },
 };
