@@ -134,7 +134,7 @@ export default function AnalysisDetailPage() {
 
                         <AnalysisResults analysis={{
                             ...analysis,
-                            recommendations: analysis.recommendations ? [analysis.recommendations] : []
+                            recommendations: analysis.recommendations || []
                         }} />
                     </div>
                 </div>
