@@ -49,7 +49,12 @@ const nextConfig = {
 
             headers[0].headers.push({
                 key: 'Content-Security-Policy',
-                value: cspValue,
+                value: `${cspValue}; connect-src 'self' https://api.emailjs.com`,
+            });
+        } else {
+            headers[0].headers.push({
+                key: 'Content-Security-Policy',
+                value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://lh3.googleusercontent.com; font-src 'self'; object-src 'none'; connect-src 'self' https://api.emailjs.com",
             });
         }
 

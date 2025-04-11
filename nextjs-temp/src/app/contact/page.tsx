@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import emailjs from '@emailjs/browser';
 import Navigation from '@/components/Navigation';
 import { useSidebar } from '@/contexts/SidebarContext';
 import { EnvelopeIcon, PhoneIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
@@ -10,6 +11,12 @@ import ErrorMessage from '@/components/ErrorMessage';
 
 export default function ContactPage() {
     const { isOpen } = useSidebar();
+
+    // Initialize EmailJS
+    useEffect(() => {
+        emailjs.init(process.env.NEXT_PUBLIC_EMAILJS_USER_ID!);
+    }, []);
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -130,18 +137,45 @@ export default function ContactPage() {
 
         setSubmitStatus('submitting');
 
-        // Simulate form submission
-        setTimeout(() => {
-            setSubmitStatus('success');
-            setFormData({
-                name: '',
-                email: '',
-                subject: '',
-                message: ''
+        // Prepare template parameters for EmailJS
+        const templateParams = {
+            name: formData.name,
+            email: formData.email,
+            subject: subjectOptions.find(option => option.value === formData.subject)?.label || formData.subject,
+            message: formData.message,
+            // Add these additional fields that might be expected by your template
+            to_name: "Solva Support Team",
+            from_name: formData.name,
+            reply_to: formData.email
+        };
+
+        console.log('EmailJS params:', templateParams);
+        console.log('Using service ID:', process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID);
+        console.log('Using template ID:', process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID);
+
+        // Send email using EmailJS
+        emailjs.send(
+            process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+            process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+            templateParams
+        )
+            .then((response) => {
+                console.log('Email sent successfully!', response.status, response.text);
+                setSubmitStatus('success');
+                setFormData({
+                    name: '',
+                    email: '',
+                    subject: '',
+                    message: ''
+                });
+                // Reset touched fields
+                setTouchedFields({});
+            })
+            .catch((err) => {
+                console.error('Failed to send email. Error details:', err);
+                if (err.text) console.error('Error text:', err.text);
+                setSubmitStatus('error');
             });
-            // Reset touched fields
-            setTouchedFields({});
-        }, 1500);
     };
 
     const contactMethods = [
@@ -239,6 +273,17 @@ export default function ContactPage() {
                                                     className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                                                 >
                                                     Send another message
+                                                </button>
+                                            </div>
+                                        ) : submitStatus === 'error' ? (
+                                            <div className="bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 p-6 rounded-lg border border-red-200 dark:border-red-800/30">
+                                                <h3 className="text-lg font-medium">Failed to send message</h3>
+                                                <p className="mt-2">There was an error sending your message. Please try again or contact us directly.</p>
+                                                <button
+                                                    onClick={() => setSubmitStatus('idle')}
+                                                    className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                                                >
+                                                    Try again
                                                 </button>
                                             </div>
                                         ) : (
@@ -344,4 +389,4 @@ export default function ContactPage() {
             </div>
         </div>
     );
-} 
+}
