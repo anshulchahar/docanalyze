@@ -7,6 +7,8 @@ import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import HelpButton from '@/components/HelpButton';
 import CookieConsent from '@/components/CookieConsent';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -40,6 +42,8 @@ export default function RootLayout({
                   className: "!bg-white dark:!bg-gray-800 !text-gray-900 dark:!text-gray-100 !shadow-md",
                 }}
               />
+              <Analytics />
+              <SpeedInsights />
             </SidebarProvider>
           </ThemeProvider>
         </NextAuthProvider>
